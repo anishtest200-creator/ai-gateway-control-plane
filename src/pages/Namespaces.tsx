@@ -23,9 +23,44 @@ interface Namespace {
   createdAt: string
 }
 
+interface BudgetRule {
+  id: string
+  name: string
+  scope: 'namespace' | 'team' | 'model'
+  scopeTarget: string
+  limitAmount: number
+  period: 'monthly' | 'weekly' | 'daily'
+  alertThresholds: number[]
+  action: 'notify' | 'throttle' | 'block'
+  spent: number
+  status: 'active' | 'paused'
+  createdAt: string
+}
+
 /* ------------------------------------------------------------------ */
 /*  Mock Data                                                          */
 /* ------------------------------------------------------------------ */
+
+const initialBudgetRules: Record<string, BudgetRule[]> = {
+  'ns-ai-platform-prod-001': [
+    { id: 'br-1', name: 'Platform Monthly Cap', scope: 'namespace', scopeTarget: 'ai-platform', limitAmount: 15000, period: 'monthly', alertThresholds: [60, 80, 100], action: 'notify', spent: 11200, status: 'active', createdAt: '2024-06-01' },
+    { id: 'br-2', name: 'GPT-4o Spend Limit', scope: 'model', scopeTarget: 'GPT-4o', limitAmount: 5000, period: 'monthly', alertThresholds: [80, 100], action: 'throttle', spent: 3890, status: 'active', createdAt: '2024-07-15' },
+    { id: 'br-3', name: 'ML Platform Team', scope: 'team', scopeTarget: 'ML Platform', limitAmount: 8000, period: 'monthly', alertThresholds: [60, 80, 100], action: 'notify', spent: 5420, status: 'active', createdAt: '2024-08-01' },
+  ],
+  'ns-ml-inference-prod-002': [
+    { id: 'br-4', name: 'Inference Budget', scope: 'namespace', scopeTarget: 'ml-inference', limitAmount: 8000, period: 'monthly', alertThresholds: [80, 100], action: 'throttle', spent: 5100, status: 'active', createdAt: '2024-06-15' },
+  ],
+  'ns-customer-support-ai-prod-004': [
+    { id: 'br-5', name: 'Support Monthly Cap', scope: 'namespace', scopeTarget: 'customer-support-ai', limitAmount: 3000, period: 'monthly', alertThresholds: [60, 80, 100], action: 'block', spent: 3400, status: 'active', createdAt: '2024-06-01' },
+    { id: 'br-6', name: 'Claude Haiku Limit', scope: 'model', scopeTarget: 'Claude 3 Haiku', limitAmount: 1500, period: 'monthly', alertThresholds: [80, 100], action: 'notify', spent: 980, status: 'active', createdAt: '2024-09-01' },
+  ],
+  'ns-data-engineering-prod-003': [
+    { id: 'br-7', name: 'Data Eng Budget', scope: 'namespace', scopeTarget: 'data-engineering', limitAmount: 5000, period: 'monthly', alertThresholds: [60, 80, 100], action: 'notify', spent: 3900, status: 'active', createdAt: '2024-06-01' },
+  ],
+  'ns-research-sandbox-007': [
+    { id: 'br-8', name: 'Research Sandbox Cap', scope: 'namespace', scopeTarget: 'research-lab', limitAmount: 2000, period: 'monthly', alertThresholds: [80, 100], action: 'notify', spent: 800, status: 'active', createdAt: '2024-07-01' },
+  ],
+}
 
 const initialNamespaces: Namespace[] = [
   {
@@ -405,6 +440,9 @@ const Namespaces: React.FC = () => {
   const [showAddMember, setShowAddMember] = useState(false)
   const [newMemberEmail, setNewMemberEmail] = useState('')
   const [newMemberRole, setNewMemberRole] = useState('Viewer')
+  const [budgetRules, setBudgetRules] = useState<Record<string, BudgetRule[]>>(initialBudgetRules)
+  const [showBudgetModal, setShowBudgetModal] = useState(false)
+  const [budgetForm, setBudgetForm] = useState({ name: '', scope: 'namespace' as BudgetRule['scope'], scopeTarget: '', limitAmount: '', period: 'monthly' as BudgetRule['period'], action: 'notify' as BudgetRule['action'], alerts: [60, 80, 100] as number[] })
 
   const managedCount = nsList.filter(n => n.type === 'managed').length
   const personalCount = nsList.filter(n => n.type === 'personal').length
@@ -473,6 +511,57 @@ const Namespaces: React.FC = () => {
     setNewMemberEmail('')
     setNewMemberRole('Viewer')
     setShowAddMember(false)
+  }
+
+  const openBudgetModal = () => {
+    setBudgetForm({ name: '', scope: 'namespace', scopeTarget: selectedNs?.name || '', limitAmount: '', period: 'monthly', action: 'notify', alerts: [60, 80, 100] })
+    setShowBudgetModal(true)
+  }
+
+  const handleCreateBudgetRule = () => {
+    if (!budgetForm.name.trim() || !budgetForm.limitAmount || !selectedNs) return
+    const newRule: BudgetRule = {
+      id: `br-${Date.now()}`,
+      name: budgetForm.name,
+      scope: budgetForm.scope,
+      scopeTarget: budgetForm.scopeTarget || selectedNs.name,
+      limitAmount: Number(budgetForm.limitAmount),
+      period: budgetForm.period,
+      alertThresholds: budgetForm.alerts,
+      action: budgetForm.action,
+      spent: 0,
+      status: 'active',
+      createdAt: new Date().toISOString().slice(0, 10),
+    }
+    setBudgetRules(prev => ({
+      ...prev,
+      [selectedNs.id]: [...(prev[selectedNs.id] || []), newRule],
+    }))
+    setShowBudgetModal(false)
+  }
+
+  const handleDeleteBudgetRule = (ruleId: string) => {
+    if (!selectedNs) return
+    setBudgetRules(prev => ({
+      ...prev,
+      [selectedNs.id]: (prev[selectedNs.id] || []).filter(r => r.id !== ruleId),
+    }))
+  }
+
+  const handleToggleBudgetRule = (ruleId: string) => {
+    if (!selectedNs) return
+    setBudgetRules(prev => ({
+      ...prev,
+      [selectedNs.id]: (prev[selectedNs.id] || []).map(r => r.id === ruleId ? { ...r, status: r.status === 'active' ? 'paused' as const : 'active' as const } : r),
+    }))
+  }
+
+  const getNsBudgetSummary = (nsId: string) => {
+    const rules = budgetRules[nsId] || []
+    if (rules.length === 0) return null
+    const totalBudget = rules.filter(r => r.scope === 'namespace').reduce((s, r) => s + r.limitAmount, 0)
+    const totalSpent = rules.filter(r => r.scope === 'namespace').reduce((s, r) => s + r.spent, 0)
+    return { rules: rules.length, totalBudget, totalSpent }
   }
 
   const filtered = nsList.filter(ns => {
@@ -693,6 +782,248 @@ const Namespaces: React.FC = () => {
             )}
           </div>
         </div>
+
+        {/* Budget Rules section */}
+        {(() => {
+          const nsRules = budgetRules[ns.id] || []
+          const scopeIcon: Record<string, string> = { namespace: '🏢', team: '👥', model: '🧠' }
+          const actionCfg: Record<string, { label: string; color: string; bg: string }> = {
+            notify: { label: 'Notify', color: colors.blue, bg: 'rgba(96,165,250,0.12)' },
+            throttle: { label: 'Throttle', color: colors.amber, bg: 'rgba(245,158,11,0.12)' },
+            block: { label: 'Hard Block', color: colors.red, bg: 'rgba(239,68,68,0.12)' },
+          }
+
+          return (
+            <div>
+              <div style={sectionHeader}>
+                <div style={sectionTitle}>
+                  <span style={{ fontSize: 16 }}>💰</span>
+                  <span>Budget Rules</span>
+                  <span style={badge('rgba(212, 168, 67, 0.12)', colors.gold)}>{nsRules.length}</span>
+                </div>
+                <button onClick={openBudgetModal} style={{
+                  padding: '6px 14px', borderRadius: 6, border: '1px solid rgba(212, 168, 67, 0.3)',
+                  backgroundColor: 'rgba(212, 168, 67, 0.1)', color: colors.gold,
+                  fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
+                }}>
+                  + Create Rule
+                </button>
+              </div>
+
+              {nsRules.length === 0 ? (
+                <div style={{ ...card, textAlign: 'center', padding: 32 }}>
+                  <div style={{ fontSize: 28, marginBottom: 8 }}>💰</div>
+                  <div style={{ color: colors.textMuted, fontSize: 13, marginBottom: 12 }}>No budget rules configured for this namespace</div>
+                  <button onClick={openBudgetModal} style={{
+                    padding: '8px 18px', borderRadius: 6, border: 'none',
+                    backgroundColor: colors.gold, color: '#0A0A0A',
+                    fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
+                  }}>
+                    Create First Budget Rule
+                  </button>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  {nsRules.map(rule => {
+                    const pct = Math.round((rule.spent / rule.limitAmount) * 100)
+                    const barColor = pct > 100 ? colors.red : pct >= 80 ? colors.amber : colors.green
+                    const remaining = rule.limitAmount - rule.spent
+                    const ac = actionCfg[rule.action]
+                    return (
+                      <div key={rule.id} style={{
+                        ...card, borderLeft: `3px solid ${barColor}`,
+                        opacity: rule.status === 'paused' ? 0.6 : 1,
+                      }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <span style={{ fontSize: 14 }}>{scopeIcon[rule.scope]}</span>
+                            <span style={{ fontSize: 13, fontWeight: 600, color: '#fff' }}>{rule.name}</span>
+                            {rule.status === 'paused' && <span style={badge('rgba(102,102,102,0.2)', colors.textDim)}>Paused</span>}
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                            <span style={badge(ac.bg, ac.color)}>{ac.label}</span>
+                            <span style={badge('rgba(212,168,67,0.06)', colors.textMuted)}>{rule.period}</span>
+                            <button
+                              onClick={() => handleToggleBudgetRule(rule.id)}
+                              title={rule.status === 'active' ? 'Pause rule' : 'Activate rule'}
+                              style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 14, color: rule.status === 'active' ? colors.amber : colors.green, padding: '0 4px' }}
+                            >
+                              {rule.status === 'active' ? '⏸' : '▶'}
+                            </button>
+                            <button
+                              onClick={() => handleDeleteBudgetRule(rule.id)}
+                              title="Delete rule"
+                              style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 14, color: colors.red, padding: '0 4px' }}
+                            >
+                              ×
+                            </button>
+                          </div>
+                        </div>
+
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                          <span style={{ fontSize: 11, color: colors.textMuted }}>Scope:</span>
+                          <span style={{ fontSize: 12, color: colors.gold, fontFamily: 'monospace' }}>{rule.scopeTarget}</span>
+                          <span style={{ color: colors.textDim, fontSize: 11 }}>·</span>
+                          <span style={{ fontSize: 11, color: colors.textMuted }}>Alerts at: {rule.alertThresholds.map(t => `${t}%`).join(', ')}</span>
+                        </div>
+
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                          <span style={{ fontSize: 12, color: colors.textMuted }}>
+                            ${rule.spent.toLocaleString()} <span style={{ color: colors.textDim }}>of</span> ${rule.limitAmount.toLocaleString()}
+                          </span>
+                          <span style={{ fontSize: 12, fontWeight: 600, color: barColor }}>{pct}%</span>
+                        </div>
+
+                        <div style={{ height: 6, backgroundColor: 'rgba(212,168,67,0.06)', borderRadius: 3, overflow: 'hidden', marginBottom: 6 }}>
+                          <div style={{ height: '100%', width: `${Math.min(pct, 100)}%`, backgroundColor: barColor, borderRadius: 3, transition: 'width 0.4s ease' }} />
+                        </div>
+
+                        <div style={{ fontSize: 11, color: remaining >= 0 ? colors.green : colors.red, fontWeight: 600 }}>
+                          {remaining >= 0 ? `$${remaining.toLocaleString()} remaining` : `$${Math.abs(remaining).toLocaleString()} over budget`}
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+          )
+        })()}
+
+        {/* Budget Rule Create Modal */}
+        {showBudgetModal && (
+          <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ backgroundColor: '#1A1A1A', border: `1px solid ${colors.border}`, borderRadius: 10, padding: 24, width: 480, maxHeight: '80vh', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <div style={{ fontSize: 16, fontWeight: 700, color: '#fff' }}>Create Budget Rule</div>
+              <div style={{ fontSize: 12, color: colors.textMuted }}>Set spending limits with alerts and enforcement actions for this namespace.</div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <label style={{ fontSize: 12, color: colors.textMuted }}>Rule Name</label>
+                <input type="text" value={budgetForm.name} onChange={(e) => setBudgetForm(p => ({ ...p, name: e.target.value }))} placeholder="e.g. Monthly GPT-4o Cap" style={{ padding: '8px 12px', borderRadius: 6, border: `1px solid ${colors.border}`, backgroundColor: '#111', color: colors.text, fontSize: 13, fontFamily: 'inherit', outline: 'none' }} />
+              </div>
+
+              <div style={{ display: 'flex', gap: 12 }}>
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  <label style={{ fontSize: 12, color: colors.textMuted }}>Scope</label>
+                  <div style={{ display: 'flex', gap: 6 }}>
+                    {(['namespace', 'team', 'model'] as const).map(s => (
+                      <button
+                        key={s}
+                        onClick={() => setBudgetForm(p => ({ ...p, scope: s, scopeTarget: s === 'namespace' ? (selectedNs?.name || '') : '' }))}
+                        style={{
+                          flex: 1, padding: '8px 4px', borderRadius: 6, border: `1px solid ${budgetForm.scope === s ? colors.gold : colors.border}`,
+                          backgroundColor: budgetForm.scope === s ? 'rgba(212,168,67,0.12)' : 'transparent',
+                          color: budgetForm.scope === s ? colors.gold : colors.textMuted,
+                          fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
+                          display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
+                        }}
+                      >
+                        <span style={{ fontSize: 16 }}>{{ namespace: '🏢', team: '👥', model: '🧠' }[s]}</span>
+                        {s.charAt(0).toUpperCase() + s.slice(1)}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {budgetForm.scope !== 'namespace' && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  <label style={{ fontSize: 12, color: colors.textMuted }}>
+                    {budgetForm.scope === 'team' ? 'Team Name' : 'Model Name'}
+                  </label>
+                  {budgetForm.scope === 'model' ? (
+                    <select
+                      value={budgetForm.scopeTarget}
+                      onChange={(e) => setBudgetForm(p => ({ ...p, scopeTarget: e.target.value }))}
+                      style={{ padding: '8px 12px', borderRadius: 6, border: `1px solid ${colors.border}`, backgroundColor: '#111', color: colors.text, fontSize: 13, fontFamily: 'inherit', cursor: 'pointer', outline: 'none' }}
+                    >
+                      <option value="">Select model...</option>
+                      {['GPT-4o', 'GPT-4o-mini', 'Claude 3.5 Sonnet', 'Claude 3 Haiku', 'Gemini 1.5 Pro', 'Llama 3.1 70B'].map(m => (
+                        <option key={m} value={m}>{m}</option>
+                      ))}
+                    </select>
+                  ) : (
+                    <input type="text" value={budgetForm.scopeTarget} onChange={(e) => setBudgetForm(p => ({ ...p, scopeTarget: e.target.value }))} placeholder="e.g. ML Platform" style={{ padding: '8px 12px', borderRadius: 6, border: `1px solid ${colors.border}`, backgroundColor: '#111', color: colors.text, fontSize: 13, fontFamily: 'inherit', outline: 'none' }} />
+                  )}
+                </div>
+              )}
+
+              <div style={{ display: 'flex', gap: 12 }}>
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  <label style={{ fontSize: 12, color: colors.textMuted }}>Spend Limit ($)</label>
+                  <input type="number" value={budgetForm.limitAmount} onChange={(e) => setBudgetForm(p => ({ ...p, limitAmount: e.target.value }))} placeholder="5000" style={{ padding: '8px 12px', borderRadius: 6, border: `1px solid ${colors.border}`, backgroundColor: '#111', color: colors.text, fontSize: 13, fontFamily: 'inherit', outline: 'none' }} />
+                </div>
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  <label style={{ fontSize: 12, color: colors.textMuted }}>Period</label>
+                  <select value={budgetForm.period} onChange={(e) => setBudgetForm(p => ({ ...p, period: e.target.value as BudgetRule['period'] }))} style={{ padding: '8px 12px', borderRadius: 6, border: `1px solid ${colors.border}`, backgroundColor: '#111', color: colors.text, fontSize: 13, fontFamily: 'inherit', cursor: 'pointer', outline: 'none' }}>
+                    <option value="daily">Daily</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                  </select>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <label style={{ fontSize: 12, color: colors.textMuted }}>When limit is reached</label>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  {([
+                    { key: 'notify' as const, label: '🔔 Notify Only', desc: 'Send alerts but allow traffic' },
+                    { key: 'throttle' as const, label: '🔄 Throttle', desc: 'Rate-limit to reduce spend' },
+                    { key: 'block' as const, label: '🛑 Hard Block', desc: 'Block all requests' },
+                  ]).map(a => (
+                    <button
+                      key={a.key}
+                      onClick={() => setBudgetForm(p => ({ ...p, action: a.key }))}
+                      style={{
+                        flex: 1, padding: '10px 8px', borderRadius: 6,
+                        border: `1px solid ${budgetForm.action === a.key ? colors.gold : colors.border}`,
+                        backgroundColor: budgetForm.action === a.key ? 'rgba(212,168,67,0.12)' : 'transparent',
+                        color: budgetForm.action === a.key ? '#fff' : colors.textMuted,
+                        fontSize: 12, cursor: 'pointer', fontFamily: 'inherit', textAlign: 'center',
+                      }}
+                    >
+                      <div style={{ fontWeight: 600, marginBottom: 2 }}>{a.label}</div>
+                      <div style={{ fontSize: 10, color: colors.textDim }}>{a.desc}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <label style={{ fontSize: 12, color: colors.textMuted }}>Alert Thresholds</label>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  {[60, 80, 90, 100].map(t => {
+                    const isActive = budgetForm.alerts.includes(t)
+                    return (
+                      <button
+                        key={t}
+                        onClick={() => setBudgetForm(p => ({
+                          ...p,
+                          alerts: isActive ? p.alerts.filter(a => a !== t) : [...p.alerts, t].sort((a, b) => a - b),
+                        }))}
+                        style={{
+                          padding: '6px 14px', borderRadius: 6,
+                          border: `1px solid ${isActive ? colors.gold : colors.border}`,
+                          backgroundColor: isActive ? 'rgba(212,168,67,0.12)' : 'transparent',
+                          color: isActive ? colors.gold : colors.textMuted,
+                          fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
+                        }}
+                      >
+                        {t}%
+                      </button>
+                    )
+                  })}
+                </div>
+                <div style={{ fontSize: 11, color: colors.textDim }}>Select thresholds to receive alert notifications</div>
+              </div>
+
+              <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 4 }}>
+                <button onClick={() => setShowBudgetModal(false)} style={{ padding: '8px 18px', borderRadius: 6, border: `1px solid ${colors.border}`, backgroundColor: 'transparent', color: colors.textMuted, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>Cancel</button>
+                <button onClick={handleCreateBudgetRule} style={{ padding: '8px 18px', borderRadius: 6, border: 'none', backgroundColor: colors.gold, color: '#0A0A0A', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>Create Rule</button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     )
   }
@@ -845,7 +1176,26 @@ const Namespaces: React.FC = () => {
                 </div>
               )}
 
-              {/* Row 4: Owner + Members */}
+              {/* Row 4: Budget indicator */}
+              {(() => {
+                const bs = getNsBudgetSummary(ns.id)
+                if (!bs) return null
+                const pct = bs.totalBudget > 0 ? Math.round((bs.totalSpent / bs.totalBudget) * 100) : 0
+                const barColor = pct > 100 ? colors.red : pct >= 80 ? colors.amber : colors.green
+                return (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 11 }}>
+                    <span style={{ color: colors.textMuted }}>💰</span>
+                    <span style={{ color: colors.textMuted }}>${bs.totalSpent.toLocaleString()} / ${bs.totalBudget.toLocaleString()}</span>
+                    <div style={{ flex: 1, height: 4, backgroundColor: 'rgba(212,168,67,0.06)', borderRadius: 2, overflow: 'hidden' }}>
+                      <div style={{ height: '100%', width: `${Math.min(pct, 100)}%`, backgroundColor: barColor, borderRadius: 2 }} />
+                    </div>
+                    <span style={{ color: barColor, fontWeight: 600 }}>{pct}%</span>
+                    <span style={{ color: colors.textDim }}>{bs.rules} rule{bs.rules !== 1 ? 's' : ''}</span>
+                  </div>
+                )
+              })()}
+
+              {/* Row 5: Owner + Members */}
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 12, color: colors.textDim }}>
                 <span>{ns.owner}</span>
                 <span>{ns.members.length} member{ns.members.length !== 1 ? 's' : ''}</span>

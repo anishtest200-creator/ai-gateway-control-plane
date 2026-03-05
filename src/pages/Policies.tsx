@@ -1068,26 +1068,23 @@ const Policies: React.FC = () => {
 
   return (
     <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 20 }}>
-      {/* Header — stats + create button */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
-        <div style={{ display: 'flex', gap: 24, alignItems: 'center' }}>
-          {[
-            { value: enabledPolicies, label: 'runtime rules', color: colors.gold },
-            { value: accessRuleList.filter(r => ruleStates[r.id]).length, label: 'access rules', color: colors.purple },
-            { value: enabledGuardrails, label: 'guardrails', color: colors.green },
-            { value: approvalList.length, label: 'pending', color: colors.amber },
-          ].map((s, i) => (
-            <React.Fragment key={s.label}>
-              {i > 0 && <span style={{ color: 'rgba(212,168,67,0.15)', fontSize: 20 }}>·</span>}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: s.color, display: 'inline-block', flexShrink: 0 }} />
-                <span style={{ fontSize: 28, fontWeight: 700, color: '#fff', lineHeight: 1.1 }}>{s.value}</span>
-                <span style={{ fontSize: 12, color: '#888' }}>{s.label}</span>
-              </div>
-            </React.Fragment>
-          ))}
-        </div>
-        <button onClick={() => { setShowCreateFlow(true); setCreateFlowCategory(null); setCreateFlowMethod(null); setAiComposeInput(''); setAiCompiling(false); setAiCompiled(false); setTemplateSelected(false) }} style={{ backgroundColor: '#D4A843', color: '#0A0A0A', border: 'none', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' }}>✚ Create Policy</button>
+      {/* Header — stat cards + create button (matches Access page) */}
+      <div style={{ display: 'flex', gap: 14, alignItems: 'stretch' }}>
+        {[
+          { value: enabledPolicies, label: 'Runtime Rules', color: colors.gold },
+          { value: accessRuleList.filter(r => ruleStates[r.id]).length, label: 'Access Rules', color: colors.purple },
+          { value: enabledGuardrails, label: 'Guardrails', color: colors.green },
+          { value: approvalList.length, label: 'Pending', color: colors.amber },
+        ].map((s) => (
+          <div key={s.label} style={{ backgroundColor: colors.card, border: `1px solid ${colors.border}`, borderRadius: 8, padding: 16, flex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: s.color, display: 'inline-block', flexShrink: 0 }} />
+              <span style={{ color: colors.textMuted, fontSize: 12 }}>{s.label}</span>
+            </div>
+            <span style={{ color: '#fff', fontSize: 28, fontWeight: 700, lineHeight: 1.1 }}>{s.value}</span>
+          </div>
+        ))}
+        <button onClick={() => { setShowCreateFlow(true); setCreateFlowCategory(null); setCreateFlowMethod(null); setAiComposeInput(''); setAiCompiling(false); setAiCompiled(false); setTemplateSelected(false) }} style={{ backgroundColor: '#D4A843', color: '#0A0A0A', border: 'none', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap', alignSelf: 'center' }}>✚ Create Policy</button>
       </div>
 
       {/* Tabs */}

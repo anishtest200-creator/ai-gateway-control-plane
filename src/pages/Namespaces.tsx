@@ -550,17 +550,16 @@ const Namespaces: React.FC = () => {
           </div>
         </div>
 
-        {/* Inline stat row */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 24, flexWrap: 'wrap' }}>
-          {statItems.map((s, i) => (
-            <React.Fragment key={s.label}>
-              {i > 0 && <span style={{ color: 'rgba(212,168,67,0.15)', fontSize: 20 }}>·</span>}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        {/* Stat cards (matches Access page) */}
+        <div style={{ display: 'flex', gap: 14, alignItems: 'stretch' }}>
+          {statItems.map((s) => (
+            <div key={s.label} style={{ backgroundColor: colors.card, border: `1px solid ${colors.border}`, borderRadius: 8, padding: 16, flex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: s.color, display: 'inline-block', flexShrink: 0 }} />
-                <span style={{ fontSize: 28, fontWeight: 700, color: '#fff', lineHeight: 1.1 }}>{s.value}</span>
-                <span style={{ fontSize: 12, color: colors.textMuted }}>{s.label}</span>
+                <span style={{ color: colors.textMuted, fontSize: 12 }}>{s.label}</span>
               </div>
-            </React.Fragment>
+              <span style={{ color: '#fff', fontSize: 28, fontWeight: 700, lineHeight: 1.1 }}>{s.value}</span>
+            </div>
           ))}
         </div>
 
@@ -732,22 +731,21 @@ const Namespaces: React.FC = () => {
         </button>
       </div>
 
-      {/* Compact stats */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 24, padding: '0 2px' }}>
+      {/* Stat cards (matches Access page) */}
+      <div style={{ display: 'flex', gap: 14, alignItems: 'stretch' }}>
         {[
-          { label: 'namespaces', value: nsList.length, color: colors.gold },
-          { label: 'managed', value: managedCount, color: colors.purple },
-          { label: 'personal', value: personalCount, color: colors.blue },
-          { label: 'total assets', value: nsList.reduce((s, n) => s + n.totalAssets, 0), color: colors.green },
-        ].map((s, i) => (
-          <React.Fragment key={s.label}>
-            {i > 0 && <span style={{ color: 'rgba(212,168,67,0.15)', fontSize: 20 }}>·</span>}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          { label: 'Namespaces', value: nsList.length, color: colors.gold },
+          { label: 'Managed', value: managedCount, color: colors.purple },
+          { label: 'Personal', value: personalCount, color: colors.blue },
+          { label: 'Total Assets', value: nsList.reduce((s, n) => s + n.totalAssets, 0), color: colors.green },
+        ].map((s) => (
+          <div key={s.label} style={{ backgroundColor: colors.card, border: `1px solid ${colors.border}`, borderRadius: 8, padding: 16, flex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: s.color, display: 'inline-block', flexShrink: 0 }} />
-              <span style={{ fontSize: 28, fontWeight: 700, color: '#fff', lineHeight: 1.1 }}>{s.value}</span>
-              <span style={{ fontSize: 12, color: colors.textMuted }}>{s.label}</span>
+              <span style={{ color: colors.textMuted, fontSize: 12 }}>{s.label}</span>
             </div>
-          </React.Fragment>
+            <span style={{ color: '#fff', fontSize: 28, fontWeight: 700, lineHeight: 1.1 }}>{s.value}</span>
+          </div>
         ))}
       </div>
 

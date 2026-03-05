@@ -551,14 +551,15 @@ const Namespaces: React.FC = () => {
         </div>
 
         {/* Inline stat row */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 24, flexWrap: 'wrap' }}>
           {statItems.map((s, i) => (
             <React.Fragment key={s.label}>
-              {i > 0 && <span style={{ color: colors.textDim, fontSize: 12 }}>·</span>}
-              <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: 4 }}>
-                <span style={{ fontSize: 18, fontWeight: 700, color: s.color }}>{s.value}</span>
+              {i > 0 && <span style={{ color: 'rgba(212,168,67,0.15)', fontSize: 20 }}>·</span>}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: s.color, display: 'inline-block', flexShrink: 0 }} />
+                <span style={{ fontSize: 28, fontWeight: 700, color: '#fff', lineHeight: 1.1 }}>{s.value}</span>
                 <span style={{ fontSize: 12, color: colors.textMuted }}>{s.label}</span>
-              </span>
+              </div>
             </React.Fragment>
           ))}
         </div>
@@ -732,7 +733,7 @@ const Namespaces: React.FC = () => {
       </div>
 
       {/* Compact stats */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '0 2px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 24, padding: '0 2px' }}>
         {[
           { label: 'namespaces', value: nsList.length, color: colors.gold },
           { label: 'managed', value: managedCount, color: colors.purple },
@@ -740,11 +741,12 @@ const Namespaces: React.FC = () => {
           { label: 'total assets', value: nsList.reduce((s, n) => s + n.totalAssets, 0), color: colors.green },
         ].map((s, i) => (
           <React.Fragment key={s.label}>
-            {i > 0 && <span style={{ color: colors.textDim, fontSize: 12 }}>·</span>}
-            <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: 4 }}>
-              <span style={{ fontSize: 18, fontWeight: 700, color: s.color }}>{s.value}</span>
+            {i > 0 && <span style={{ color: 'rgba(212,168,67,0.15)', fontSize: 20 }}>·</span>}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: s.color, display: 'inline-block', flexShrink: 0 }} />
+              <span style={{ fontSize: 28, fontWeight: 700, color: '#fff', lineHeight: 1.1 }}>{s.value}</span>
               <span style={{ fontSize: 12, color: colors.textMuted }}>{s.label}</span>
-            </span>
+            </div>
           </React.Fragment>
         ))}
       </div>

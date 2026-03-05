@@ -338,17 +338,17 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   {
+    path: '/assets',
+    label: 'Assets',
+    icon: <Grid24Regular />,
+    activeIcon: <Grid24Filled />,
+    section: 'Configure',
+  },
+  {
     path: '/credentials',
     label: 'Credentials',
     icon: <Key24Regular />,
     activeIcon: <Key24Filled />,
-    section: 'Operations',
-  },
-  {
-    path: '/policies',
-    label: 'Policies',
-    icon: <Shield24Regular />,
-    activeIcon: <Shield24Filled />,
   },
   {
     path: '/routing',
@@ -357,24 +357,23 @@ const navItems: NavItem[] = [
     activeIcon: <Flow24Filled />,
   },
   {
+    path: '/policies',
+    label: 'Policies',
+    icon: <Shield24Regular />,
+    activeIcon: <Shield24Filled />,
+  },
+  {
     path: '/traffic',
     label: 'Traffic',
     icon: <DataUsage24Regular />,
     activeIcon: <DataUsage24Filled />,
-  },
-  {
-    path: '/assets',
-    label: 'Assets',
-    icon: <Grid24Regular />,
-    activeIcon: <Grid24Filled />,
-    section: 'Inventory',
+    section: 'Monitor',
   },
   {
     path: '/observability',
     label: 'Metrics',
     icon: <DataUsage24Regular />,
     activeIcon: <DataUsage24Filled />,
-    section: 'Observability',
   },
   {
     path: '/logs',
@@ -387,7 +386,7 @@ const navItems: NavItem[] = [
     label: 'Namespaces',
     icon: <Folder24Regular />,
     activeIcon: <Folder24Filled />,
-    section: 'Governance',
+    section: 'Govern',
   },
   {
     path: '/access',
@@ -400,6 +399,7 @@ const navItems: NavItem[] = [
     label: 'Test Console',
     icon: <Play24Regular />,
     activeIcon: <Play24Filled />,
+    section: 'Tools',
   },
 ];
 

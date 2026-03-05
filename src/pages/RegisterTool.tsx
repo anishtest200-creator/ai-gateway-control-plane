@@ -19,6 +19,8 @@ interface FormData {
   // Step 1
   toolType: ToolType | null;
   toolSource: ToolSource | null;
+  // REST import mode
+  restImportMode: 'api' | 'mcp';
   // MCP External
   mcpUrl: string;
   mcpTransport: string;
@@ -88,6 +90,7 @@ interface FormData {
 const initialFormData: FormData = {
   toolType: null,
   toolSource: null,
+  restImportMode: 'mcp',
   mcpUrl: '',
   mcpTransport: 'sse',
   mcpDisplayName: '',
@@ -414,7 +417,7 @@ const infoBox: CSSProperties = {
 // --- Config data ---
 const toolTypes: { id: ToolType; name: string; desc: string; sub: string; icon: string; accent: string }[] = [
   { id: 'mcp', name: 'MCP Server', desc: 'Model Context Protocol endpoint', sub: 'Agents discover and invoke tools via MCP protocol', icon: '⬡', accent: '#4fc3f7' },
-  { id: 'rest', name: 'REST API', desc: 'Standard HTTP/REST endpoint', sub: 'Auto-converted to MCP so agents can discover and invoke via protocol', icon: '⬢', accent: '#66bb6a' },
+  { id: 'rest', name: 'REST API', desc: 'Standard HTTP/REST endpoint', sub: 'Register as a governed API or convert to MCP for agent discovery', icon: '⬢', accent: '#66bb6a' },
   { id: 'saas', name: 'SaaS Connector', desc: 'Pre-built SaaS integration', sub: 'Auto-converted to MCP — Salesforce, ServiceNow, Jira, and more', icon: '◈', accent: '#b388ff' },
 ];
 
@@ -636,9 +639,35 @@ function RegisterTool({ onClose, onComplete }: { onClose: () => void; onComplete
         <div style={title}>Configure endpoint</div>
         <div style={subtitle}>Provide connection details for the existing tool — the gateway will mediate all access through this endpoint</div>
 
-        {(form.toolType === 'rest' || form.toolType === 'saas') && (
+        {form.toolType === 'rest' && form.toolSource !== 'convert' && (
+          <div style={{ marginBottom: 16 }}>
+            <label style={{ ...label, marginBottom: 8 }}>Registration Mode</label>
+            <div style={{ display: 'flex', gap: 10 }}>
+              {([
+                { id: 'mcp' as const, label: '⬡ Import as MCP Server', desc: 'Auto-convert to MCP — agents discover and invoke natively' },
+                { id: 'api' as const, label: '⬢ Import as REST API', desc: 'Register as a governed REST API endpoint' },
+              ]).map((mode) => (
+                <div
+                  key={mode.id}
+                  onClick={() => set('restImportMode', mode.id)}
+                  style={{
+                    flex: 1, padding: '12px 14px', borderRadius: 6, cursor: 'pointer',
+                    backgroundColor: form.restImportMode === mode.id ? 'rgba(96,205,255,0.06)' : '#1a1a1a',
+                    border: `1px solid ${form.restImportMode === mode.id ? '#60cdff' : '#333'}`,
+                    transition: 'all 0.15s',
+                  }}
+                >
+                  <div style={{ fontSize: 13, fontWeight: 600, color: form.restImportMode === mode.id ? '#60cdff' : '#ccc', marginBottom: 4 }}>{mode.label}</div>
+                  <div style={{ fontSize: 11, color: '#888' }}>{mode.desc}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {form.toolType === 'saas' && (
           <div style={{ ...infoBox, marginBottom: 16 }}>
-            ⬡ <strong>Auto-MCP conversion</strong> — All registered REST APIs and SaaS connectors are automatically converted to MCP protocol, enabling agents to discover and invoke them natively.
+            ⬡ <strong>Auto-MCP conversion</strong> — All registered SaaS connectors are automatically converted to MCP protocol, enabling agents to discover and invoke them natively.
           </div>
         )}
 

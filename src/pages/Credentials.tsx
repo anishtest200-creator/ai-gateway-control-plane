@@ -480,11 +480,14 @@ const Credentials: React.FC = () => {
         </div>
 
         {/* Impact Summary */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14 }}>
+        <div style={{ display: 'flex', gap: 14, alignItems: 'stretch' }}>
           {impactStats.map((s) => (
-            <div key={s.label} style={{ ...card, padding: '16px 20px' }}>
-              <div style={{ fontSize: 12, color: '#999', marginBottom: 4 }}>{s.label}</div>
-              <div style={{ fontSize: 28, fontWeight: 700, color: s.color }}>{s.value}</div>
+            <div key={s.label} style={{ ...card, padding: 16, flex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: s.color, display: 'inline-block', flexShrink: 0 }} />
+                <span style={{ color: '#999', fontSize: 12 }}>{s.label}</span>
+              </div>
+              <span style={{ color: '#fff', fontSize: 28, fontWeight: 700, lineHeight: 1.1 }}>{s.value}</span>
             </div>
           ))}
         </div>
@@ -847,12 +850,22 @@ const Credentials: React.FC = () => {
         </select>
       </div>
 
-      {/* Compact summary row */}
-      <div style={{ display: 'flex', gap: 20, fontSize: 13, color: '#999' }}>
-        <span><span style={{ color: '#fff', fontWeight: 600 }}>{stats[0].value}</span> total</span>
-        <span><span style={{ color: '#4ADE80', fontWeight: 600 }}>{stats[1].value}</span> healthy</span>
-        <span><span style={{ color: '#F59E0B', fontWeight: 600 }}>{stats[2].value}</span> expiring</span>
-        <span><span style={{ color: '#EF4444', fontWeight: 600 }}>{stats[3].value}</span> expired</span>
+      {/* Stat cards (matches Access page) */}
+      <div style={{ display: 'flex', gap: 14, alignItems: 'stretch' }}>
+        {[
+          { label: 'Total Credentials', value: stats[0].value, color: '#D4A843' },
+          { label: 'Healthy', value: stats[1].value, color: '#4ADE80' },
+          { label: 'Expiring Soon', value: stats[2].value, color: '#F59E0B' },
+          { label: 'Expired', value: stats[3].value, color: '#EF4444' },
+        ].map((s) => (
+          <div key={s.label} style={{ ...card, padding: 16, flex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: s.color, display: 'inline-block', flexShrink: 0 }} />
+              <span style={{ color: '#999', fontSize: 12 }}>{s.label}</span>
+            </div>
+            <span style={{ color: '#fff', fontSize: 28, fontWeight: 700, lineHeight: 1.1 }}>{s.value}</span>
+          </div>
+        ))}
       </div>
 
       {/* Credentials Table — simplified columns */}

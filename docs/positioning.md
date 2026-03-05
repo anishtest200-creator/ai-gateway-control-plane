@@ -96,29 +96,23 @@ The typical enterprise pattern: teams build in Foundry, then register their depl
 
 ---
 
-## 6. Two Portal Experiences
+## 6. Portal Experience
 
-The Azure AI Gateway offers two distinct portal experiences, each designed for a different organizational context.
+The Azure AI Gateway is operated through two complementary portals, each serving a distinct role.
 
-### AI Gateway Studio — Standalone Mode
+### AI Gateway Control Plane — Governance Portal
 
-For organizations that do not use Foundry, or that use the Gateway as their primary AI platform.
+The **AI Gateway Control Plane** is the governance-first portal for platform engineers, operations teams, and security teams. It provides:
 
-- **Full-featured experience** — Asset catalogs, interactive playground, governance configuration, and observability dashboards.
-- **Complete model, tool, and agent management** — Register, organize, and govern all AI assets from a single interface.
-- **Self-contained** — No dependency on Foundry or any other AI development platform.
+- **Operations-first interface** — Traffic dashboards, routing rules, policy management, credential configuration, and compliance monitoring.
+- **Enterprise governance at scale** — Namespace isolation, access control, token quotas, audit logging, and policy enforcement across all registered AI assets.
+- **Registry-centric** — Assets are shown as "what's registered for production governance," not "what's available to build with." This is a governance and operations view.
 
-This mode is ideal for multi-cloud organizations, teams standardized on non-Azure AI providers, or enterprises that need a neutral governance layer above all their AI investments.
+The Control Plane portal is organized into four sections — **Operations** (Overview, Traffic, Routing, Policies), **Inventory** (Catalog), **Insights** (Analytics, Audit Log), and **Administration** (Namespaces, Access Control, Secrets, Compliance) — plus a Playground for interactive testing.
 
-### AI Gateway Operations Console — Complementary Mode
+### AI Gateway Studio — Developer Portal
 
-For organizations that use Foundry, Bedrock, or other AI platforms for development and want the Gateway purely for production operations.
-
-- **Operations-first interface** — Traffic dashboards, routing rules, policy management, and credential configuration.
-- **Registry over catalog** — Assets are shown as "what's registered for production," not "what's available to build with." The distinction is intentional: this is an operations view, not a development view.
-- **No Skills or Workflows** — Agent authoring and workflow design remain in Foundry's domain. The Operations Console does not duplicate them.
-
-This mode is ideal for enterprises already invested in Foundry who need a dedicated operations layer for production AI traffic.
+The [AI Gateway Studio](https://github.com/anishta_microsoft/standalone-ai-gateway) serves as the developer-facing portal. It provides the full-featured experience for asset catalogs, interactive playground, model/tool/agent management, and self-contained operation without dependency on Foundry or any other AI development platform. Organizations that use the Gateway as their primary AI platform interact through the Studio.
 
 ---
 

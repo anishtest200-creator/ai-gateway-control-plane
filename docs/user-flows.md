@@ -1,11 +1,12 @@
 # User Flows — Azure AI Gateway Portal
 
 > **Purpose:** Step-by-step user flow specs for every key scenario in the AI Gateway portal.
-> These flows cover both the **Admin / Platform Engineer** and **Developer / Agent Builder** personas
+> These flows describe the governance configuration experience in the AI Gateway Control Plane portal.
+> They cover both the **Admin / Platform Engineer** and **Developer / Agent Builder** personas
 > and serve as the product spec for the mock implementation.
 >
 > **Portal pages referenced:**
-> _Existing:_ Dashboard, Playground, Catalog, Models, Tools, MCP Servers, Agents, Namespaces, Policies (Runtime Rules / Design-Time Rules / Safety Guardrails), Logs
+> _Existing:_ Overview, Playground, Catalog, Models, Tools, MCP Servers, Agents, Namespaces, Policies (Runtime Rules / Design-Time Rules / Safety Guardrails), Audit Log
 > _New:_ **Analytics** (token consumption observability), **Consumers** (per-user/per-app auth & quotas)
 > _Enhanced:_ **Models** (Routing tab, Failover tab)
 
@@ -15,11 +16,11 @@
 
 | # | Scenario | Admin Flow(s) | Developer Flow(s) | Pages Touched |
 |---|----------|---------------|-------------------|---------------|
-| S1 | Token Consumption Observability | S1-A | S1-D | Analytics, Dashboard, Consumers |
+| S1 | Token Consumption Observability | S1-A | S1-D | Analytics, Overview, Consumers |
 | S2 | Per-User/Per-App Auth, Quotas & Enforcement | S2-A | S2-D | Consumers, Catalog, Logs |
 | S3 | Model Routing & Load Balancing | S3-A | S3-D | Models → Routing tab, Catalog |
 | S4 | High Availability & Resilience | S4-A | S4-D | Models → Failover tab, Catalog |
-| S5 | Centralized Gateway for Enterprise Governance | S5-A | S5-D | Catalog, Namespaces, Policies, Consumers, Analytics, Dashboard |
+| S5 | Centralized Gateway for Enterprise Governance | S5-A | S5-D | Catalog, Namespaces, Policies, Consumers, Analytics, Overview |
 | P0-MR | Model Registration (M1–M4) | P0-MR-A | — | Models, Namespaces, Policies |
 | P0-TO | Tool & MCP Onboarding (T1–T3) | P0-TO-A | — | Tools, MCP Servers, Catalog |
 | P0-AE | Agent Exposure (A1) | P0-AE-A | — | Agents, Models, Tools, Catalog |
@@ -84,12 +85,12 @@
 ### S1-D: Personal Usage Widget (Developer)
 
 **Persona:** Developer / Agent Builder
-**Pages touched:** Dashboard, Analytics
+**Pages touched:** Overview, Analytics
 **Precondition:** Developer is authenticated; at least one model request has been made under their consumer identity.
 
 **Steps:**
 
-1. Developer lands on the **Dashboard** (home page).
+1. Developer lands on the **Overview** (home page).
 2. System displays a **My Usage** widget card in the dashboard grid showing:
    - _Tokens Used Today_: e.g. 42,350 / 100,000 (progress bar).
    - _Requests Today_: e.g. 128.
@@ -174,7 +175,7 @@
 ### S2-D: Request Access & View Own Quota (Developer)
 
 **Persona:** Developer / Agent Builder
-**Pages touched:** Catalog, Dashboard
+**Pages touched:** Catalog, Overview
 **Precondition:** Developer is authenticated; a model exists in the Catalog.
 
 **Steps:**
@@ -358,12 +359,12 @@
 ### S5-A: Single Pane of Glass (Admin)
 
 **Persona:** Admin / Platform Engineer
-**Pages touched:** Dashboard, Catalog, Namespaces, Policies, Consumers, Analytics
+**Pages touched:** Overview, Catalog, Namespaces, Policies, Consumers, Analytics
 **Precondition:** The gateway is set up with models, tools, agents, namespaces, and consumers.
 
 **Steps:**
 
-1. Admin lands on the **Dashboard**.
+1. Admin lands on the **Overview**.
 2. System shows enterprise-wide summary widgets:
    - _Total Assets_: Models (12), Tools (34), MCP Servers (8), Agents (5).
    - _Active Consumers_: 47 users, 23 apps.
@@ -392,12 +393,12 @@
 ### S5-D: Governed Self-Service (Developer)
 
 **Persona:** Developer / Agent Builder
-**Pages touched:** Dashboard, Catalog, Namespaces
+**Pages touched:** Overview, Catalog, Namespaces
 **Precondition:** Developer is authenticated and belongs to a namespace.
 
 **Steps:**
 
-1. Developer lands on **Dashboard**.
+1. Developer lands on **Overview**.
 2. System shows a personalised view:
    - _My Namespace_: `backend-team` — 3 models, 5 tools available.
    - _My Usage_ widget (as described in S1-D).
@@ -800,7 +801,7 @@
 
 | Page | Section | Persona | New / Enhanced | Purpose |
 |------|---------|---------|----------------|---------|
-| Dashboard | — | Both | Enhanced | Summary widgets; personal usage for devs |
+| Overview | — | Both | Enhanced | Summary widgets; personal usage for devs |
 | Playground | — | Developer | Existing | Interactive testing |
 | Catalog | Discovery | Both | Existing | Unified asset discovery, search, filters, detail views |
 | Models | AI Assets | Admin | **Enhanced** | Model list + Routing tab + Failover tab |
@@ -810,7 +811,7 @@
 | Namespaces | Organization | Admin | Existing | Team/project scoping |
 | **Consumers** | Organization | Both | **New** | Consumer CRUD, auth, quotas, keys, enforcement log |
 | Policies | Governance | Admin | Existing | Runtime Rules, Design-Time Rules, Safety Guardrails |
-| Logs | Observability | Admin | Existing | Request logs, policy enforcement audit |
+| Audit Log | Observability | Admin | Existing | Request logs, policy enforcement audit |
 | **Analytics** | Observability | Both | **New** | Token consumption dashboard, filters, budget alerts |
 
 ---
@@ -820,7 +821,7 @@
 The sidebar navigation should be updated to include the new pages:
 
 ```
-Dashboard
+Overview
 Playground
 ─── Discovery ───
 Catalog
@@ -836,7 +837,7 @@ Consumers          ← NEW
 Policies
 ─── Observability ───
 Analytics          ← NEW
-Logs
+Audit Log
 ```
 
 ---
@@ -875,7 +876,7 @@ All flows should use consistent Fluent UI v9 patterns:
 | Detail pages | `TabList` with tab panels | Model Detail (Overview/Routing/Failover/Policies/Usage) |
 | Creation wizards | Multi-step side panel or dialog | Register Model, Create Consumer, Register Agent |
 | Status indicators | `Badge` with color variants | ● Healthy / ● Degraded / ● Unhealthy |
-| Metric cards | `Card` with large number + sparkline | Dashboard widgets, Analytics hero metrics |
+| Metric cards | `Card` with large number + sparkline | Overview widgets, Analytics hero metrics |
 | Charts | Recharts or similar | Time series (area/line), breakdowns (doughnut/bar) |
 | Filters | `Combobox`, `Dropdown`, `SearchBox` | Consistent filter bar across list/analytics pages |
 | Confirmations | `Dialog` | Destructive actions (revoke key, test failover) |

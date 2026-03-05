@@ -162,15 +162,12 @@ The gateway governs agent traffic in production — enforcing policies on agent-
 
 ## 10. Product Experience
 
-Navigation model:
-- Models
-- Tools
-- Agents
-- Skills / Workflows
-- Workloads
-- Observability
+The AI Gateway is operated through two portals:
 
-Each asset page supports asset discovery, creation, policy configuration, and usage monitoring.
+- **AI Gateway Control Plane** (this repository) — the governance-first portal for platform engineers, operations teams, and security teams. Organized into four sections: **Operations** (Overview, Traffic, Routing, Policies), **Inventory** (Catalog), **Insights** (Analytics, Audit Log), and **Administration** (Namespaces, Access Control, Secrets, Compliance), plus a Playground.
+- **AI Gateway Studio** ([standalone-ai-gateway](https://github.com/anishta_microsoft/standalone-ai-gateway)) — the developer-facing portal for asset catalogs, interactive playground, and full model/tool/agent management.
+
+The Control Plane portal provides 16 console pages covering governance configuration, policy management, traffic observability, and compliance monitoring.
 
 ---
 
@@ -200,11 +197,17 @@ Initial focus: **product-market fit**, not revenue optimization.
 
 ## 13. Execution Plan
 
-### Prototype phase
+### Prototype phase — Complete
 
-Working prototype includes model integration, tool integration, basic routing, and gateway UX. Demonstrated at **MVP Summit (March 24–26)**.
+✅ Working prototype delivered and demonstrated at **MVP Summit (March 24–26)**. Includes model integration, tool integration, basic routing, and gateway UX.
 
-### Portal
+### Portal — Built
+
+✅ Control Plane portal built with 16 console pages and 4 public marketing pages. Premium black + gold dark theme. Currently gathering feedback from field teams and early adopters.
+
+### Current state
+
+🔄 Iterating on MVP based on feedback and real-world usage. The Control Plane portal (this repository) provides the governance configuration UI. The runtime data plane and the developer-facing AI Gateway Studio portal are maintained separately.
 
 Long-term portal at: `gateway.azure.com`
 

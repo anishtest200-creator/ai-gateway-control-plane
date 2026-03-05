@@ -1,127 +1,305 @@
-# Scenario Matrix — Azure AI Gateway
+# User Scenarios — Azure AI Gateway Control Plane
 
-This document contains the full scenario inventory, organized by asset type and persona, with prioritization for the standalone AI gateway.
-
-## Priority Levels
-- **P0 (MVP Must-Have)** — Ship in Phase 1. Core value prop, competitive table stakes, or top customer ask.
-- **P1 (Fast Follow)** — Ship in Phase 2. Important but can follow MVP launch.
-- **P2 (Future)** — Phase 3+. Nice-to-have, enhances ecosystem.
-
-## Prioritization Criteria
-- **Customer demand** — what enterprise customers need most urgently
-- **Competitive parity** — what Kong and others already offer (table stakes)
-- **Differentiation** — what makes our standalone gateway unique and winning
+This document catalogs every user scenario in the AI Gateway Control Plane portal — a governance-first control plane for managing AI traffic across providers. It covers what is **built**, what is **partially implemented**, and what is **missing** in the current prototype. The portal features a black + gold premium theme and uses mock data throughout.
 
 ---
 
-## MODELS
+## Personas
 
-### Admin / Platform Engineer
+### Platform Engineer / Admin
 
-| # | Scenario | Status | Priority | Rationale |
-|---|---------|--------|----------|-----------|
-| M1 | Expose RAPI/CAPI models from Foundry, AWS Bedrock, or elsewhere | ⭐ Available (UI) | **P0** | Core value prop — multi-cloud model access is table stakes |
-| M2 | Expose Anthropic models via messages API | ⌚ Roadmap | **P0** | Critical for cloud-agnostic positioning; top customer ask |
-| M3 | Expose Vertex AI Gemini models | ⌚ Roadmap | **P0** | Must support all major providers day 1 |
-| M4 | Unified model API across heterogeneous models | ⌚ Roadmap | **P0** | Key differentiator — single API across all providers |
-| M5 | Granular token limits and quotas (per user/key/IP) | ⭐ Available (UI) | **P0** | Enterprise requirement, competitive table stakes |
-| M6 | Secure access with developer-specific keys/tokens | ⭐ Available (UI) | **P0** | Fundamental security |
-| M7 | Request throttling and IP filtering | ⭐ Available (UI) | **P0** | Abuse protection |
-| M8 | Content safety guardrails | ⭐ Available (UI) | **P1** | Important but can use external services initially |
-| M9 | Traffic splitting for A/B testing | ⭐ Available (UI) | **P1** | Valuable but not blocking MVP |
-| M10 | Semantic caching for similar prompts | ⭐ Available (UI) | **P1** | Cost optimization — important but not day 1 |
-| M11 | Automatic model failover (same provider) | ⭐ Available (UI) | **P0** | HA critical for production |
-| M12 | Cross-provider model failover | ⭐ Available (UI) | **P0** | Major differentiator |
-| M13 | Monitor usage (logs, traces, metrics, tokens/user) | ⭐ Available (UI) | **P0** | Observability non-negotiable |
-| M14 | Log prompts/completions without stream interruption | ⭐ Available (UI) | **P1** | Compliance — can follow MVP |
-| M19 | Register models from Foundry, Bedrock, Vertex, OpenAI, Anthropic, self-hosted | ⭐ Available (UI) | **P0** | Core registration experience |
+- **Primary user.** Configures routing, policies, credentials, namespaces, and compliance.
+- **Uses:** Overview, Traffic, Routing, Policies, Secrets, Namespaces, Access Control, Compliance, Analytics, Audit Log, Playground
 
-### Developer / Agent Builder
+### AI Developer / Agent Builder
 
-| # | Scenario | Status | Priority | Rationale |
-|---|---------|--------|----------|-----------|
-| M15 | Discover models in portal + acquire credentials | ⭐ Available (UI) | **P0** | Core discovery experience |
-| M16 | Consume models through unified API | ⌚ Roadmap | **P0** | Developer side of M4 |
-| M17 | Discover models in GitHub Copilot CLI | ⌚ Roadmap | **P2** | Cool but not MVP |
-| M18 | A/B test via traffic splitting | ⭐ Available (UI) | **P1** | Developer side of M9 |
+- **Secondary user.** Discovers approved assets, registers new ones, tests in the playground.
+- **Uses:** Catalog, Playground, Analytics
+
+### Security / Compliance Officer
+
+- **Tertiary user.** Audits activity, enforces compliance frameworks, reviews access controls.
+- **Uses:** Compliance, Audit Log, Access Control, Secrets, Policies
+
+### Visitor / Prospect
+
+- **Unauthenticated user.** Evaluates the product before signing up.
+- **Uses:** Landing Page, Pricing, Docs, Demo
 
 ---
 
-## TOOLS
+## Scenario Matrix
 
-> **Note:** Tool governance is a key differentiator from Azure AI Foundry. While Foundry may host tools, the gateway mediates and governs tool traffic — enforcing access policies, rate limits, credential management, and execution auditing at the API boundary.
+**Status legend:**
 
-### Admin / Platform Engineer
-
-| # | Scenario | Status | Priority | Rationale |
-|---|---------|--------|----------|-----------|
-| T1 | Onboard externally hosted MCP endpoints | ⭐ Available (UI) | **P0** | MCP is the protocol moment |
-| T2 | Convert OpenAPI APIs to MCP (no code) | ⭐ Available (UI) | **P0** | Massive differentiator |
-| T3 | Register tools in enterprise catalog | ⭐ Available (UI) | **P0** | Core catalog value |
-| T4 | Public and private catalog collections | ⭐ Available (UI) | **P0** | Multi-tenant must-have |
-| T5 | Skills as first-class catalog entities | ⌚ Roadmap | **P1** | Skills follow tools |
-| T6 | Bundle tools/skills/models into Products | ⌚ Roadmap | **P1** | Composition — fast follow |
-| T7 | Team-based tool visibility | ⭐ Available (UI) | **P0** | RBAC enterprise requirement |
-| T8 | Auth for tool access (OAuth, API keys, Entra ID) | ⭐ Available (UI) | **P0** | Security must-have |
-| T9 | Secure backend credential management | ⭐ Available (UI) | **P0** | Enterprise must-have |
-| T10 | Approval workflows for asset onboarding | ⌚ Roadmap | **P1** | Governance workflow |
-| T11 | Delegated access (On-Behalf-Of) | ⌚ Roadmap | **P1** | Advanced auth |
-| T12 | Policy-based access control | ⭐ Available (UI) | **P0** | Runtime governance core |
-| T13 | Throttling, quotas, IP filtering for tools | ⭐ Available (UI) | **P0** | Same protection as models |
-| T14 | Consistent governance across APIs and MCP | ⌚ Roadmap | **P0** | Unified governance selling point |
-| T15 | Granular governance at tool level | ⌚ Roadmap | **P1** | Per-MCP-server is fine for MVP |
-| T16 | Tool usage monitoring (logs, metrics, perf) | ⭐ Available (UI) | **P0** | Observability must-have |
-| T17 | MCP observability with deeper analytics | ⌚ Roadmap | **P1** | Enhanced — fast follow |
-| T18 | Correlate tool usage with agent workflows | ⌚ Roadmap | **P2** | Advanced analytics |
-| T28+ | Register tools from Foundry, OpenAPI, MCP, SaaS with governance wizard | ⭐ Available (UI) | **P0** | Core registration experience |
-
-### Developer / Agent Builder
-
-| # | Scenario | Status | Priority | Rationale |
-|---|---------|--------|----------|-----------|
-| T19 | Discover tools through governed catalogs | ⭐ Available (UI) | **P0** | Core discovery |
-| T20 | Access only team-approved tools | ⭐ Available (UI) | **P0** | RBAC must-have |
-| T21 | Intent-based tool discovery at design time | ⌚ Roadmap | **P1** | Compelling but not MVP |
-| T22 | Discover skills alongside tools | ⌚ Roadmap | **P1** | Follows T5 |
-| T23 | Discover bundled capabilities | ⌚ Roadmap | **P2** | Follows T6 |
-| T24 | Add APIs/MCP servers with familiar auth | ⭐ Available (UI) | **P0** | Frictionless onboarding |
-| T25 | Standardized endpoints with built-in governance | ⭐ Available (UI) | **P0** | Value prop |
-| T26 | Consistent tool usage across workflows | ⭐ Available (UI) | **P0** | Consistency must-have |
-| T27 | Combine APIs & MCP servers behind one endpoint | ⌚ Roadmap | **P0** | Aggregation differentiator |
-| T28 | Tools with structured resources and guided flows | ⌚ Roadmap | **P1** | Rich capabilities |
+| Symbol | Meaning |
+|--------|---------|
+| ✅ Built (UI) | Interactive UI exists in prototype with mock data |
+| 🔧 Partial | Page exists but interaction is limited or static |
+| ❌ Missing | Not yet built |
 
 ---
 
-## AGENTS
+### Category: Product Evaluation (Visitor)
 
-> **Note:** The gateway does not build or host agents — it governs agent traffic in production. These scenarios cover routing, authentication, observability, and safety enforcement for agents built and deployed through platforms like Azure AI Foundry, AWS Bedrock, or custom infrastructure.
-
-### Admin / Platform Engineer
-
-| # | Scenario | Status | Priority | Rationale |
-|---|---------|--------|----------|-----------|
-| A1 | Route and govern RAPI/A2A agent traffic | ⭐ Available (UI) | **P0** | Agent traffic governance is core differentiator |
-| A2 | Sync agents from Vertex AI and AWS Bedrock | ⌚ Roadmap | **P1** | Multi-cloud — fast follow |
-| A3 | Monitor agent calls with OpenTelemetry | ⭐ Available (UI) | **P0** | Observability must-have |
-| A4 | Content safety for RAPI agents | ⭐ Available (UI) | **P1** | Safety — follows M8 |
-| A5 | Content safety for A2A and MCP agents | ⌚ Roadmap | **P1** | Same as A4 |
-| A6 | Per-user throttling and IP filtering | ⭐ Available (UI) | **P0** | Abuse protection |
-| A7 | Secure agent access with keys/tokens | ⭐ Available (UI) | **P0** | Security must-have |
-| A8 | Automatic agent failover | ⭐ Available (UI) | **P0** | HA must-have |
-| A9+ | Register agents from Foundry, Bedrock, Vertex, A2A, RAPI with binding governance | ⭐ Available (UI) | **P0** | Core registration experience |
-
-### Developer / Agent Builder
-
-| # | Scenario | Status | Priority | Rationale |
-|---|---------|--------|----------|-----------|
-| A9 | Discover agents in portal or GitHub CLI | ⌚ Roadmap | **P1** | Discovery — fast follow |
+| ID | Scenario | Persona | Page(s) | Status | Notes |
+|----|----------|---------|---------|--------|-------|
+| V1 | View product overview and value proposition | Visitor | Landing Page | ✅ Built (UI) | Hero section, feature highlights, CTA |
+| V2 | Explore pricing tiers and compare plans | Visitor | Pricing | ✅ Built (UI) | 3 tiers, FAQ accordion, competitive comparison |
+| V3 | Read documentation and quickstart guides | Visitor | Docs | ✅ Built (UI) | Search, quickstart cards, code examples |
+| V4 | Try interactive product demo | Visitor | Demo | ✅ Built (UI) | 4 scenarios, auto-advance, live metrics |
+| V5 | Sign up / create account | Visitor | Auth | ✅ Built (UI) | Mock auth — sets `isAuthenticated=true`, no real auth |
+| V6 | Login to existing account | Visitor | Auth | ✅ Built (UI) | Mock auth |
 
 ---
 
-## Summary by Priority
+### Category: Gateway Overview (Admin)
 
-| Priority | Models | Tools | Agents | Total |
-|----------|--------|-------|--------|-------|
-| **P0 (MVP)** | 10 | 14 | 5 | **29** |
-| **P1 (Fast Follow)** | 4 | 8 | 4 | **16** |
-| **P2 (Future)** | 1 | 2 | 0 | **3** |
+| ID | Scenario | Persona | Page(s) | Status | Notes |
+|----|----------|---------|---------|--------|-------|
+| A1 | View gateway health at a glance | Admin | Overview | ✅ Built (UI) | Governance score ring, alerts, heatmap |
+| A2 | See policy coverage across namespaces | Admin | Overview | ✅ Built (UI) | Policy coverage heatmap |
+| A3 | Respond to governance alerts | Admin | Overview | ✅ Built (UI) | Clickable alerts navigate to relevant pages |
+| A4 | View recent governance timeline | Admin | Overview | ✅ Built (UI) | Timeline with navigation links |
+| A5 | Identify ungoverned assets | Admin | Overview | ✅ Built (UI) | Ungoverned assets list with "View all" link |
+
+---
+
+### Category: Traffic Monitoring (Admin)
+
+| ID | Scenario | Persona | Page(s) | Status | Notes |
+|----|----------|---------|---------|--------|-------|
+| T1 | View real-time request volume | Admin | Traffic | 🔧 Partial | Static mock data, no real-time updates |
+| T2 | Monitor latency across providers | Admin | Traffic | 🔧 Partial | Displays mock latency stats |
+| T3 | Track policy enforcement actions | Admin | Traffic | 🔧 Partial | Static enforcement chart |
+| T4 | View top namespaces by traffic | Admin | Traffic | 🔧 Partial | Static table, no drill-through |
+| T5 | Filter traffic by time range | Admin | Traffic | ❌ Missing | No time range picker |
+| T6 | Export traffic reports | Admin | Traffic | ❌ Missing | No export functionality |
+
+---
+
+### Category: Routing Configuration (Admin)
+
+| ID | Scenario | Persona | Page(s) | Status | Notes |
+|----|----------|---------|---------|--------|-------|
+| R1 | View existing routing rules | Admin | Routing | ✅ Built (UI) | Table with 6 rules |
+| R2 | Filter rules by provider | Admin | Routing | ✅ Built (UI) | Provider dropdown filter works |
+| R3 | Add new routing rule | Admin | Routing | ❌ Missing | Button exists but no handler |
+| R4 | Import routing rules | Admin | Routing | ❌ Missing | Button exists but no handler |
+| R5 | View failover chains | Admin | Routing | ✅ Built (UI) | 3 failover chains with health indicators |
+| R6 | View load balancing strategy | Admin | Routing | 🔧 Partial | Static display of weighted round robin |
+| R7 | Configure health checks | Admin | Routing | ❌ Missing | Display only, not editable |
+| R8 | Edit/delete routing rules | Admin | Routing | ❌ Missing | No edit or delete actions |
+
+---
+
+### Category: Policy Management (Admin)
+
+| ID | Scenario | Persona | Page(s) | Status | Notes |
+|----|----------|---------|---------|--------|-------|
+| P1 | View all runtime policies | Admin | Policies | ✅ Built (UI) | Runtime tab with 18 policies |
+| P2 | Enable/disable individual policies | Admin | Policies | ✅ Built (UI) | Toggle switches work with state |
+| P3 | View policy version history | Admin | Policies | ✅ Built (UI) | Expandable version history per policy |
+| P4 | Simulate policy impact | Admin | Policies | ✅ Built (UI) | Simulator modal with policy selector and enable toggle |
+| P5 | View access rules | Admin | Policies | ✅ Built (UI) | Access Rules tab with 6 rules and toggles |
+| P6 | Configure RAI guardrails | Admin | Policies | ✅ Built (UI) | Guardrails tab with toggles |
+| P7 | View pending policy approvals | Admin | Policies | 🔧 Partial | Displays 4 pending items, no approve/reject action |
+| P8 | Create new policy | Admin | Policies | ❌ Missing | No creation workflow |
+| P9 | Edit existing policy | Admin | Policies | ❌ Missing | No edit capability |
+| P10 | Delete policy | Admin | Policies | ❌ Missing | No delete capability |
+| P11 | View policy audit trail | Admin | Policies | 🔧 Partial | Static audit entries |
+| P12 | Navigate from policy to audit log | Admin | Policies | ✅ Built (UI) | "View in Logs" links navigate to `/logs` |
+
+---
+
+### Category: Credential / Secret Management (Admin)
+
+| ID | Scenario | Persona | Page(s) | Status | Notes |
+|----|----------|---------|---------|--------|-------|
+| S1 | View all credentials | Admin | Secrets | ✅ Built (UI) | Table with 10 credentials |
+| S2 | View credential detail | Admin | Secrets | ✅ Built (UI) | Click row opens detail panel |
+| S3 | View credential blast radius | Admin | Secrets | ✅ Built (UI) | Detail shows dependent assets, routes, namespaces |
+| S4 | View expiring/expired credentials | Admin | Secrets | ✅ Built (UI) | Health alerts with status indicators |
+| S5 | View credential access log | Admin | Secrets | ✅ Built (UI) | Detail shows 8 recent access log entries |
+| S6 | Navigate to dependent assets | Admin | Secrets | ✅ Built (UI) | Detail links navigate to `/assets`, `/routing`, `/logs` |
+| S7 | Add new credential | Admin | Secrets | ❌ Missing | No creation workflow |
+| S8 | Rotate credential | Admin | Secrets | ❌ Missing | No rotation action |
+| S9 | Revoke credential (emergency) | Admin | Secrets | ❌ Missing | No revocation action |
+| S10 | Edit credential scope | Admin | Secrets | ❌ Missing | No edit capability |
+
+---
+
+### Category: Asset Catalog (Admin / Developer)
+
+| ID | Scenario | Persona | Page(s) | Status | Notes |
+|----|----------|---------|---------|--------|-------|
+| C1 | View all models | Admin, Developer | Catalog | ✅ Built (UI) | Models tab, 32 models |
+| C2 | View all tools | Admin, Developer | Catalog | ✅ Built (UI) | Tools tab, 24 tools |
+| C3 | View all agents | Admin, Developer | Catalog | ✅ Built (UI) | Agents tab, 8 agents |
+| C4 | View governance overview | Admin, Developer | Catalog | ✅ Built (UI) | 4 stat cards: total, governed, partial, ungoverned |
+| C5 | View source distribution | Admin, Developer | Catalog | ✅ Built (UI) | 7 source pills |
+| C6 | Register new model | Admin | RegisterModel | ✅ Built (UI) | 6-step wizard, 6 source types |
+| C7 | Register new tool | Admin | RegisterTool | ✅ Built (UI) | 6-step wizard, 3 tool types, 4 sources |
+| C8 | Register new agent | Admin | RegisterAgent | ✅ Built (UI) | 6-step wizard, 6 agent sources |
+| C9 | Search/filter assets | Admin, Developer | Catalog | ❌ Missing | No search bar or filter controls on catalog |
+| C10 | Edit existing asset | Admin | Catalog | ❌ Missing | No edit workflow |
+| C11 | Delete/decommission asset | Admin | Catalog | ❌ Missing | No delete or decommission action |
+| C12 | View asset detail | Admin, Developer | Catalog | ❌ Missing | No detail panel/page for individual assets |
+
+---
+
+### Category: Analytics (Admin)
+
+| ID | Scenario | Persona | Page(s) | Status | Notes |
+|----|----------|---------|---------|--------|-------|
+| AN1 | View token usage metrics | Admin | Analytics | 🔧 Partial | Mock cost/token data |
+| AN2 | View cost attribution by namespace | Admin | Analytics | 🔧 Partial | Mock namespace breakdown |
+| AN3 | Set namespace budgets | Admin | Analytics | 🔧 Partial | Budget UI exists but may not be interactive |
+| AN4 | Detect anomalies | Admin | Analytics | 🔧 Partial | Anomaly detection display |
+| AN5 | Export analytics reports | Admin | Analytics | ❌ Missing | No export functionality |
+| AN6 | Filter by time range | Admin | Analytics | ❌ Missing | No date range picker |
+| AN7 | View chargeback reports | Admin | Analytics | 🔧 Partial | Chargeback section present |
+
+---
+
+### Category: Audit Log (Admin / Security)
+
+| ID | Scenario | Persona | Page(s) | Status | Notes |
+|----|----------|---------|---------|--------|-------|
+| L1 | View audit trail | Admin, Security | Audit Log | ✅ Built (UI) | Table with entries |
+| L2 | Search log entries | Admin, Security | Audit Log | ✅ Built (UI) | Search input |
+| L3 | Filter by asset type | Admin, Security | Audit Log | ✅ Built (UI) | Asset type filter |
+| L4 | Filter by severity/status | Admin, Security | Audit Log | ✅ Built (UI) | Status filter |
+| L5 | Filter by date range | Admin, Security | Audit Log | ✅ Built (UI) | Date/time filter |
+| L6 | View log entry detail | Admin, Security | Audit Log | 🔧 Partial | May have detail panel |
+| L7 | Export audit log | Admin, Security | Audit Log | ❌ Missing | No export functionality |
+
+---
+
+### Category: Namespace Management (Admin)
+
+| ID | Scenario | Persona | Page(s) | Status | Notes |
+|----|----------|---------|---------|--------|-------|
+| N1 | View all namespaces | Admin | Namespaces | ✅ Built (UI) | Grid with 6 namespaces |
+| N2 | View namespace detail | Admin | Namespaces | ✅ Built (UI) | Click to expand detail |
+| N3 | View namespace members | Admin | Namespaces | ✅ Built (UI) | Members tab in detail |
+| N4 | View namespace credentials | Admin | Namespaces | ✅ Built (UI) | Credentials tab |
+| N5 | View namespace assets | Admin | Namespaces | ✅ Built (UI) | Assets tab |
+| N6 | View namespace policies | Admin | Namespaces | ✅ Built (UI) | Policies tab |
+| N7 | Create new namespace | Admin | Namespaces | ❌ Missing | No creation workflow |
+| N8 | Edit namespace settings | Admin | Namespaces | ❌ Missing | No edit capability |
+| N9 | Delete namespace | Admin | Namespaces | ❌ Missing | No delete action |
+
+---
+
+### Category: Access Control (Admin / Security)
+
+| ID | Scenario | Persona | Page(s) | Status | Notes |
+|----|----------|---------|---------|--------|-------|
+| AC1 | View pending access requests | Admin, Security | Access Control | ✅ Built (UI) | Pending requests tab |
+| AC2 | Approve/reject access requests | Admin, Security | Access Control | ✅ Built (UI) | Approve/reject buttons work |
+| AC3 | View access control matrix | Admin, Security | Access Control | ✅ Built (UI) | Matrix tab |
+| AC4 | Manage identity permissions | Admin, Security | Access Control | ✅ Built (UI) | Role/permission toggles |
+| AC5 | View authentication methods | Admin, Security | Access Control | ✅ Built (UI) | Auth method pills |
+| AC6 | Create new access policy | Admin, Security | Access Control | ❌ Missing | No creation workflow |
+| AC7 | Invite user | Admin | Access Control | ❌ Missing | No invite action |
+| AC8 | Remove user access | Admin | Access Control | ❌ Missing | No removal action |
+
+---
+
+### Category: Compliance (Security)
+
+| ID | Scenario | Persona | Page(s) | Status | Notes |
+|----|----------|---------|---------|--------|-------|
+| CO1 | View compliance frameworks | Security | Compliance | ✅ Built (UI) | Framework tabs |
+| CO2 | View controls per framework | Security | Compliance | ✅ Built (UI) | Control rows |
+| CO3 | View control evidence | Security | Compliance | ✅ Built (UI) | Evidence mapping |
+| CO4 | Generate compliance report | Security | Compliance | ❌ Missing | Evidence generation mentioned but no export |
+| CO5 | Navigate from control to relevant page | Security | Compliance | ✅ Built (UI) | Links to policies/logs/assets |
+
+---
+
+### Category: Playground (Developer / Admin)
+
+| ID | Scenario | Persona | Page(s) | Status | Notes |
+|----|----------|---------|---------|--------|-------|
+| PG1 | Select namespace | Developer, Admin | Playground | ✅ Built (UI) | Namespace dropdown |
+| PG2 | Select asset type | Developer, Admin | Playground | ✅ Built (UI) | Model/tool/agent radio |
+| PG3 | Select specific endpoint | Developer, Admin | Playground | ✅ Built (UI) | Endpoint dropdown |
+| PG4 | Edit request payload | Developer, Admin | Playground | ✅ Built (UI) | JSON textarea |
+| PG5 | Send test request | Developer, Admin | Playground | ✅ Built (UI) | Send button triggers mock execution |
+| PG6 | View execution trace | Developer, Admin | Playground | ✅ Built (UI) | Collapsible trace steps |
+| PG7 | View response | Developer, Admin | Playground | ✅ Built (UI) | Response panel |
+| PG8 | Save/load test scenarios | Developer, Admin | Playground | ❌ Missing | No save/load functionality |
+| PG9 | Compare responses across models | Developer, Admin | Playground | ❌ Missing | No comparison view |
+
+---
+
+### Category: Asset Registration Wizards (Admin)
+
+| ID | Scenario | Persona | Page(s) | Status | Notes |
+|----|----------|---------|---------|--------|-------|
+| RW1 | Register model from Azure AI Foundry (auto-discover) | Admin | RegisterModel | ✅ Built (UI) | Foundry source with project/model selection |
+| RW2 | Register model from AWS Bedrock | Admin | RegisterModel | ✅ Built (UI) | Bedrock source |
+| RW3 | Register model from Google Vertex | Admin | RegisterModel | ✅ Built (UI) | Vertex source |
+| RW4 | Register model from OpenAI | Admin | RegisterModel | ✅ Built (UI) | OpenAI source |
+| RW5 | Register model from Anthropic | Admin | RegisterModel | ✅ Built (UI) | Anthropic source |
+| RW6 | Register self-hosted model | Admin | RegisterModel | ✅ Built (UI) | Custom source |
+| RW7 | Configure model routing priority | Admin | RegisterModel | ✅ Built (UI) | Priority selector |
+| RW8 | Configure model failover chain | Admin | RegisterModel | ✅ Built (UI) | Failover dropdowns |
+| RW9 | Set model policies during registration | Admin | RegisterModel | ✅ Built (UI) | Policy toggles with thresholds |
+| RW10 | Register MCP server tool | Admin | RegisterTool | ✅ Built (UI) | MCP External source |
+| RW11 | Import tool from Foundry | Admin | RegisterTool | ✅ Built (UI) | MCP Foundry source |
+| RW12 | Register REST API tool | Admin | RegisterTool | ✅ Built (UI) | REST Manual/OpenAPI source |
+| RW13 | Convert REST API to MCP | Admin | RegisterTool | ✅ Built (UI) | Convert source |
+| RW14 | Register SaaS connector | Admin | RegisterTool | ✅ Built (UI) | SaaS source |
+| RW15 | Register Foundry Agent Service agent | Admin | RegisterAgent | ✅ Built (UI) | Foundry source |
+| RW16 | Register Bedrock agent | Admin | RegisterAgent | ✅ Built (UI) | Bedrock source |
+| RW17 | Register Vertex AI agent | Admin | RegisterAgent | ✅ Built (UI) | Vertex source |
+| RW18 | Register A2A protocol agent | Admin | RegisterAgent | ✅ Built (UI) | A2A source with metadata fetch |
+| RW19 | Register custom agent | Admin | RegisterAgent | ✅ Built (UI) | RAPI and Custom sources |
+| RW20 | Configure agent model/tool bindings | Admin | RegisterAgent | ✅ Built (UI) | Model/tool multi-select or "Allow All" |
+
+---
+
+### Category: Navigation & Authentication
+
+| ID | Scenario | Persona | Page(s) | Status | Notes |
+|----|----------|---------|---------|--------|-------|
+| NAV1 | Navigate between console pages via sidebar | All | Layout | ✅ Built (UI) | 12 nav items |
+| NAV2 | Return to landing page from console | All | Layout | ✅ Built (UI) | Brand click triggers sign out → landing |
+| NAV3 | Navigate to Pricing/Docs/Demo from landing | Visitor | Landing Page | ✅ Built (UI) | Nav links |
+| NAV4 | Cross-page navigation from alerts/links | Admin | Multiple | ✅ Built (UI) | Overview alerts → relevant pages, Secrets → Assets/Routing/Logs |
+| NAV5 | View page title and subtitle | All | Layout | ✅ Built (UI) | Dynamic page titles |
+| NAV6 | Open profile menu | All | Layout | ✅ Built (UI) | Profile dropdown |
+| NAV7 | Sign out | All | Layout | ✅ Built (UI) | Sign out button in profile dropdown |
+| NAV8 | Real authentication (Entra ID) | All | Auth | ❌ Missing | Mock auth only |
+| NAV9 | Notification center | All | Layout | ❌ Missing | Badge shows "3" but no notification panel |
+| NAV10 | Settings page | All | Settings | ❌ Missing | Button exists, no handler |
+| NAV11 | Docs/API Reference/Support/Feedback links | All | Layout | ❌ Missing | Sidebar footer buttons have no handlers |
+
+---
+
+## Summary Statistics
+
+| Status | Count |
+|--------|-------|
+| ✅ Built (UI) | ~75 |
+| 🔧 Partial | ~15 |
+| ❌ Missing | ~30 |
+| **Total scenarios** | **~120** |
+
+---
+
+## Top Missing Capabilities (Priority Order)
+
+1. **CRUD operations** — Can view most entities but cannot create, edit, or delete (except via registration wizards for new assets)
+2. **Real authentication** — No Entra ID / MSAL integration
+3. **Search and filtering** — Missing across Catalog, Traffic, and most list views
+4. **Export / reporting** — No CSV/PDF export for analytics, audit log, or compliance
+5. **Real-time data** — All pages show static mock data
+6. **Time range filtering** — No date range pickers on Traffic or Analytics
+7. **Notifications** — Badge shows count but no notification panel
+8. **Settings** — No settings/preferences page
+9. **Asset detail views** — Can see assets in tables but no dedicated detail page per asset
+10. **Responsive design** — Desktop-only layout

@@ -322,7 +322,13 @@ const Credentials: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [rotateMsg, setRotateMsg] = useState<string | null>(null);
-  const [editScopeMsg, setEditScopeMsg] = useState<string | null>(null);
+  const [showEditScope, setShowEditScope] = useState(false);
+  const [editScopeData, setEditScopeData] = useState<{
+    primaryNamespace: string;
+    sharedNamespaces: string[];
+    assetBindings: { name: string; type: string; namespace: string; bound: boolean }[];
+    environment: string;
+  }>({ primaryNamespace: '', sharedNamespaces: [], assetBindings: [], environment: 'Production' });
   const [credFormData, setCredFormData] = useState({ name: '', type: 'API Key', provider: '', namespace: 'ai-platform', expires: '' });
   const [credToast, setCredToast] = useState<string | null>(null);
   const showCredToast = (msg: string) => { setCredToast(msg); setTimeout(() => setCredToast(null), 3000); };
@@ -346,6 +352,62 @@ const Credentials: React.FC = () => {
     setCredList(prev => [...prev, newCred]);
     setShowAddCredential(false);
     setCredFormData({ name: '', type: 'API Key', provider: '', namespace: 'ai-platform', expires: '' });
+  };
+
+  const allNamespaces = ['retail-support', 'finance-analytics', 'customer-ops', 'hr-automation', 'dev-sandbox', 'Global', 'ai-platform', 'ml-inference', 'research-sandbox'];
+
+  const allAvailableAssets: { name: string; type: string; namespace: string }[] = [
+    { name: 'GPT-4o', type: 'model', namespace: 'retail-support' },
+    { name: 'GPT-4o-mini', type: 'model', namespace: 'retail-support' },
+    { name: 'Embedding Ada-002', type: 'model', namespace: 'retail-support' },
+    { name: 'Claude 3.5 Sonnet', type: 'model', namespace: 'finance-analytics' },
+    { name: 'Claude 3 Haiku', type: 'model', namespace: 'finance-analytics' },
+    { name: 'Gemini 1.5 Pro', type: 'model', namespace: 'finance-analytics' },
+    { name: 'Claude 3 (Bedrock)', type: 'model', namespace: 'customer-ops' },
+    { name: 'Titan Embeddings', type: 'model', namespace: 'customer-ops' },
+    { name: 'Support Summarizer', type: 'agent', namespace: 'retail-support' },
+    { name: 'Financial Analyst Agent', type: 'agent', namespace: 'finance-analytics' },
+    { name: 'Config Sync Agent', type: 'agent', namespace: 'Global' },
+    { name: 'Sprint Planning Agent', type: 'agent', namespace: 'dev-sandbox' },
+    { name: 'Lead Scoring Agent', type: 'agent', namespace: 'retail-support' },
+    { name: 'Content Moderator', type: 'tool', namespace: 'retail-support' },
+    { name: 'CRM Lookup Tool', type: 'tool', namespace: 'retail-support' },
+    { name: 'Jira Issue Tracker', type: 'tool', namespace: 'dev-sandbox' },
+    { name: 'Ticket Creator Tool', type: 'tool', namespace: 'hr-automation' },
+    { name: 'HR Database Connector', type: 'tool', namespace: 'hr-automation' },
+    { name: 'Azure Key Vault Resolver', type: 'tool', namespace: 'Global' },
+    { name: 'Azure Storage Connector', type: 'tool', namespace: 'Global' },
+  ];
+
+  const openEditScope = () => {
+    if (!selectedCredential) return;
+    const deps = credentialDependencies[selectedCredential.name];
+    const boundAssetNames = deps ? deps.assets.map(a => a.name) : [];
+    const sharedNs = deps ? deps.namespaces.filter(n => n !== selectedCredential.namespace) : [];
+
+    const assetBindings = allAvailableAssets.map(a => ({
+      ...a,
+      bound: boundAssetNames.includes(a.name),
+    }));
+
+    setEditScopeData({
+      primaryNamespace: selectedCredential.namespace,
+      sharedNamespaces: sharedNs,
+      assetBindings,
+      environment: 'Production',
+    });
+    setShowEditScope(true);
+  };
+
+  const handleSaveScope = () => {
+    if (!selectedCredential) return;
+    // Update the credential's namespace
+    setCredList(prev => prev.map(c =>
+      c.name === selectedCredential.name ? { ...c, namespace: editScopeData.primaryNamespace } : c
+    ));
+    setSelectedCredential({ ...selectedCredential, namespace: editScopeData.primaryNamespace });
+    setShowEditScope(false);
+    showCredToast(`✓ Scope updated — ${editScopeData.assetBindings.filter(a => a.bound).length} assets bound, ${editScopeData.sharedNamespaces.length + 1} namespace(s)`);
   };
 
   // --- Stat cards ---
@@ -422,11 +484,10 @@ const Credentials: React.FC = () => {
             style={{ backgroundColor: 'transparent', color: '#EF4444', border: '1px solid #EF4444', borderRadius: 6, padding: '6px 16px', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}
           >Revoke</button>
           <button
-            onClick={() => { setEditScopeMsg('Scope editing — coming soon'); setTimeout(() => setEditScopeMsg(null), 2000); }}
+            onClick={openEditScope}
             style={{ backgroundColor: 'transparent', color: '#D4A843', border: '1px solid #D4A843', borderRadius: 6, padding: '6px 16px', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}
           >Edit Scope</button>
           {rotateMsg && <span style={{ color: '#4ADE80', fontSize: 13 }}>{rotateMsg}</span>}
-          {editScopeMsg && <span style={{ color: '#D4A843', fontSize: 13 }}>{editScopeMsg}</span>}
         </div>
 
         {/* Impact Summary */}
@@ -605,6 +666,163 @@ const Credentials: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {/* Edit Scope Modal */}
+        {showEditScope && (
+          <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+            <div style={{ backgroundColor: '#1A1A1A', borderTop: '3px solid #D4A843', borderRadius: 8, padding: 24, width: '100%', maxWidth: 640, border: '1px solid rgba(212, 168, 67, 0.10)', maxHeight: '85vh', overflowY: 'auto' }}>
+              <h3 style={{ color: '#fff', fontSize: 16, fontWeight: 600, margin: '0 0 4px' }}>Edit Credential Scope</h3>
+              <p style={{ color: '#999', fontSize: 12, margin: '0 0 20px' }}>
+                Configure where <span style={{ color: '#D4A843' }}>{selectedCredential.name}</span> can be used — by namespace, environment, and asset binding.
+              </p>
+
+              {/* Primary Namespace */}
+              <div style={{ marginBottom: 16 }}>
+                <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Primary Namespace</label>
+                <select
+                  value={editScopeData.primaryNamespace}
+                  onChange={e => setEditScopeData(prev => ({ ...prev, primaryNamespace: e.target.value }))}
+                  style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit' }}
+                >
+                  {allNamespaces.map(ns => <option key={ns} value={ns}>{ns}</option>)}
+                </select>
+              </div>
+
+              {/* Shared Namespaces */}
+              <div style={{ marginBottom: 16 }}>
+                <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>
+                  Shared With (additional namespaces)
+                </label>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                  {allNamespaces.filter(ns => ns !== editScopeData.primaryNamespace).map(ns => {
+                    const isShared = editScopeData.sharedNamespaces.includes(ns);
+                    return (
+                      <button
+                        key={ns}
+                        onClick={() => setEditScopeData(prev => ({
+                          ...prev,
+                          sharedNamespaces: isShared
+                            ? prev.sharedNamespaces.filter(n => n !== ns)
+                            : [...prev.sharedNamespaces, ns],
+                        }))}
+                        style={{
+                          backgroundColor: isShared ? 'rgba(212,168,67,0.15)' : '#0F0F0F',
+                          border: `1px solid ${isShared ? '#D4A843' : 'rgba(212,168,67,0.10)'}`,
+                          color: isShared ? '#D4A843' : '#999',
+                          borderRadius: 16, padding: '4px 12px', fontSize: 12, cursor: 'pointer', fontFamily: 'inherit',
+                        }}
+                      >
+                        {isShared ? '✓ ' : ''}{ns}
+                      </button>
+                    );
+                  })}
+                </div>
+                <div style={{ color: '#666', fontSize: 11, marginTop: 4 }}>
+                  Click to toggle. Shared namespaces can reference this credential for their assets.
+                </div>
+              </div>
+
+              {/* Environment */}
+              <div style={{ marginBottom: 16 }}>
+                <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Environment Tag</label>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  {['Production', 'Staging', 'Development'].map(env => (
+                    <button
+                      key={env}
+                      onClick={() => setEditScopeData(prev => ({ ...prev, environment: env }))}
+                      style={{
+                        backgroundColor: editScopeData.environment === env ? 'rgba(212,168,67,0.15)' : '#0F0F0F',
+                        border: `1px solid ${editScopeData.environment === env ? '#D4A843' : 'rgba(212,168,67,0.10)'}`,
+                        color: editScopeData.environment === env ? '#D4A843' : '#999',
+                        borderRadius: 6, padding: '6px 14px', fontSize: 12, cursor: 'pointer', fontFamily: 'inherit', fontWeight: 500,
+                      }}
+                    >
+                      {env}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Asset Bindings */}
+              <div style={{ marginBottom: 16 }}>
+                <label style={{ color: '#999', fontSize: 12, marginBottom: 8, display: 'block' }}>
+                  Asset Bindings — {editScopeData.assetBindings.filter(a => a.bound).length} of {editScopeData.assetBindings.length} bound
+                </label>
+
+                {/* Asset filter by type */}
+                {(['model', 'agent', 'tool'] as const).map(assetType => {
+                  const assets = editScopeData.assetBindings.filter(a => a.type === assetType);
+                  if (assets.length === 0) return null;
+                  return (
+                    <div key={assetType} style={{ marginBottom: 12 }}>
+                      <div style={{ color: '#888', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6, display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <span>{assetTypeEmoji[assetType] || '📦'}</span> {assetType}s
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                        {assets.map(asset => (
+                          <div
+                            key={`${asset.name}-${asset.namespace}`}
+                            onClick={() => {
+                              setEditScopeData(prev => ({
+                                ...prev,
+                                assetBindings: prev.assetBindings.map(a =>
+                                  a.name === asset.name && a.namespace === asset.namespace
+                                    ? { ...a, bound: !a.bound }
+                                    : a
+                                ),
+                              }));
+                            }}
+                            style={{
+                              display: 'flex', alignItems: 'center', gap: 10, padding: '6px 12px',
+                              backgroundColor: asset.bound ? 'rgba(212,168,67,0.08)' : '#0F0F0F',
+                              border: `1px solid ${asset.bound ? 'rgba(212,168,67,0.20)' : 'rgba(212,168,67,0.06)'}`,
+                              borderRadius: 6, cursor: 'pointer', transition: 'all 0.15s',
+                            }}
+                          >
+                            <span style={{
+                              width: 16, height: 16, borderRadius: 4,
+                              border: `1px solid ${asset.bound ? '#D4A843' : '#555'}`,
+                              backgroundColor: asset.bound ? '#D4A843' : 'transparent',
+                              display: 'flex', alignItems: 'center', justifyContent: 'center',
+                              fontSize: 10, color: '#0A0A0A', fontWeight: 700, flexShrink: 0,
+                            }}>
+                              {asset.bound ? '✓' : ''}
+                            </span>
+                            <span style={{ color: asset.bound ? '#E8E8E8' : '#888', fontSize: 13, flex: 1 }}>{asset.name}</span>
+                            <span style={{ backgroundColor: '#1E1E1E', padding: '1px 8px', borderRadius: 4, fontSize: 10, color: '#777' }}>{asset.namespace}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Summary */}
+              <div style={{ backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.10)', borderRadius: 6, padding: 12, marginBottom: 16 }}>
+                <div style={{ color: '#999', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 }}>Scope Summary</div>
+                <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap', fontSize: 12 }}>
+                  <span style={{ color: '#D4A843' }}>Primary: {editScopeData.primaryNamespace}</span>
+                  <span style={{ color: '#4ADE80' }}>Shared: {editScopeData.sharedNamespaces.length > 0 ? editScopeData.sharedNamespaces.join(', ') : 'None'}</span>
+                  <span style={{ color: '#A78BFA' }}>Env: {editScopeData.environment}</span>
+                  <span style={{ color: '#F59E0B' }}>Bound: {editScopeData.assetBindings.filter(a => a.bound).length} assets</span>
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
+                <button onClick={() => setShowEditScope(false)} style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(212, 168, 67, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>Cancel</button>
+                <button onClick={handleSaveScope} style={{ backgroundColor: '#D4A843', color: '#0A0A0A', border: 'none', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>Save Scope</button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {credToast && (
+          <div style={{ position: 'fixed', bottom: 24, right: 24, backgroundColor: '#1A1A1A', border: '1px solid #D4A843', borderRadius: 8, padding: '12px 20px', color: '#D4A843', fontSize: 13, fontWeight: 600, zIndex: 1001, boxShadow: '0 4px 12px rgba(0,0,0,0.5)' }}>
+            {credToast}
+          </div>
+        )}
       </div>
     );
   }

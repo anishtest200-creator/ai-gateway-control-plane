@@ -280,10 +280,6 @@ const tabInactive: CSSProperties = {
   ...tabBase, backgroundColor: 'transparent', color: '#999',
 }
 
-const sectionTitle: CSSProperties = {
-  color: colors.text, fontSize: 14, fontWeight: 600, marginBottom: 12,
-}
-
 /* ------------------------------------------------------------------ */
 /*  Config maps                                                        */
 /* ------------------------------------------------------------------ */
@@ -316,17 +312,6 @@ const severityConfig: Record<'block' | 'warn' | 'log', { color: string; bg: stri
 /*  Helpers                                                            */
 /* ------------------------------------------------------------------ */
 
-const StatCard: React.FC<{ value: string; label: string; sub: string; accent: string }> = ({ value, label, sub, accent }) => (
-  <div style={{ ...card, flex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
-    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-      <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: accent, display: 'inline-block', flexShrink: 0 }} />
-      <span style={{ color: colors.textMuted, fontSize: 12 }}>{label}</span>
-    </div>
-    <span style={{ color: '#fff', fontSize: 28, fontWeight: 700, lineHeight: 1.1 }}>{value}</span>
-    <span style={{ color: colors.textDim, fontSize: 11 }}>{sub}</span>
-  </div>
-)
-
 const Toggle: React.FC<{ enabled: boolean; onToggle: () => void }> = ({ enabled, onToggle }) => (
   <span
     onClick={onToggle}
@@ -349,7 +334,7 @@ const Toggle: React.FC<{ enabled: boolean; onToggle: () => void }> = ({ enabled,
 /*  Main component                                                     */
 /* ------------------------------------------------------------------ */
 
-type TabKey = 'runtime' | 'access' | 'guardrails' | 'audit'
+type TabKey = 'runtime' | 'access' | 'guardrails' | 'audit' | 'approvals'
 
 const Policies: React.FC = () => {
   const navigate = useNavigate()
@@ -408,16 +393,6 @@ const Policies: React.FC = () => {
 
   const toggleVersionHistory = (id: string) => setExpandedVersions(s => ({ ...s, [id]: !s[id] }))
 
-  const deploymentBadge = (dep: Policy['deployment']): React.ReactNode => {
-    const cfgMap: Record<Policy['deployment'], { icon: string; label: string; color: string; bg: string }> = {
-      production: { icon: '🟢', label: 'Production', color: colors.gold, bg: colors.goldMuted },
-      sandbox: { icon: '🟡', label: 'Sandbox Only', color: colors.amber, bg: 'rgba(245,158,11,0.12)' },
-      staged: { icon: '🔵', label: 'Staged (sandbox → dev → prod)', color: colors.gold, bg: colors.goldMuted },
-    }
-    const c = cfgMap[dep]
-    return <span style={badge(c.bg, c.color)}>{c.icon} {c.label}</span>
-  }
-
   /* ---- Tab: Runtime Rules ---- */
   const renderRuntimeRules = () => {
     const categories = Object.keys(categoryConfig) as PolicyCategory[]
@@ -459,14 +434,8 @@ const Policies: React.FC = () => {
                         {p.namespace !== 'global' && (
                           <span style={badge('rgba(139,92,246,0.15)', '#a78bfa')}>{p.namespace}</span>
                         )}
-                        {deploymentBadge(p.deployment)}
                       </div>
                       <div style={{ color: colors.textMuted, fontSize: 12, marginBottom: 8, lineHeight: 1.4 }}>{p.description}</div>
-                      <div style={{ display: 'flex', gap: 16, fontSize: 11, color: colors.textDim, marginBottom: 8 }}>
-                        <span>{p.ruleCount} rule{p.ruleCount !== 1 ? 's' : ''}</span>
-                        <span>Applied to {p.appliedTo} endpoint{p.appliedTo !== 1 ? 's' : ''}</span>
-                        <span>{p.namespace === 'global' ? '🌐 Global' : `📁 ${p.namespace}`}</span>
-                      </div>
                       {/* Version History */}
                       {p.versions.length > 0 && (
                         <div style={{ borderTop: `1px solid ${colors.border}`, paddingTop: 6, marginTop: 4 }}>
@@ -684,12 +653,11 @@ const Policies: React.FC = () => {
                 {/* Description */}
                 <div style={{ color: colors.textMuted, fontSize: 12, marginBottom: 8, lineHeight: 1.4 }}>{g.description}</div>
                 {/* Stats row */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
-                  <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-                    {g.appliesTo.map(model => (
-                      <span key={model} style={badge('rgba(212, 168, 67, 0.06)', colors.textMuted)}>{model}</span>
-                    ))}
-                  </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                  {g.appliesTo.map(model => (
+                    <span key={model} style={badge('rgba(212, 168, 67, 0.06)', colors.textMuted)}>{model}</span>
+                  ))}
+                  <span style={{ color: colors.textDim, fontSize: 11 }}>·</span>
                   <span
                     onClick={() => navigate('/logs?filter=' + g.category)}
                     style={{ fontSize: 11, color: g.triggersToday > 0 ? colors.amber : colors.textDim, cursor: 'pointer', textDecoration: 'none' }}
@@ -704,22 +672,11 @@ const Policies: React.FC = () => {
                     onMouseEnter={e => { (e.target as HTMLElement).style.textDecoration = 'underline' }}
                     onMouseLeave={e => { (e.target as HTMLElement).style.textDecoration = 'none' }}
                   >
-                    🚫 {g.blockedToday} blocked today
+                    🚫 {g.blockedToday} blocked
                   </span>
                   {g.lastTriggered && (
                     <span style={{ fontSize: 11, color: colors.textDim }}>Last: {g.lastTriggered}</span>
                   )}
-                </div>
-                {/* View in Logs link */}
-                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 6 }}>
-                  <span
-                    onClick={() => navigate('/logs')}
-                    style={{ fontSize: 12, color: colors.gold, cursor: 'pointer' }}
-                    onMouseEnter={e => { (e.target as HTMLElement).style.textDecoration = 'underline' }}
-                    onMouseLeave={e => { (e.target as HTMLElement).style.textDecoration = 'none' }}
-                  >
-                    View in Logs →
-                  </span>
                 </div>
               </div>
               <Toggle enabled={guardrailStates[g.id]} onToggle={() => toggleGuardrail(g.id)} />
@@ -754,44 +711,52 @@ const Policies: React.FC = () => {
     }
 
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        {auditTrailEntries.map(entry => {
-          const aCfg = actionBadgeConfig[entry.action]
-          const fullDate = new Date(entry.timestamp).toLocaleString()
-          return (
-            <div
-              key={entry.id}
-              onMouseEnter={() => setHoveredRow(entry.id)}
-              onMouseLeave={() => setHoveredRow(null)}
-              style={{
-                ...card,
-                backgroundColor: hoveredRow === entry.id ? '#1A1A1A' : colors.card,
-                transition: 'background-color 0.15s',
-              }}
-            >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                  <span style={badge(aCfg.bg, aCfg.color)}>{aCfg.label}</span>
-                  <span style={{ color: '#fff', fontWeight: 600, fontSize: 13 }}>{entry.policyName}</span>
-                  <span style={badge('rgba(212, 168, 67, 0.06)', colors.textMuted)}>v{entry.version}</span>
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', flexShrink: 0 }}>
-                  <span style={{ fontSize: 12, color: colors.text, fontWeight: 500 }}>{relativeTime(entry.timestamp)}</span>
-                  <span style={{ fontSize: 10, color: colors.textDim }}>{fullDate}</span>
-                </div>
-              </div>
-              <div style={{ color: colors.textMuted, fontSize: 12, marginBottom: 6, lineHeight: 1.4 }}>{entry.details}</div>
-              {entry.action === 'rolled-back' && entry.previousVersion != null && (
-                <div style={{ fontSize: 11, color: colors.purple, fontStyle: 'italic', marginBottom: 4 }}>
-                  ↩ Rolled back from v{entry.previousVersion} to v{entry.version}
-                </div>
-              )}
-              <div style={{ fontSize: 11, color: colors.textDim }}>
-                👤 {entry.actor} · Policy ID: {entry.policyId}
-              </div>
-            </div>
-          )
-        })}
+      <div style={{ ...card, padding: 0, overflow: 'hidden' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+          <thead>
+            <tr style={{ borderBottom: '1px solid rgba(212, 168, 67, 0.10)', color: '#999', textAlign: 'left' }}>
+              <th style={{ padding: '10px 16px', fontWeight: 600, fontSize: 12, whiteSpace: 'nowrap' }}>Time</th>
+              <th style={{ padding: '10px 16px', fontWeight: 600, fontSize: 12, whiteSpace: 'nowrap' }}>Action</th>
+              <th style={{ padding: '10px 16px', fontWeight: 600, fontSize: 12, whiteSpace: 'nowrap' }}>Policy</th>
+              <th style={{ padding: '10px 16px', fontWeight: 600, fontSize: 12, whiteSpace: 'nowrap' }}>Version</th>
+              <th style={{ padding: '10px 16px', fontWeight: 600, fontSize: 12 }}>Details</th>
+              <th style={{ padding: '10px 16px', fontWeight: 600, fontSize: 12, whiteSpace: 'nowrap' }}>Actor</th>
+            </tr>
+          </thead>
+          <tbody>
+            {auditTrailEntries.map((entry, i) => {
+              const aCfg = actionBadgeConfig[entry.action]
+              return (
+                <tr
+                  key={entry.id}
+                  onMouseEnter={() => setHoveredRow(`audit-${i}`)}
+                  onMouseLeave={() => setHoveredRow(null)}
+                  style={{
+                    borderBottom: '1px solid rgba(212, 168, 67, 0.10)',
+                    backgroundColor: hoveredRow === `audit-${i}` ? '#1A1A1A' : 'transparent',
+                    transition: 'background-color 0.15s',
+                  }}
+                >
+                  <td style={{ padding: '10px 16px', color: colors.textDim, fontSize: 12, whiteSpace: 'nowrap' }} title={new Date(entry.timestamp).toLocaleString()}>{relativeTime(entry.timestamp)}</td>
+                  <td style={{ padding: '10px 16px' }}>
+                    <span style={badge(aCfg.bg, aCfg.color)}>{aCfg.label}</span>
+                  </td>
+                  <td style={{ padding: '10px 16px', fontWeight: 500, color: colors.gold, whiteSpace: 'nowrap' }}>{entry.policyName}</td>
+                  <td style={{ padding: '10px 16px' }}>
+                    <span style={badge('rgba(212, 168, 67, 0.06)', colors.textMuted)}>v{entry.version}</span>
+                  </td>
+                  <td style={{ padding: '10px 16px', color: colors.textMuted, fontSize: 12, lineHeight: 1.4 }}>
+                    {entry.details}
+                    {entry.action === 'rolled-back' && entry.previousVersion != null && (
+                      <span style={{ color: colors.purple, fontStyle: 'italic', marginLeft: 6 }}>↩ v{entry.previousVersion} → v{entry.version}</span>
+                    )}
+                  </td>
+                  <td style={{ padding: '10px 16px', color: colors.textDim, fontSize: 12, whiteSpace: 'nowrap' }}>{entry.actor.split('@')[0]}</td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
       </div>
     )
   }
@@ -880,11 +845,12 @@ const Policies: React.FC = () => {
   )
 
   /* ---- Render ---- */
-  const tabs: { key: TabKey; label: string }[] = [
+  const tabs: { key: TabKey; label: string; badge?: number }[] = [
     { key: 'runtime', label: 'Runtime Rules' },
     { key: 'access', label: 'Asset Access Rules' },
     { key: 'guardrails', label: 'Safety Guardrails' },
     { key: 'audit', label: 'Audit Trail' },
+    { key: 'approvals', label: 'Approvals', badge: approvalList.length },
   ]
 
   return (
@@ -897,134 +863,122 @@ const Policies: React.FC = () => {
             Configure runtime rules, asset access controls, and safety guardrails across your AI gateway.
           </p>
         </div>
-        <button onClick={() => setShowCreatePolicy(true)} style={{ backgroundColor: '#D4A843', color: '#0A0A0A', border: 'none', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' }}>✚ Create Policy</button>
-      </div>
-
-      {/* Stats row */}
-      <div style={{ display: 'flex', gap: 12 }}>
-        <StatCard accent={colors.gold} label="Runtime Rules" value={String(enabledPolicies)} sub={`of ${policyList.length} enabled`} />
-        <StatCard accent={colors.purple} label="Asset Access Rules" value={String(accessRules.filter(r => ruleStates[r.id]).length)} sub={`of ${accessRules.length} enabled`} />
-        <StatCard accent="#ef4444" label="Safety Guardrails" value={String(enabledGuardrails)} sub={`of ${guardrails.length} enabled`} />
-        <StatCard accent="#f59e0b" label="Pending Approvals" value={String(approvalList.length)} sub="awaiting review" />
-      </div>
-
-      {/* Pending Approvals (always visible when there are items) */}
-      {approvalList.length > 0 && (
-        <div>
-          <div style={sectionTitle}>Pending Approvals</div>
-          {renderApprovals()}
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button
+            onClick={() => setShowSimulator(s => !s)}
+            style={{
+              padding: '8px 16px', borderRadius: 6, backgroundColor: 'transparent',
+              border: `1px solid ${colors.border}`, color: colors.text, fontSize: 13,
+              fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap',
+            }}
+          >
+            🔍 Simulate Impact
+          </button>
+          <button onClick={() => setShowCreatePolicy(true)} style={{ backgroundColor: '#D4A843', color: '#0A0A0A', border: 'none', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' }}>✚ Create Policy</button>
         </div>
-      )}
+      </div>
 
-      {/* Impact Simulator */}
-      <div>
-        <button
-          onClick={() => setShowSimulator(s => !s)}
-          style={{
-            padding: '8px 16px', borderRadius: 6, backgroundColor: 'transparent',
-            border: `1px solid ${colors.border}`, color: colors.text, fontSize: 13,
-            fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
-          }}
-        >
-          🔍 Simulate Policy Impact
-        </button>
-        {showSimulator && (() => {
-          const simResults = getSimulatorResults()
-          return (
-            <div style={{ ...card, marginTop: 12 }}>
-              <div style={{ fontSize: 14, fontWeight: 600, color: '#fff', marginBottom: 12 }}>Policy Impact Simulator</div>
-              <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start', flexWrap: 'wrap' }}>
-                {/* Controls */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 10, minWidth: 240 }}>
-                  <div>
-                    <label style={{ fontSize: 11, color: colors.textMuted, display: 'block', marginBottom: 4 }}>Select Policy</label>
-                    <select
-                      value={selectedSimPolicy}
-                      onChange={e => setSelectedSimPolicy(e.target.value)}
-                      style={{
-                        width: '100%', padding: '6px 10px', borderRadius: 6,
-                        backgroundColor: '#1A1A1A', border: `1px solid ${colors.border}`,
-                        color: colors.text, fontSize: 12, fontFamily: 'inherit',
-                      }}
-                    >
-                      {policyList.map(p => (
-                        <option key={p.id} value={p.id}>{p.name}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <span style={{ fontSize: 12, color: colors.textMuted }}>Action:</span>
-                    <Toggle enabled={simEnabled} onToggle={() => setSimEnabled(e => !e)} />
-                    <span style={{ fontSize: 12, color: simEnabled ? colors.green : colors.red }}>
-                      {simEnabled ? 'Enable' : 'Disable'}
-                    </span>
-                  </div>
-                  {simEnabled && selectedSimPolicy && (
-                    <div style={{ backgroundColor: 'rgba(212, 168, 67, 0.08)', border: '1px solid rgba(212, 168, 67, 0.20)', borderRadius: 6, padding: '10px 14px', marginTop: 4 }}>
-                      <div style={{ fontSize: 12, color: colors.text, marginBottom: 4 }}>Estimated impact: <span style={{ color: colors.amber, fontWeight: 600 }}>~340 requests/hour</span> would be affected</div>
-                      <div style={{ fontSize: 12, color: colors.textMuted, marginBottom: 4 }}>Affected namespaces: <span style={{ color: colors.text }}>ai-platform, ml-inference</span></div>
-                      <div style={{ fontSize: 12, color: colors.textMuted }}>Risk level: <span style={{ color: colors.green, fontWeight: 600 }}>Low</span></div>
-                    </div>
-                  )}
+      {/* Compact stats summary */}
+      <div style={{ fontSize: 13, color: colors.textMuted, lineHeight: 1.6 }}>
+        <span style={{ fontWeight: 600, color: '#fff' }}>{enabledPolicies}</span> runtime rules · <span style={{ fontWeight: 600, color: '#fff' }}>{accessRules.filter(r => ruleStates[r.id]).length}</span> access rules · <span style={{ fontWeight: 600, color: '#fff' }}>{enabledGuardrails}</span> guardrails · <span style={{ fontWeight: 600, color: '#fff' }}>{approvalList.length}</span> pending approvals
+      </div>
+
+      {/* Impact Simulator panel */}
+      {showSimulator && (() => {
+        const simResults = getSimulatorResults()
+        return (
+          <div style={{ ...card }}>
+            <div style={{ fontSize: 14, fontWeight: 600, color: '#fff', marginBottom: 12 }}>Policy Impact Simulator</div>
+            <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+              {/* Controls */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, minWidth: 240 }}>
+                <div>
+                  <label style={{ fontSize: 11, color: colors.textMuted, display: 'block', marginBottom: 4 }}>Select Policy</label>
+                  <select
+                    value={selectedSimPolicy}
+                    onChange={e => setSelectedSimPolicy(e.target.value)}
+                    style={{
+                      width: '100%', padding: '6px 10px', borderRadius: 6,
+                      backgroundColor: '#1A1A1A', border: `1px solid ${colors.border}`,
+                      color: colors.text, fontSize: 12, fontFamily: 'inherit',
+                    }}
+                  >
+                    {policyList.map(p => (
+                      <option key={p.id} value={p.id}>{p.name}</option>
+                    ))}
+                  </select>
                 </div>
-                {/* Results */}
-                {simResults && (
-                  <div style={{ flex: 1, minWidth: 280 }}>
-                    <div style={{ fontSize: 12, color: colors.text, marginBottom: 8 }}>
-                      Estimated impact: <span style={{ color: colors.amber, fontWeight: 600 }}>{simResults.trafficPct}%</span> of traffic affected
-                      (<span style={{ fontWeight: 600 }}>{simResults.requestsDay.toLocaleString()}</span> requests/day)
-                    </div>
-                    <div style={{ fontSize: 12, color: colors.textMuted, marginBottom: 4 }}>
-                      Namespaces affected: {simResults.nsAffected.map(ns => (
-                        <span key={ns} style={badge('rgba(139,92,246,0.15)', '#a78bfa')}>{ns}</span>
-                      ))}
-                    </div>
-                    <div style={{ fontSize: 12, color: colors.textMuted, marginBottom: 10 }}>
-                      Asset types affected: {simResults.assetTypes.map(at => (
-                        <span key={at} style={badge(colors.goldMuted, colors.gold)}>{at}</span>
-                      ))}
-                    </div>
-                    {/* Traffic bar */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-                      <span style={{ fontSize: 10, color: colors.textDim, width: 60 }}>Traffic</span>
-                      <div style={{ flex: 1, height: 14, borderRadius: 7, backgroundColor: 'rgba(212, 168, 67, 0.06)', overflow: 'hidden', display: 'flex' }}>
-                        <div style={{
-                          width: `${100 - simResults.trafficPct}%`, height: '100%',
-                          backgroundColor: 'rgba(16,185,129,0.5)', transition: 'width 0.3s',
-                        }} />
-                        <div style={{
-                          width: `${simResults.trafficPct}%`, height: '100%',
-                          backgroundColor: 'rgba(245,158,11,0.5)', transition: 'width 0.3s',
-                        }} />
-                      </div>
-                    </div>
-                    <div style={{ display: 'flex', gap: 6, fontSize: 10, color: colors.textDim, marginBottom: 12 }}>
-                      <span>🟩 Unaffected ({100 - simResults.trafficPct}%)</span>
-                      <span>🟨 Affected ({simResults.trafficPct}%)</span>
-                    </div>
-                    <div style={{ display: 'flex', gap: 8 }}>
-                      <button style={{
-                        padding: '6px 16px', borderRadius: 6, border: 'none',
-                        backgroundColor: colors.gold, color: '#0A0A0A', fontSize: 12,
-                        fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
-                      }} onClick={() => { setShowSimulator(false); alert('✓ Policy change applied'); }}>Apply Change</button>
-                      <button
-                        onClick={() => setShowSimulator(false)}
-                        style={{
-                          padding: '6px 16px', borderRadius: 6, backgroundColor: 'transparent',
-                          border: `1px solid ${colors.border}`, color: colors.textMuted, fontSize: 12,
-                          fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
-                        }}
-                      >Cancel</button>
-                    </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ fontSize: 12, color: colors.textMuted }}>Action:</span>
+                  <Toggle enabled={simEnabled} onToggle={() => setSimEnabled(e => !e)} />
+                  <span style={{ fontSize: 12, color: simEnabled ? colors.green : colors.red }}>
+                    {simEnabled ? 'Enable' : 'Disable'}
+                  </span>
+                </div>
+                {simEnabled && selectedSimPolicy && (
+                  <div style={{ backgroundColor: 'rgba(212, 168, 67, 0.08)', border: '1px solid rgba(212, 168, 67, 0.20)', borderRadius: 6, padding: '10px 14px', marginTop: 4 }}>
+                    <div style={{ fontSize: 12, color: colors.text, marginBottom: 4 }}>Estimated impact: <span style={{ color: colors.amber, fontWeight: 600 }}>~340 requests/hour</span> would be affected</div>
+                    <div style={{ fontSize: 12, color: colors.textMuted, marginBottom: 4 }}>Affected namespaces: <span style={{ color: colors.text }}>ai-platform, ml-inference</span></div>
+                    <div style={{ fontSize: 12, color: colors.textMuted }}>Risk level: <span style={{ color: colors.green, fontWeight: 600 }}>Low</span></div>
                   </div>
                 )}
               </div>
+              {/* Results */}
+              {simResults && (
+                <div style={{ flex: 1, minWidth: 280 }}>
+                  <div style={{ fontSize: 12, color: colors.text, marginBottom: 8 }}>
+                    Estimated impact: <span style={{ color: colors.amber, fontWeight: 600 }}>{simResults.trafficPct}%</span> of traffic affected
+                    (<span style={{ fontWeight: 600 }}>{simResults.requestsDay.toLocaleString()}</span> requests/day)
+                  </div>
+                  <div style={{ fontSize: 12, color: colors.textMuted, marginBottom: 4 }}>
+                    Namespaces affected: {simResults.nsAffected.map(ns => (
+                      <span key={ns} style={badge('rgba(139,92,246,0.15)', '#a78bfa')}>{ns}</span>
+                    ))}
+                  </div>
+                  <div style={{ fontSize: 12, color: colors.textMuted, marginBottom: 10 }}>
+                    Asset types affected: {simResults.assetTypes.map(at => (
+                      <span key={at} style={badge(colors.goldMuted, colors.gold)}>{at}</span>
+                    ))}
+                  </div>
+                  {/* Traffic bar */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+                    <span style={{ fontSize: 10, color: colors.textDim, width: 60 }}>Traffic</span>
+                    <div style={{ flex: 1, height: 14, borderRadius: 7, backgroundColor: 'rgba(212, 168, 67, 0.06)', overflow: 'hidden', display: 'flex' }}>
+                      <div style={{
+                        width: `${100 - simResults.trafficPct}%`, height: '100%',
+                        backgroundColor: 'rgba(16,185,129,0.5)', transition: 'width 0.3s',
+                      }} />
+                      <div style={{
+                        width: `${simResults.trafficPct}%`, height: '100%',
+                        backgroundColor: 'rgba(245,158,11,0.5)', transition: 'width 0.3s',
+                      }} />
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', gap: 6, fontSize: 10, color: colors.textDim, marginBottom: 12 }}>
+                    <span>🟩 Unaffected ({100 - simResults.trafficPct}%)</span>
+                    <span>🟨 Affected ({simResults.trafficPct}%)</span>
+                  </div>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <button style={{
+                      padding: '6px 16px', borderRadius: 6, border: 'none',
+                      backgroundColor: colors.gold, color: '#0A0A0A', fontSize: 12,
+                      fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
+                    }} onClick={() => { setShowSimulator(false); alert('✓ Policy change applied'); }}>Apply Change</button>
+                    <button
+                      onClick={() => setShowSimulator(false)}
+                      style={{
+                        padding: '6px 16px', borderRadius: 6, backgroundColor: 'transparent',
+                        border: `1px solid ${colors.border}`, color: colors.textMuted, fontSize: 12,
+                        fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
+                      }}
+                    >Cancel</button>
+                  </div>
+                </div>
+              )}
             </div>
-          )
-        })()}
-
-      </div>
+          </div>
+        )
+      })()}
 
       {/* Tabs */}
       <div style={tabBar}>
@@ -1035,6 +989,9 @@ const Policies: React.FC = () => {
             style={activeTab === t.key ? tabActive : tabInactive}
           >
             {t.label}
+            {t.badge != null && t.badge > 0 && (
+              <span style={{ marginLeft: 6, padding: '1px 7px', borderRadius: 10, fontSize: 10, fontWeight: 700, backgroundColor: 'rgba(245,158,11,0.2)', color: '#F59E0B' }}>{t.badge}</span>
+            )}
           </button>
         ))}
       </div>
@@ -1044,6 +1001,7 @@ const Policies: React.FC = () => {
       {activeTab === 'access' && renderAccessRules()}
       {activeTab === 'guardrails' && renderGuardrails()}
       {activeTab === 'audit' && renderAuditTrail()}
+      {activeTab === 'approvals' && renderApprovals()}
 
       {/* Create Policy Modal */}
       {showCreatePolicy && (

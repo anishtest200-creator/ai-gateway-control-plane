@@ -415,7 +415,7 @@ const pageSubtitles: Record<string, string> = {
   '/routing': 'Multi-provider rules, backup chains, and load balancing',
   '/policies': 'Configure runtime rules, asset access controls, and safety guardrails across your AI gateway.',
   '/credentials': 'API keys, managed identities, and secret rotation',
-  '/assets': 'Registered models, tools, and agents',
+  '/assets': 'Registered models, tools, agents, and skills',
   '/observability': 'Live traffic, usage metrics, cost attribution, and budgets',
   '/logs': 'Complete request and response audit trail',
   '/namespaces': 'Team boundaries, quotas, and isolation policies',

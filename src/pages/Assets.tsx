@@ -3,8 +3,9 @@ import type { CSSProperties } from 'react';
 import RegisterModel from './RegisterModel';
 import RegisterTool from './RegisterTool';
 import RegisterAgent from './RegisterAgent';
+import RegisterSkill from './RegisterSkill';
 
-type Tab = 'models' | 'tools' | 'agents';
+type Tab = 'models' | 'tools' | 'agents' | 'skills';
 type Source = 'Foundry' | 'Bedrock' | 'Vertex' | 'OpenAI' | 'Anthropic' | 'Self-Hosted' | 'External';
 type Governance = 'full' | 'partial' | 'none';
 
@@ -191,6 +192,15 @@ const agents = [
   { agent: 'dev-copilot', protocol: 'RAPI', endpoint: 'agents.internal/dev', namespace: 'dev-sandbox', models: 'claude-3-haiku', tools: 'jira-tickets', policies: ['Rate limit'], health: 'active', source: 'Vertex' as Source, governance: 'full' as Governance },
 ];
 
+const skills = [
+  { skill: 'customer-sentiment', category: 'NLP', endpoint: 'promptflow.internal/sentiment', namespace: 'retail-support', models: 'gpt-4o', tools: 'salesforce-crm', policies: ['Rate limit', 'PII scan'], health: 'active', invocations: '18.2K', source: 'Foundry' as Source, governance: 'full' as Governance },
+  { skill: 'doc-summarizer', category: 'NLP', endpoint: 'promptflow.internal/summarize', namespace: 'finance-analytics', models: 'gpt-4o, claude-3.5', tools: '—', policies: ['Rate limit', 'Audit'], health: 'active', invocations: '9.4K', source: 'Foundry' as Source, governance: 'full' as Governance },
+  { skill: 'entity-extractor', category: 'Data', endpoint: 'sk.internal/extract', namespace: 'hr-automation', models: 'gpt-4o-mini', tools: 'postgres-query', policies: ['Rate limit'], health: 'active', invocations: '14.7K', source: 'Self-Hosted' as Source, governance: 'partial' as Governance },
+  { skill: 'claim-classifier', category: 'Analytics', endpoint: 'langchain.internal/classify', namespace: 'finance-analytics', models: 'gpt-4o', tools: '—', policies: ['Rate limit', 'Safety'], health: 'active', invocations: '6.1K', source: 'Foundry' as Source, governance: 'full' as Governance },
+  { skill: 'code-reviewer', category: 'Code', endpoint: 'sk.internal/review', namespace: 'dev-sandbox', models: 'claude-3.5-sonnet', tools: 'jira-tickets', policies: ['Rate limit'], health: 'degraded', invocations: '2.3K', source: 'External' as Source, governance: 'partial' as Governance },
+  { skill: 'image-classifier', category: 'Vision', endpoint: 'promptflow.internal/vision', namespace: 'retail-support', models: 'gpt-4o', tools: '—', policies: ['Rate limit', 'Audit'], health: 'active', invocations: '4.8K', source: 'Foundry' as Source, governance: 'full' as Governance },
+];
+
 // --- Helpers ---
 const HealthBadge = ({ status }: { status: string }) => {
   if (status === 'healthy' || status === 'active')
@@ -222,10 +232,11 @@ const GovernanceBadge = ({ status }: { status: Governance }) => {
 // --- Component ---
 function Assets() {
   const [activeTab, setActiveTab] = useState<Tab>('models');
-  const [showWizard, setShowWizard] = useState<'model' | 'tool' | 'agent' | null>(null);
+  const [showWizard, setShowWizard] = useState<'model' | 'tool' | 'agent' | 'skill' | null>(null);
   const [modelsList, setModelsList] = useState([...models]);
   const [toolsList, setToolsList] = useState([...tools]);
   const [agentsList, setAgentsList] = useState([...agents]);
+  const [skillsList, setSkillsList] = useState([...skills]);
   const [searchQuery, setSearchQuery] = useState('');
   const [govFilter, setGovFilter] = useState<string>('all');
   const [sourceFilter, setSourceFilter] = useState<string>('all');
@@ -244,11 +255,13 @@ function Assets() {
   const filteredModels = filterItems(modelsList, 'model');
   const filteredTools = filterItems(toolsList, 'tool');
   const filteredAgents = filterItems(agentsList, 'agent');
+  const filteredSkills = filterItems(skillsList, 'skill');
 
-  const registerLabels: Record<Tab, { label: string; wizard: 'model' | 'tool' | 'agent' }> = {
+  const registerLabels: Record<Tab, { label: string; wizard: 'model' | 'tool' | 'agent' | 'skill' }> = {
     models: { label: 'Register Model', wizard: 'model' },
     tools: { label: 'Register Tool', wizard: 'tool' },
     agents: { label: 'Register Agent', wizard: 'agent' },
+    skills: { label: 'Register Skill', wizard: 'skill' },
   };
 
   return (
@@ -258,17 +271,17 @@ function Assets() {
         {/* Row 1 — Stat cards */}
         <div style={statRow}>
           <div style={statCard('rgba(129, 140, 248, 0.10)')}>
-            <div style={statValue}>44</div>
+            <div style={statValue}>50</div>
             <div style={statLabel}>Total Assets</div>
             <div style={statSub}>All registered</div>
           </div>
           <div style={statCard('rgba(74,222,128,0.3)')}>
-            <div style={{ ...statValue, color: '#4ADE80' }}>36</div>
+            <div style={{ ...statValue, color: '#4ADE80' }}>40</div>
             <div style={statLabel}>Fully Governed</div>
             <div style={statSub}>All policies applied</div>
           </div>
           <div style={statCard('rgba(245,158,11,0.3)')}>
-            <div style={{ ...statValue, color: '#F59E0B' }}>6</div>
+            <div style={{ ...statValue, color: '#F59E0B' }}>8</div>
             <div style={statLabel}>Partially Governed</div>
             <div style={statSub}>Missing some policies</div>
           </div>
@@ -358,7 +371,7 @@ function Assets() {
       {/* Tab bar with register button */}
       <div style={tabBarRow}>
         <div style={tabBar}>
-          {(['models', 'tools', 'agents'] as Tab[]).map((t) => (
+          {(['models', 'tools', 'agents', 'skills'] as Tab[]).map((t) => (
             <button
               key={t}
               style={activeTab === t ? tabActive : tabInactive}
@@ -508,6 +521,51 @@ function Assets() {
         </>
       )}
 
+      {/* Skills */}
+      {activeTab === 'skills' && (
+        <>
+          <div style={summary}>12 skills registered across 4 categories</div>
+          <div style={tableWrap}>
+            <table style={table}>
+              <thead>
+                <tr>
+                  <th style={th}>Skill</th>
+                  <th style={th}>Category</th>
+                  <th style={th}>Source</th>
+                  <th style={th}>Endpoint</th>
+                  <th style={th}>Namespace</th>
+                  <th style={th}>Models</th>
+                  <th style={th}>Tools</th>
+                  <th style={th}>Policies</th>
+                  <th style={th}>Governance</th>
+                  <th style={th}>Health</th>
+                  <th style={th}>Invocations (24h)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredSkills.map((r, i) => (
+                  <tr key={i} style={{ cursor: 'pointer' }} onClick={() => setDetailItem({ name: r.skill, provider: r.category, source: r.source, endpoint: r.endpoint, region: '—', governance: r.governance, health: r.health, policies: r.policies, namespace: r.namespace })}>
+                    <td style={{ ...td, fontWeight: 600, color: '#fff' }}>{r.skill}</td>
+                    <td style={td}>
+                      <span style={badge('rgba(129, 140, 248, 0.1)', '#818CF8')}>{r.category}</span>
+                    </td>
+                    <td style={td}><SourceBadge source={r.source} /></td>
+                    <td style={{ ...td, ...mono }}>{r.endpoint}</td>
+                    <td style={{ ...td, ...mono }}>{r.namespace}</td>
+                    <td style={td}>{r.models}</td>
+                    <td style={td}>{r.tools}</td>
+                    <td style={td}><Policies list={r.policies} /></td>
+                    <td style={td}><GovernanceBadge status={r.governance} /></td>
+                    <td style={td}><HealthBadge status={r.health} /></td>
+                    <td style={{ ...td, fontVariantNumeric: 'tabular-nums' }}>{r.invocations}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
+      )}
+
       {/* Detail Panel Overlay */}
       {detailItem && (
         <div style={{ position: 'fixed', top: 0, right: 0, bottom: 0, width: 400, backgroundColor: '#1A1A1A', borderLeft: '1px solid rgba(129, 140, 248, 0.10)', borderTop: '3px solid #818CF8', zIndex: 1000, overflowY: 'auto', padding: 24, display: 'flex', flexDirection: 'column', gap: 16, boxShadow: '-4px 0 20px rgba(0,0,0,0.5)' }}>
@@ -538,6 +596,9 @@ function Assets() {
       )}
       {showWizard === 'agent' && (
         <RegisterAgent onClose={() => setShowWizard(null)} onComplete={() => { setAgentsList(prev => [...prev, { agent: 'new-agent', protocol: 'RAPI', endpoint: 'agents.internal/new', namespace: 'default', models: 'gpt-4o', tools: '', policies: ['Rate limit'], health: 'active', source: 'Foundry' as Source, governance: 'none' as Governance }]); setShowWizard(null); }} />
+      )}
+      {showWizard === 'skill' && (
+        <RegisterSkill onClose={() => setShowWizard(null)} onComplete={() => { setSkillsList(prev => [...prev, { skill: 'new-skill', category: 'Custom', endpoint: 'skills.internal/new', namespace: 'default', models: 'gpt-4o', tools: '—', policies: ['Rate limit'], health: 'active', invocations: '0', source: 'Foundry' as Source, governance: 'none' as Governance }]); setShowWizard(null); }} />
       )}
     </div>
   );

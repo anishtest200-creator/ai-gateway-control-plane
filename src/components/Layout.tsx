@@ -358,7 +358,7 @@ const navItems: NavItem[] = [
   },
   {
     path: '/credentials',
-    label: 'Secrets',
+    label: 'Credential Manager',
     icon: <Key24Regular />,
     activeIcon: <Key24Filled />,
   },
@@ -408,7 +408,7 @@ const pageTitles: Record<string, string> = {
   '/traffic': 'Traffic',
   '/routing': 'Routing',
   '/policies': 'Policies',
-  '/credentials': 'Secrets',
+  '/credentials': 'Credential Manager',
   '/assets': 'Catalog',
   '/observability': 'Analytics',
   '/logs': 'Audit Log',

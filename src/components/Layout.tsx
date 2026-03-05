@@ -468,7 +468,7 @@ const Layout: React.FC<LayoutProps> = ({ onSignOut }) => {
     <div className={styles.root}>
       {/* Top Bar */}
       <div className={styles.topBar}>
-        <div className={styles.topBarBrand} onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
+        <div className={styles.topBarBrand} onClick={() => { onSignOut?.(); navigate('/'); }} style={{ cursor: 'pointer' }}>
           <span style={{ color: '#818CF8', fontSize: 20 }}>⚡</span> Azure AI Gateway
           <span className={styles.topBarBadge}>Preview</span>
         </div>

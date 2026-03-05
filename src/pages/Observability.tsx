@@ -336,6 +336,10 @@ const Observability: React.FC = () => {
   const [timeRange, setTimeRange] = useState<'24h' | '7d' | '30d'>('24h');
   const [nsFilter, setNsFilter] = useState<string>('all');
   const [hoveredRow, setHoveredRow] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'usage' | 'cost' | 'budgets'>('usage');
+  const [editingBudget, setEditingBudget] = useState<string | null>(null);
+  const [budgetEdits, setBudgetEdits] = useState<Record<string, number>>({});
+  const [toastMsg, setToastMsg] = useState<string | null>(null);
   const navigate = useNavigate();
 
   // Budget data for cost governance
@@ -397,6 +401,28 @@ const Observability: React.FC = () => {
 
   return (
     <div style={{ padding: 24, maxWidth: 1280, margin: '0 auto' }}>
+      {/* ── Toast ──────────────────────────────────────────────── */}
+      {toastMsg && (
+        <div style={{
+          position: 'fixed',
+          top: 60,
+          right: 24,
+          backgroundColor: '#1A1A1A',
+          border: `1px solid ${colors.gold}`,
+          borderRadius: 8,
+          padding: '10px 18px',
+          fontSize: 13,
+          color: colors.text,
+          zIndex: 2000,
+          boxShadow: '0 4px 16px rgba(0,0,0,0.4)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8,
+        }}>
+          <span style={{ color: colors.green }}>✓</span> {toastMsg}
+        </div>
+      )}
+
       {/* ── Header ─────────────────────────────────────────────── */}
       <div
         style={{
@@ -429,6 +455,27 @@ const Observability: React.FC = () => {
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          {/* Export Report */}
+          <button
+            onClick={() => {
+              setToastMsg('Report exported to CSV');
+              setTimeout(() => setToastMsg(null), 3000);
+            }}
+            style={{
+              backgroundColor: 'transparent',
+              color: colors.text,
+              border: `1px solid ${colors.border}`,
+              borderRadius: 6,
+              padding: '5px 12px',
+              fontSize: 12,
+              fontWeight: 600,
+              cursor: 'pointer',
+              fontFamily: 'inherit',
+            }}
+          >
+            📥 Export Report
+          </button>
+
           {/* Namespace filter */}
           <select
             value={nsFilter}
@@ -483,7 +530,36 @@ const Observability: React.FC = () => {
         </div>
       </div>
 
-      {/* ── Stats Grid ─────────────────────────────────────────── */}
+      {/* ── Tab Switcher ───────────────────────────────────────── */}
+      <div style={{ display: 'flex', gap: 0, marginBottom: 16, borderBottom: `1px solid ${colors.border}` }}>
+        {([
+          { key: 'usage' as const, label: 'Usage' },
+          { key: 'cost' as const, label: 'Cost' },
+          { key: 'budgets' as const, label: 'Budgets' },
+        ]).map((tab) => (
+          <button
+            key={tab.key}
+            onClick={() => setActiveTab(tab.key)}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              borderBottom: activeTab === tab.key ? `2px solid ${colors.gold}` : '2px solid transparent',
+              color: activeTab === tab.key ? colors.gold : colors.textMuted,
+              fontSize: 13,
+              fontWeight: 600,
+              padding: '8px 20px',
+              cursor: 'pointer',
+              fontFamily: 'inherit',
+              transition: 'all 0.15s',
+            }}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {/* ── Stats Grid (Usage + Cost tabs) ──────────────────── */}
+      {(activeTab === 'usage' || activeTab === 'cost') && (
       <div style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
         <StatCard
           label="Total Tokens"
@@ -510,15 +586,18 @@ const Observability: React.FC = () => {
           accent="#9b59b6"
         />
       </div>
+      )}
 
-      {/* ── Cost Governance ───────────────────────────────────── */}
+      {/* ── Cost Governance (Cost + Budgets tabs) ─────────────── */}
+      {(activeTab === 'cost' || activeTab === 'budgets') && (
       <div style={{ ...card, marginBottom: 16 }}>
         <div style={sectionTitle}>💰 Cost Governance</div>
 
         {/* Budget Overview */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 12, marginBottom: 20 }}>
           {budgetData.map((b) => {
-            const pct = Math.round((b.spent / b.budget) * 100);
+            const effectiveBudget = budgetEdits[b.namespace] ?? b.budget;
+            const pct = Math.round((b.spent / effectiveBudget) * 100);
             const barColor = pct > 100 ? colors.red : pct >= 60 ? colors.amber : colors.green;
             return (
               <div
@@ -542,7 +621,46 @@ const Observability: React.FC = () => {
                   </span>
                 </div>
                 <div style={{ fontSize: 11, color: colors.textMuted, marginBottom: 2 }}>
-                  Monthly budget: <span style={{ color: colors.text, fontWeight: 600 }}>${b.budget.toLocaleString()}</span>
+                  Monthly budget:{' '}
+                  {editingBudget === b.namespace ? (
+                    <input
+                      autoFocus
+                      type="number"
+                      defaultValue={budgetEdits[b.namespace] ?? b.budget}
+                      onBlur={(e) => {
+                        setBudgetEdits((prev) => ({ ...prev, [b.namespace]: Number(e.target.value) }));
+                        setEditingBudget(null);
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          setBudgetEdits((prev) => ({ ...prev, [b.namespace]: Number((e.target as HTMLInputElement).value) }));
+                          setEditingBudget(null);
+                        }
+                        if (e.key === 'Escape') setEditingBudget(null);
+                      }}
+                      style={{
+                        backgroundColor: '#0A0A0A',
+                        color: colors.text,
+                        border: `1px solid ${colors.gold}`,
+                        borderRadius: 4,
+                        padding: '1px 6px',
+                        fontSize: 11,
+                        fontWeight: 600,
+                        width: 80,
+                        outline: 'none',
+                        fontFamily: 'inherit',
+                      }}
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                  ) : (
+                    <span
+                      style={{ color: colors.text, fontWeight: 600, cursor: 'pointer', borderBottom: `1px dashed ${colors.goldDim}` }}
+                      onClick={(e) => { e.stopPropagation(); setEditingBudget(b.namespace); }}
+                      title="Click to edit budget"
+                    >
+                      ${(budgetEdits[b.namespace] ?? b.budget).toLocaleString()}
+                    </span>
+                  )}
                 </div>
                 <div style={{ fontSize: 11, color: colors.textMuted, marginBottom: 8 }}>
                   Spent this month: <span style={{ color: barColor, fontWeight: 600 }}>${b.spent.toLocaleString()}</span>
@@ -601,8 +719,10 @@ const Observability: React.FC = () => {
           ))}
         </div>
       </div>
+      )}
 
-      {/* ── Token Usage Chart ──────────────────────────────────── */}
+      {/* ── Token Usage Chart (Usage tab) ──────────────────────── */}
+      {activeTab === 'usage' && (
       <div style={{ ...card, marginBottom: 16 }}>
         <div style={sectionTitle}>📈 Token Usage — Last 24 Hours</div>
         <div
@@ -706,8 +826,10 @@ const Observability: React.FC = () => {
           </div>
         </div>
       </div>
+      )}
 
-      {/* ── Usage by Model ─────────────────────────────────────── */}
+      {/* ── Usage by Model (Usage tab) ─────────────────────────── */}
+      {activeTab === 'usage' && (
       <div style={{ marginBottom: 16 }}>
         <div style={sectionTitle}>📊 Usage by Model</div>
         <div
@@ -859,8 +981,10 @@ const Observability: React.FC = () => {
           })}
         </div>
       </div>
+      )}
 
-      {/* ── Top Consumers Table ────────────────────────────────── */}
+      {/* ── Top Consumers Table (Usage + Cost tabs) ────────────── */}
+      {(activeTab === 'usage' || activeTab === 'cost') && (
       <div style={{ ...card, marginBottom: 16 }}>
         <div style={sectionTitle}>👥 Top Consumers</div>
         <div style={{ overflowX: 'auto' }}>
@@ -988,8 +1112,10 @@ const Observability: React.FC = () => {
           </table>
         </div>
       </div>
+      )}
 
-      {/* ── Chargeback Summary ──────────────────────────────────── */}
+      {/* ── Chargeback Summary (Cost tab) ──────────────────────── */}
+      {activeTab === 'cost' && (
       <div style={{ ...card, marginBottom: 16 }}>
         <div style={sectionTitle}>📊 Chargeback Report — March 2026</div>
         <div style={{ overflowX: 'auto' }}>
@@ -1067,8 +1193,10 @@ const Observability: React.FC = () => {
           </div>
         </div>
       </div>
+      )}
 
-      {/* ── Namespace Usage ─────────────────────────────────────── */}
+      {/* ── Namespace Usage (Usage tab) ─────────────────────────── */}
+      {activeTab === 'usage' && (
       <div style={{ ...card, marginBottom: 16 }}>
         <div style={sectionTitle}>🏢 Namespace Token Usage</div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -1151,6 +1279,7 @@ const Observability: React.FC = () => {
             })}
         </div>
       </div>
+      )}
     </div>
   );
 };

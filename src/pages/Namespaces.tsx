@@ -18,7 +18,7 @@ interface Namespace {
   members: { name: string; role: string }[]
   serviceIdentities: { name: string; purpose: string }[]
   credentials: { name: string; type: string; environment: string }[]
-  environment: 'production' | 'development' | 'sandbox'
+  environment: 'production' | 'staging' | 'development' | 'sandbox'
   status: string
   createdAt: string
 }
@@ -27,7 +27,7 @@ interface Namespace {
 /*  Mock Data                                                          */
 /* ------------------------------------------------------------------ */
 
-const namespaces: Namespace[] = [
+const initialNamespaces: Namespace[] = [
   {
     id: 'ns-ai-platform-prod-001',
     name: 'ai-platform',
@@ -334,6 +334,7 @@ const badge = (bg: string, fg: string): CSSProperties => ({
 
 const envConfig: Record<string, { bg: string; color: string }> = {
   production: { bg: '#1a3a2a', color: '#4ade80' },
+  staging: { bg: '#2d1a3d', color: '#c084fc' },
   development: { bg: '#3d2800', color: '#fbbf24' },
   sandbox: { bg: '#1a2d3d', color: '#38bdf8' },
 }
@@ -392,11 +393,89 @@ const Namespaces: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabKey>('all')
   const [selectedNs, setSelectedNs] = useState<Namespace | null>(null)
   const [hoveredCard, setHoveredCard] = useState<string | null>(null)
+  const [nsList, setNsList] = useState<Namespace[]>(initialNamespaces)
+  const [showCreateModal, setShowCreateModal] = useState(false)
+  const [editingNs, setEditingNs] = useState<Namespace | null>(null)
+  const [menuOpenId, setMenuOpenId] = useState<string | null>(null)
+  const [formName, setFormName] = useState('')
+  const [formEnv, setFormEnv] = useState<'production' | 'staging' | 'development' | 'sandbox'>('production')
+  const [formDesc, setFormDesc] = useState('')
+  const [formBudget, setFormBudget] = useState('')
+  const [formOwner, setFormOwner] = useState('')
+  const [showAddMember, setShowAddMember] = useState(false)
+  const [newMemberEmail, setNewMemberEmail] = useState('')
+  const [newMemberRole, setNewMemberRole] = useState('Viewer')
 
-  const managedCount = namespaces.filter(n => n.type === 'managed').length
-  const personalCount = namespaces.filter(n => n.type === 'personal').length
+  const managedCount = nsList.filter(n => n.type === 'managed').length
+  const personalCount = nsList.filter(n => n.type === 'personal').length
 
-  const filtered = namespaces.filter(ns => {
+  const openCreateModal = (ns?: Namespace) => {
+    if (ns) {
+      setEditingNs(ns)
+      setFormName(ns.displayName)
+      setFormEnv(ns.environment)
+      setFormDesc(ns.description)
+      setFormBudget('')
+      setFormOwner(ns.owner)
+    } else {
+      setEditingNs(null)
+      setFormName('')
+      setFormEnv('production')
+      setFormDesc('')
+      setFormBudget('')
+      setFormOwner('')
+    }
+    setShowCreateModal(true)
+  }
+
+  const handleCreateOrEdit = () => {
+    if (!formName.trim()) return
+    if (editingNs) {
+      setNsList(prev => prev.map(n => n.id === editingNs.id ? { ...n, displayName: formName, name: formName.toLowerCase().replace(/\s+/g, '-'), environment: formEnv, description: formDesc, owner: formOwner } : n))
+      if (selectedNs && selectedNs.id === editingNs.id) {
+        setSelectedNs(prev => prev ? { ...prev, displayName: formName, name: formName.toLowerCase().replace(/\s+/g, '-'), environment: formEnv, description: formDesc, owner: formOwner } : prev)
+      }
+    } else {
+      const newNs: Namespace = {
+        id: `ns-${Date.now()}`,
+        name: formName.toLowerCase().replace(/\s+/g, '-'),
+        displayName: formName,
+        description: formDesc,
+        owner: formOwner || 'unassigned',
+        type: 'managed',
+        assetCount: { models: 0, tools: 0, mcpServers: 0, agents: 0, skills: 0 },
+        totalAssets: 0,
+        policies: [],
+        members: [],
+        serviceIdentities: [],
+        credentials: [],
+        environment: formEnv,
+        status: 'active',
+        createdAt: new Date().toISOString().slice(0, 10),
+      }
+      setNsList(prev => [...prev, newNs])
+    }
+    setShowCreateModal(false)
+  }
+
+  const handleDelete = (nsId: string) => {
+    if (confirm('Delete this namespace? This cannot be undone.')) {
+      setNsList(prev => prev.filter(n => n.id !== nsId))
+      setMenuOpenId(null)
+    }
+  }
+
+  const handleAddMember = () => {
+    if (!newMemberEmail.trim() || !selectedNs) return
+    const updatedNs = { ...selectedNs, members: [...selectedNs.members, { name: newMemberEmail, role: newMemberRole.toLowerCase().replace(/\s+/g, '-') }] }
+    setSelectedNs(updatedNs)
+    setNsList(prev => prev.map(n => n.id === updatedNs.id ? updatedNs : n))
+    setNewMemberEmail('')
+    setNewMemberRole('Viewer')
+    setShowAddMember(false)
+  }
+
+  const filtered = nsList.filter(ns => {
     const matchesTab = activeTab === 'all' || ns.type === activeTab
     const q = search.toLowerCase()
     const matchesSearch =
@@ -516,7 +595,7 @@ const Namespaces: React.FC = () => {
               <span>Members</span>
               <span style={badge('rgba(167, 139, 250, 0.15)', colors.purple)}>{ns.members.length}</span>
             </div>
-            <button style={{
+            <button onClick={() => setShowAddMember(!showAddMember)} style={{
               padding: '6px 14px', borderRadius: 6, border: '1px solid rgba(212, 168, 67, 0.3)',
               backgroundColor: 'rgba(212, 168, 67, 0.1)', color: colors.gold,
               fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
@@ -524,6 +603,17 @@ const Namespaces: React.FC = () => {
               + Add Member
             </button>
           </div>
+          {showAddMember && (
+            <div style={{ ...card, marginBottom: 8, display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+              <input type="text" placeholder="Email address" value={newMemberEmail} onChange={(e) => setNewMemberEmail(e.target.value)} style={{ flex: 1, minWidth: 180, padding: '6px 10px', borderRadius: 6, border: `1px solid ${colors.border}`, backgroundColor: '#1A1A1A', color: colors.text, fontSize: 13, fontFamily: 'inherit', outline: 'none' }} />
+              <select value={newMemberRole} onChange={(e) => setNewMemberRole(e.target.value)} style={{ padding: '6px 10px', borderRadius: 6, border: `1px solid ${colors.border}`, backgroundColor: '#1A1A1A', color: colors.text, fontSize: 13, fontFamily: 'inherit', cursor: 'pointer', outline: 'none' }}>
+                <option value="Admin">Admin</option>
+                <option value="Editor">Editor</option>
+                <option value="Viewer">Viewer</option>
+              </select>
+              <button onClick={handleAddMember} style={{ padding: '6px 14px', borderRadius: 6, border: 'none', backgroundColor: colors.gold, color: '#0A0A0A', fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>Add</button>
+            </div>
+          )}
           <div style={card}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {ns.members.map(m => {
@@ -633,7 +723,7 @@ const Namespaces: React.FC = () => {
 
   /* ---- List view ---- */
   const tabs: { key: TabKey; label: string; count: number; icon?: string }[] = [
-    { key: 'all', label: 'All', count: namespaces.length },
+    { key: 'all', label: 'All', count: nsList.length },
     { key: 'managed', label: 'Managed', count: managedCount, icon: '🏢' },
     { key: 'personal', label: 'Personal', count: personalCount, icon: '👤' },
   ]
@@ -656,7 +746,7 @@ const Namespaces: React.FC = () => {
           />
           <span style={{ color: colors.textMuted, fontSize: 13 }}>{filtered.length} namespaces</span>
         </div>
-        <button style={{
+        <button onClick={() => openCreateModal()} style={{
           padding: '8px 18px', borderRadius: 6, border: 'none',
           backgroundColor: colors.gold, color: '#0A0A0A',
           fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
@@ -737,6 +827,15 @@ const Namespaces: React.FC = () => {
                   </div>
                   <div style={{ fontFamily: 'monospace', fontSize: 11, color: '#9cdcfe', marginTop: 2 }}>{ns.name}</div>
                 </div>
+                <div style={{ position: 'relative', flexShrink: 0 }}>
+                  <button onClick={(e) => { e.stopPropagation(); setMenuOpenId(menuOpenId === ns.id ? null : ns.id); }} style={{ background: 'none', border: 'none', color: colors.textMuted, fontSize: 18, cursor: 'pointer', padding: '0 4px', lineHeight: 1 }}>⋯</button>
+                  {menuOpenId === ns.id && (
+                    <div style={{ position: 'absolute', top: 24, right: 0, backgroundColor: '#1A1A1A', border: `1px solid ${colors.border}`, borderRadius: 6, padding: 4, zIndex: 100, minWidth: 100, boxShadow: '0 4px 12px rgba(0,0,0,0.4)' }}>
+                      <button onClick={(e) => { e.stopPropagation(); setMenuOpenId(null); openCreateModal(ns); }} style={{ display: 'block', width: '100%', textAlign: 'left', background: 'none', border: 'none', color: colors.text, fontSize: 13, padding: '6px 12px', cursor: 'pointer', fontFamily: 'inherit', borderRadius: 4 }}>Edit</button>
+                      <button onClick={(e) => { e.stopPropagation(); handleDelete(ns.id); }} style={{ display: 'block', width: '100%', textAlign: 'left', background: 'none', border: 'none', color: colors.red, fontSize: 13, padding: '6px 12px', cursor: 'pointer', fontFamily: 'inherit', borderRadius: 4 }}>Delete</button>
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* Description */}
@@ -792,6 +891,44 @@ const Namespaces: React.FC = () => {
       {filtered.length === 0 && (
         <div style={{ textAlign: 'center', padding: 40, color: colors.textDim }}>
           No namespaces match your search.
+        </div>
+      )}
+
+      {/* Create/Edit Namespace Modal */}
+      {showCreateModal && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ backgroundColor: '#1A1A1A', border: `1px solid ${colors.border}`, borderRadius: 10, padding: 24, width: 420, maxHeight: '80vh', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <div style={{ fontSize: 16, fontWeight: 700, color: '#fff' }}>{editingNs ? 'Edit Namespace' : 'Create Namespace'}</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <label style={{ fontSize: 12, color: colors.textMuted }}>Name</label>
+              <input type="text" value={formName} onChange={(e) => setFormName(e.target.value)} style={{ padding: '8px 12px', borderRadius: 6, border: `1px solid ${colors.border}`, backgroundColor: '#111', color: colors.text, fontSize: 13, fontFamily: 'inherit', outline: 'none' }} />
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <label style={{ fontSize: 12, color: colors.textMuted }}>Environment</label>
+              <select value={formEnv} onChange={(e) => setFormEnv(e.target.value as 'production' | 'staging' | 'development' | 'sandbox')} style={{ padding: '8px 12px', borderRadius: 6, border: `1px solid ${colors.border}`, backgroundColor: '#111', color: colors.text, fontSize: 13, fontFamily: 'inherit', cursor: 'pointer', outline: 'none' }}>
+                <option value="production">Production</option>
+                <option value="staging">Staging</option>
+                <option value="development">Development</option>
+                <option value="sandbox">Sandbox</option>
+              </select>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <label style={{ fontSize: 12, color: colors.textMuted }}>Description</label>
+              <textarea value={formDesc} onChange={(e) => setFormDesc(e.target.value)} rows={3} style={{ padding: '8px 12px', borderRadius: 6, border: `1px solid ${colors.border}`, backgroundColor: '#111', color: colors.text, fontSize: 13, fontFamily: 'inherit', outline: 'none', resize: 'vertical' }} />
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <label style={{ fontSize: 12, color: colors.textMuted }}>Token Budget</label>
+              <input type="number" value={formBudget} onChange={(e) => setFormBudget(e.target.value)} placeholder="e.g. 100000" style={{ padding: '8px 12px', borderRadius: 6, border: `1px solid ${colors.border}`, backgroundColor: '#111', color: colors.text, fontSize: 13, fontFamily: 'inherit', outline: 'none' }} />
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <label style={{ fontSize: 12, color: colors.textMuted }}>Owner</label>
+              <input type="text" value={formOwner} onChange={(e) => setFormOwner(e.target.value)} placeholder="team@example.com" style={{ padding: '8px 12px', borderRadius: 6, border: `1px solid ${colors.border}`, backgroundColor: '#111', color: colors.text, fontSize: 13, fontFamily: 'inherit', outline: 'none' }} />
+            </div>
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 8 }}>
+              <button onClick={() => setShowCreateModal(false)} style={{ padding: '8px 18px', borderRadius: 6, border: `1px solid ${colors.border}`, backgroundColor: 'transparent', color: colors.textMuted, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>Cancel</button>
+              <button onClick={handleCreateOrEdit} style={{ padding: '8px 18px', borderRadius: 6, border: 'none', backgroundColor: colors.gold, color: '#0A0A0A', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>{editingNs ? 'Save' : 'Create'}</button>
+            </div>
+          </div>
         </div>
       )}
     </div>

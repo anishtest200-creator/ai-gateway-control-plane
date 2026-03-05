@@ -454,12 +454,26 @@ const Layout: React.FC<LayoutProps> = ({ onSignOut }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [profileOpen, setProfileOpen] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
+  const [dismissedNotifs, setDismissedNotifs] = useState<string[]>([]);
   const profileRef = useRef<HTMLDivElement>(null);
+  const notifRef = useRef<HTMLDivElement>(null);
+
+  const notifications = [
+    { id: 'n1', type: 'warning' as const, text: 'Credential azure-openai-key-prod expires in 3 days', time: '2 hours ago', nav: '/credentials' },
+    { id: 'n2', type: 'info' as const, text: 'New model gpt-4o-mini registered in ai-platform namespace', time: '5 hours ago', nav: '/assets' },
+    { id: 'n3', type: 'error' as const, text: 'Rate limit exceeded for namespace research-sandbox (3 occurrences)', time: '1 day ago', nav: '/policies' },
+  ];
+
+  const visibleNotifs = notifications.filter((n) => !dismissedNotifs.includes(n.id));
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
         setProfileOpen(false);
+      }
+      if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
+        setNotifOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -476,16 +490,102 @@ const Layout: React.FC<LayoutProps> = ({ onSignOut }) => {
     <div className={styles.root}>
       {/* Top Bar */}
       <div className={styles.topBar}>
-        <div className={styles.topBarBrand} onClick={() => onSignOut?.()} style={{ cursor: 'pointer' }}>
+        <div className={styles.topBarBrand} onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
           <span style={{ color: '#D4A843', fontSize: 20 }}>⚡</span> Azure AI Gateway
           <span className={styles.topBarBadge}>Preview</span>
         </div>
         <div />
         <div className={styles.topBarRight} ref={profileRef}>
-          <button className={styles.topBarIconBtn} title="Notifications">
-            <Alert24Regular style={{ fontSize: 18 }} />
-            <span className={styles.notifBadge}>3</span>
-          </button>
+          <div ref={notifRef} style={{ position: 'relative' }}>
+            <button className={styles.topBarIconBtn} title="Notifications" onClick={() => setNotifOpen((v) => !v)}>
+              <Alert24Regular style={{ fontSize: 18 }} />
+              {visibleNotifs.length > 0 && <span className={styles.notifBadge}>{visibleNotifs.length}</span>}
+            </button>
+            {notifOpen && (
+              <div style={{
+                position: 'absolute',
+                top: 36,
+                right: 0,
+                backgroundColor: '#141414',
+                border: '1px solid rgba(212, 168, 67, 0.15)',
+                borderRadius: 6,
+                padding: '8px 0',
+                minWidth: 340,
+                zIndex: 1000,
+                boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
+              }}>
+                <div style={{ padding: '4px 14px 8px', fontSize: 13, fontWeight: 600, color: '#fff' }}>Notifications</div>
+                <div style={{ height: 1, backgroundColor: 'rgba(212, 168, 67, 0.15)', margin: '0 0 4px' }} />
+                {visibleNotifs.length === 0 && (
+                  <div style={{ padding: '16px 14px', fontSize: 12, color: '#999', textAlign: 'center' }}>No notifications</div>
+                )}
+                {visibleNotifs.map((n) => {
+                  const dotColor = n.type === 'error' ? '#EF4444' : n.type === 'warning' ? '#F59E0B' : '#60A5FA';
+                  return (
+                    <div
+                      key={n.id}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'flex-start',
+                        gap: 8,
+                        padding: '8px 14px',
+                        cursor: 'pointer',
+                        transition: 'background-color 0.15s',
+                      }}
+                      onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.backgroundColor = '#1A1A1A'; }}
+                      onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.backgroundColor = 'transparent'; }}
+                      onClick={() => { setNotifOpen(false); navigate(n.nav); }}
+                    >
+                      <span style={{ width: 7, height: 7, borderRadius: '50%', backgroundColor: dotColor, flexShrink: 0, marginTop: 5 }} />
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: 12, color: '#E8E8E8', lineHeight: 1.4 }}>{n.text}</div>
+                        <div style={{ fontSize: 11, color: '#666', marginTop: 2 }}>{n.time}</div>
+                      </div>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setDismissedNotifs((prev) => [...prev, n.id]); }}
+                        style={{
+                          background: 'transparent',
+                          border: 'none',
+                          color: '#666',
+                          cursor: 'pointer',
+                          fontSize: 14,
+                          padding: '0 2px',
+                          lineHeight: 1,
+                          flexShrink: 0,
+                        }}
+                        title="Dismiss"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  );
+                })}
+                {visibleNotifs.length > 0 && (
+                  <>
+                    <div style={{ height: 1, backgroundColor: 'rgba(212, 168, 67, 0.15)', margin: '4px 0' }} />
+                    <button
+                      onClick={() => { setDismissedNotifs(notifications.map((n) => n.id)); }}
+                      style={{
+                        display: 'block',
+                        width: '100%',
+                        textAlign: 'center',
+                        background: 'transparent',
+                        border: 'none',
+                        color: '#D4A843',
+                        fontSize: 12,
+                        fontWeight: 600,
+                        padding: '8px 14px',
+                        cursor: 'pointer',
+                        fontFamily: 'inherit',
+                      }}
+                    >
+                      Mark all read
+                    </button>
+                  </>
+                )}
+              </div>
+            )}
+          </div>
           <button className={styles.topBarIconBtn} title="Settings">
             <Settings24Regular style={{ fontSize: 18 }} />
           </button>
@@ -505,7 +605,7 @@ const Layout: React.FC<LayoutProps> = ({ onSignOut }) => {
                 <div className={styles.profileDropdownOrg}>Contoso Corp</div>
               </div>
               <div className={styles.profileDropdownDivider} />
-              <button className={styles.profileDropdownItem}>
+              <button className={styles.profileDropdownItem} onClick={() => { setProfileOpen(false); navigate('/'); }}>
                 <Settings24Regular style={{ fontSize: 16 }} /> Settings
               </button>
               <button
@@ -551,16 +651,16 @@ const Layout: React.FC<LayoutProps> = ({ onSignOut }) => {
             })}
           </nav>
           <div className={styles.sidebarFooter}>
-            <button className={styles.sidebarFooterItem}>
+            <button className={styles.sidebarFooterItem} onClick={() => window.open('/docs', '_blank')}>
               <DocumentText24Regular style={{ fontSize: 16 }} /> Docs
             </button>
-            <button className={styles.sidebarFooterItem}>
+            <button className={styles.sidebarFooterItem} onClick={() => window.open('/docs', '_blank')}>
               <PlugConnected24Regular style={{ fontSize: 16 }} /> API Reference
             </button>
-            <button className={styles.sidebarFooterItem}>
+            <button className={styles.sidebarFooterItem} onClick={() => window.open('https://github.com/anishta_microsoft/ai-gateway-control-plane/issues', '_blank')}>
               <QuestionCircle24Regular style={{ fontSize: 16 }} /> Support
             </button>
-            <button className={styles.sidebarFooterItem}>
+            <button className={styles.sidebarFooterItem} onClick={() => window.open('https://github.com/anishta_microsoft/ai-gateway-control-plane/issues', '_blank')}>
               <CommentMultiple24Regular style={{ fontSize: 16 }} /> Feedback
             </button>
           </div>

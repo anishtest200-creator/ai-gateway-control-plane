@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import type { CSSProperties } from 'react';
 
 // ── Inline style helpers ──────────────────────────────────────────────
@@ -148,9 +149,55 @@ const StatusPill: React.FC<{ status: 'Healthy' | 'Warning' }> = ({ status }) => 
 // ── Main Component ────────────────────────────────────────────────────
 interface TrafficProps {}
 
+const timeRangeMultipliers: Record<string, number> = {
+  '1h': 0.04,
+  '6h': 0.25,
+  '24h': 1,
+  '7d': 7,
+  '30d': 30,
+};
+
+const timeRangeLabels: Record<string, string> = {
+  '1h': 'Last 1 hour',
+  '6h': 'Last 6 hours',
+  '24h': 'Last 24 hours',
+  '7d': 'Last 7 days',
+  '30d': 'Last 30 days',
+};
+
+const providerOptions = ['All Providers', 'Azure OpenAI', 'Anthropic', 'Google Vertex', 'OpenAI', 'AWS Bedrock'];
+
+const selectStyle: CSSProperties = {
+  backgroundColor: '#1A1A1A',
+  color: '#E8E8E8',
+  border: '1px solid rgba(212, 168, 67, 0.10)',
+  borderRadius: 6,
+  padding: '5px 10px',
+  fontSize: 12,
+  outline: 'none',
+  cursor: 'pointer',
+};
+
 const Traffic: React.FC<TrafficProps> = () => {
+  const navigate = useNavigate();
+  const [timeRange, setTimeRange] = useState('24h');
+  const [providerFilter, setProviderFilter] = useState('All Providers');
+  const [hoveredNsRow, setHoveredNsRow] = useState<string | null>(null);
+  const [hoveredActivity, setHoveredActivity] = useState<number | null>(null);
+
+  const mult = timeRangeMultipliers[timeRange] ?? 1;
+  const rangeLabel = timeRangeLabels[timeRange] ?? 'Last 24 hours';
+
+  const scaleVal = (v: string): string => {
+    const num = parseFloat(v.replace(/[^0-9.]/g, ''));
+    const suffix = v.replace(/[0-9.,]/g, '');
+    const scaled = num * mult;
+    if (scaled >= 1000) return `${(scaled / 1000).toFixed(1)}M`;
+    return `${scaled.toFixed(scaled < 10 ? 1 : 0)}${suffix}`;
+  };
+
   // Mock data
-  const providers = [
+  const allProviders = [
     { label: 'Azure OpenAI', pct: 45, value: '520K', color: colors.azure },
     { label: 'Anthropic', pct: 25, value: '290K', color: colors.amber },
     { label: 'Google Vertex', pct: 15, value: '174K', color: colors.google },
@@ -158,11 +205,15 @@ const Traffic: React.FC<TrafficProps> = () => {
     { label: 'Self-Hosted', pct: 5, value: '58K', color: colors.selfHosted },
   ];
 
+  const providers = providerFilter === 'All Providers'
+    ? allProviders
+    : allProviders.filter((p) => p.label === providerFilter || p.label.startsWith(providerFilter.split(' ')[0]));
+
   const enforcement = [
-    { label: 'Passed', value: '1,197,153', pct: 99.7, color: colors.green },
-    { label: 'Rate Limited', value: '1,892', pct: 0.16, color: colors.amber },
-    { label: 'Blocked (Safety)', value: '847', pct: 0.07, color: colors.red },
-    { label: 'Auth Denied', value: '108', pct: 0.01, color: colors.red },
+    { label: 'Passed', value: `${Math.round(1197153 * mult).toLocaleString()}`, pct: 99.7, color: colors.green },
+    { label: 'Rate Limited', value: `${Math.round(1892 * mult).toLocaleString()}`, pct: 0.16, color: colors.amber },
+    { label: 'Blocked (Safety)', value: `${Math.round(847 * mult).toLocaleString()}`, pct: 0.07, color: colors.red },
+    { label: 'Auth Denied', value: `${Math.round(108 * mult).toLocaleString()}`, pct: 0.01, color: colors.red },
   ];
 
   const namespaces: {
@@ -171,11 +222,11 @@ const Traffic: React.FC<TrafficProps> = () => {
     tokens: string;
     status: 'Healthy' | 'Warning';
   }[] = [
-    { name: 'retail-support', requests: '312K', tokens: '4.2B', status: 'Healthy' },
-    { name: 'finance-analytics', requests: '245K', tokens: '3.1B', status: 'Healthy' },
-    { name: 'hr-automation', requests: '189K', tokens: '2.8B', status: 'Warning' },
-    { name: 'customer-ops', requests: '156K', tokens: '1.9B', status: 'Healthy' },
-    { name: 'dev-sandbox', requests: '98K', tokens: '0.8B', status: 'Healthy' },
+    { name: 'retail-support', requests: scaleVal('312K'), tokens: scaleVal('4.2B'), status: 'Healthy' },
+    { name: 'finance-analytics', requests: scaleVal('245K'), tokens: scaleVal('3.1B'), status: 'Healthy' },
+    { name: 'hr-automation', requests: scaleVal('189K'), tokens: scaleVal('2.8B'), status: 'Warning' },
+    { name: 'customer-ops', requests: scaleVal('156K'), tokens: scaleVal('1.9B'), status: 'Healthy' },
+    { name: 'dev-sandbox', requests: scaleVal('98K'), tokens: scaleVal('0.8B'), status: 'Healthy' },
   ];
 
   const activity = [
@@ -206,11 +257,25 @@ const Traffic: React.FC<TrafficProps> = () => {
 
   return (
     <div>
+      {/* ── Filter Bar ────────────────────────────────────────── */}
+      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginBottom: 14 }}>
+        <select value={providerFilter} onChange={(e) => setProviderFilter(e.target.value)} style={selectStyle}>
+          {providerOptions.map((p) => (
+            <option key={p} value={p}>{p}</option>
+          ))}
+        </select>
+        <select value={timeRange} onChange={(e) => setTimeRange(e.target.value)} style={selectStyle}>
+          {Object.entries(timeRangeLabels).map(([k, v]) => (
+            <option key={k} value={k}>{v}</option>
+          ))}
+        </select>
+      </div>
+
       {/* ── Top Stats Row ─────────────────────────────────────── */}
       <div style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
-        <StatCard value="1.2M" label="Total Requests" sub="Last 24h" accent={colors.green} />
+        <StatCard value={scaleVal('1.2M')} label="Total Requests" sub={rangeLabel} accent={colors.green} />
         <StatCard value="47ms" label="Avg Latency" sub="P50" accent={colors.green} />
-        <StatCard value="2,847" label="Policy Blocks" sub="Last 24h" accent={colors.amber} />
+        <StatCard value={scaleVal('2847')} label="Policy Blocks" sub={rangeLabel} accent={colors.amber} />
         <StatCard value="156" label="Active Endpoints" sub="Healthy" accent={colors.green} />
       </div>
 
@@ -263,7 +328,18 @@ const Traffic: React.FC<TrafficProps> = () => {
               </thead>
               <tbody>
                 {namespaces.map((ns) => (
-                  <tr key={ns.name}>
+                  <tr
+                    key={ns.name}
+                    onClick={() => navigate('/namespaces')}
+                    onMouseEnter={() => setHoveredNsRow(ns.name)}
+                    onMouseLeave={() => setHoveredNsRow(null)}
+                    style={{
+                      cursor: 'pointer',
+                      backgroundColor: hoveredNsRow === ns.name ? '#1A1A1A' : 'transparent',
+                      borderLeft: hoveredNsRow === ns.name ? '3px solid #D4A843' : '3px solid transparent',
+                      transition: 'all 0.15s',
+                    }}
+                  >
                     <td style={{ ...tdStyle, fontFamily: 'monospace', fontSize: 12, color: colors.gold }}>
                       {ns.name}
                     </td>
@@ -284,11 +360,18 @@ const Traffic: React.FC<TrafficProps> = () => {
             {activity.map((a, i) => (
               <div
                 key={i}
+                onClick={() => navigate('/logs')}
+                onMouseEnter={() => setHoveredActivity(i)}
+                onMouseLeave={() => setHoveredActivity(null)}
                 style={{
                   display: 'flex',
                   alignItems: 'flex-start',
                   gap: 8,
                   padding: '8px 0',
+                  cursor: 'pointer',
+                  backgroundColor: hoveredActivity === i ? '#1A1A1A' : 'transparent',
+                  borderRadius: 4,
+                  transition: 'background-color 0.15s',
                   borderBottom:
                     i < activity.length - 1
                       ? `1px solid ${colors.border}`

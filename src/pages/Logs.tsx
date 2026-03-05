@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import type { CSSProperties } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 /* ── palette ─────────────────────────────────────────────────────── */
 
@@ -155,11 +156,15 @@ const mockLogs: LogEntry[] = [
 /* ── component ────────────────────────────────────────────────────── */
 
 const Logs: React.FC = () => {
+  const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const [assetFilter, setAssetFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [hoveredRow, setHoveredRow] = useState<string | null>(null);
+  const [showToast, setShowToast] = useState(false);
+  const [reqBodyOpen, setReqBodyOpen] = useState(false);
+  const [resBodyOpen, setResBodyOpen] = useState(false);
 
   /* ── filtering ──────────────────────────────────────────────────── */
 
@@ -287,6 +292,25 @@ const Logs: React.FC = () => {
           Refresh
         </button>
 
+        {/* export */}
+        <button
+          onClick={() => { setShowToast(true); setTimeout(() => setShowToast(false), 3000); }}
+          style={{
+            padding: '6px 14px',
+            borderRadius: 6,
+            border: '1px solid rgba(212, 168, 67, 0.30)',
+            backgroundColor: 'rgba(212, 168, 67, 0.1)',
+            color: '#D4A843',
+            fontSize: 13,
+            fontWeight: 600,
+            fontFamily: 'inherit',
+            cursor: 'pointer',
+            transition: 'all 0.15s',
+          }}
+        >
+          Export
+        </button>
+
         {/* request count */}
         <span style={{ fontSize: 12, color: colors.textMuted, marginLeft: 'auto' }}>
           {filtered.length} requests
@@ -402,64 +426,82 @@ const Logs: React.FC = () => {
         </div>
       </div>
 
-      {/* ── detail panel ────────────────────────────────────────────── */}
+      {/* ── detail panel (slide-in overlay) ─────────────────────────── */}
       {selected && (
-        <div style={card}>
-          {/* header */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-            <span style={{ fontSize: 14, fontWeight: 700, color: colors.text }}>Request Detail</span>
-            <span style={badge(assetTypeColors[selected.assetType].bg, assetTypeColors[selected.assetType].color)}>
-              {assetLabel[selected.assetType]}
-            </span>
-            <span style={{ fontSize: 13, color: colors.text }}>{selected.assetName}</span>
-            <button
-              onClick={() => setSelectedId(null)}
-              style={{
-                marginLeft: 'auto',
-                background: 'none',
-                border: 'none',
-                color: colors.textMuted,
-                fontSize: 18,
-                cursor: 'pointer',
-                padding: '0 4px',
-                fontFamily: 'inherit',
-                lineHeight: 1,
-              }}
-            >
-              ✕
-            </button>
+        <div style={{ position: 'fixed', top: 0, right: 0, bottom: 0, width: 420, backgroundColor: '#1A1A1A', borderLeft: '1px solid rgba(212, 168, 67, 0.10)', zIndex: 1000, overflowY: 'auto', padding: 24, display: 'flex', flexDirection: 'column', gap: 16, boxShadow: '-4px 0 20px rgba(0,0,0,0.5)' }}>
+          {/* close */}
+          <button onClick={() => { setSelectedId(null); setReqBodyOpen(false); setResBodyOpen(false); }} style={{ position: 'absolute', top: 16, right: 16, background: 'none', border: 'none', color: colors.textMuted, fontSize: 20, cursor: 'pointer', padding: '0 4px', fontFamily: 'inherit', lineHeight: 1 }}>✕</button>
+
+          {/* method + path */}
+          <div style={{ fontSize: 16, fontWeight: 700, color: colors.text, fontFamily: 'monospace', paddingRight: 24 }}>{selected.method} {selected.path}</div>
+
+          {/* timestamp */}
+          <DetailField label="Timestamp" value={fmtFull(selected.timestamp)} />
+
+          {/* status badge */}
+          <div>
+            <div style={{ fontSize: 11, fontWeight: 600, color: colors.textMuted, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 }}>Status</div>
+            <span style={badge(selected.statusCode < 300 ? 'rgba(74,222,128,0.15)' : selected.statusCode < 500 ? 'rgba(245,158,11,0.15)' : 'rgba(239,68,68,0.15)', statusDotColor(selected.statusCode))}>{selected.statusCode} {statusText[selected.statusCode] ?? ''}</span>
           </div>
 
-          {/* detail grid */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16 }}>
-            <DetailField label="Timestamp" value={fmtFull(selected.timestamp)} />
-            <DetailField
-              label="Status"
-              value={`${selected.statusCode} ${statusText[selected.statusCode] ?? ''}`}
-              valueColor={statusDotColor(selected.statusCode)}
-            />
-            <DetailField
-              label="Method & Path"
-              value={`${selected.method} ${selected.path}`}
-              mono
-            />
-            <DetailField
-              label="Latency"
-              value={`${selected.latencyMs} ms`}
-              valueColor={latencyColor(selected.latencyMs)}
-            />
-            <DetailField
-              label="Tokens"
-              value={
-                selected.tokensIn != null
-                  ? `${selected.tokensIn} In → ${selected.tokensOut} Out`
-                  : '—'
-              }
-            />
-            <DetailField label="User / Identity" value={selected.userId} mono />
-            <DetailField label="IP Address" value={selected.ipAddress} mono />
-            <DetailField label="Request ID" value={selected.id} mono />
+          {/* latency */}
+          <DetailField label="Latency" value={`${selected.latencyMs} ms`} valueColor={latencyColor(selected.latencyMs)} />
+
+          {/* asset */}
+          <div>
+            <div style={{ fontSize: 11, fontWeight: 600, color: colors.textMuted, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 }}>Asset</div>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+              <span style={badge(assetTypeColors[selected.assetType].bg, assetTypeColors[selected.assetType].color)}>{assetLabel[selected.assetType]}</span>
+              <span style={{ fontSize: 13, color: colors.text }}>{selected.assetName}</span>
+            </span>
           </div>
+
+          {/* user + ip */}
+          <DetailField label="User ID" value={selected.userId} mono />
+          <DetailField label="IP Address" value={selected.ipAddress} mono />
+
+          {/* request headers */}
+          <div>
+            <div style={{ fontSize: 11, fontWeight: 600, color: colors.textMuted, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 }}>Request Headers</div>
+            <div style={{ backgroundColor: '#111', borderRadius: 6, padding: 10, fontFamily: 'monospace', fontSize: 11, color: '#9cdcfe', lineHeight: 1.6 }}>
+              Content-Type: application/json<br />
+              Authorization: Bearer ••••••••<br />
+              X-Request-ID: {selected.id}
+            </div>
+          </div>
+
+          {/* request body */}
+          <div>
+            <button onClick={() => setReqBodyOpen(!reqBodyOpen)} style={{ background: 'none', border: 'none', color: colors.gold, fontSize: 12, fontWeight: 600, cursor: 'pointer', padding: 0, fontFamily: 'inherit' }}>{reqBodyOpen ? '▾' : '▸'} Request Body</button>
+            {reqBodyOpen && (
+              <div style={{ backgroundColor: '#111', borderRadius: 6, padding: 10, fontFamily: 'monospace', fontSize: 11, color: '#9cdcfe', marginTop: 6, whiteSpace: 'pre-wrap' }}>
+{JSON.stringify({ model: selected.assetName, messages: [{ role: 'user', content: 'Hello' }], max_tokens: 1024 }, null, 2)}
+              </div>
+            )}
+          </div>
+
+          {/* response body */}
+          <div>
+            <button onClick={() => setResBodyOpen(!resBodyOpen)} style={{ background: 'none', border: 'none', color: colors.gold, fontSize: 12, fontWeight: 600, cursor: 'pointer', padding: 0, fontFamily: 'inherit' }}>{resBodyOpen ? '▾' : '▸'} Response Body</button>
+            {resBodyOpen && (
+              <div style={{ backgroundColor: '#111', borderRadius: 6, padding: 10, fontFamily: 'monospace', fontSize: 11, color: '#9cdcfe', marginTop: 6, whiteSpace: 'pre-wrap' }}>
+{JSON.stringify({ id: selected.id, status: selected.statusCode, latency_ms: selected.latencyMs, tokens: { input: selected.tokensIn ?? 0, output: selected.tokensOut ?? 0 } }, null, 2)}
+              </div>
+            )}
+          </div>
+
+          {/* trace id */}
+          <DetailField label="Trace ID" value="a1b2c3d4-e5f6-7890-abcd-ef1234567890" mono />
+
+          {/* view in catalog */}
+          <button onClick={() => navigate('/assets')} style={{ background: 'none', border: 'none', color: colors.gold, fontSize: 13, fontWeight: 600, cursor: 'pointer', padding: 0, fontFamily: 'inherit', textAlign: 'left' }}>View in Catalog →</button>
+        </div>
+      )}
+
+      {/* ── toast ─────────────────────────────────────────────────────── */}
+      {showToast && (
+        <div style={{ position: 'fixed', bottom: 24, right: 24, backgroundColor: '#1A1A1A', border: '1px solid rgba(212, 168, 67, 0.30)', borderRadius: 8, padding: '12px 20px', color: colors.gold, fontSize: 13, fontWeight: 600, zIndex: 2000, boxShadow: '0 4px 16px rgba(0,0,0,0.4)' }}>
+          Audit log exported to CSV
         </div>
       )}
     </div>

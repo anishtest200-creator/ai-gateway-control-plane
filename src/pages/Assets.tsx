@@ -8,6 +8,18 @@ type Tab = 'models' | 'tools' | 'agents';
 type Source = 'Foundry' | 'Bedrock' | 'Vertex' | 'OpenAI' | 'Anthropic' | 'Self-Hosted' | 'External';
 type Governance = 'full' | 'partial' | 'none';
 
+interface DetailInfo {
+  name: string;
+  provider: string;
+  source: Source;
+  endpoint: string;
+  region: string;
+  governance: Governance;
+  health: string;
+  policies: string[];
+  namespace: string;
+}
+
 // --- Styles ---
 const page: CSSProperties = { color: '#e0e0e0', fontFamily: 'inherit' };
 
@@ -211,6 +223,27 @@ const GovernanceBadge = ({ status }: { status: Governance }) => {
 function Assets() {
   const [activeTab, setActiveTab] = useState<Tab>('models');
   const [showWizard, setShowWizard] = useState<'model' | 'tool' | 'agent' | null>(null);
+  const [modelsList, setModelsList] = useState([...models]);
+  const [toolsList, setToolsList] = useState([...tools]);
+  const [agentsList, setAgentsList] = useState([...agents]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [govFilter, setGovFilter] = useState<string>('all');
+  const [sourceFilter, setSourceFilter] = useState<string>('all');
+  const [detailItem, setDetailItem] = useState<DetailInfo | null>(null);
+
+  const sourceMap: Record<string, Source> = { 'Azure AI Foundry': 'Foundry', 'AWS Bedrock': 'Bedrock', 'Google Vertex': 'Vertex', OpenAI: 'OpenAI', Anthropic: 'Anthropic', 'Self-Hosted': 'Self-Hosted' };
+  const filterItems = <T extends { governance: Governance; source: Source }>(items: T[], nameKey: keyof T) => {
+    return items.filter(item => {
+      const name = String(item[nameKey]).toLowerCase();
+      const matchesSearch = !searchQuery || name.includes(searchQuery.toLowerCase());
+      const matchesGov = govFilter === 'all' || item.governance === govFilter;
+      const matchesSource = sourceFilter === 'all' || item.source === sourceMap[sourceFilter];
+      return matchesSearch && matchesGov && matchesSource;
+    });
+  };
+  const filteredModels = filterItems(modelsList, 'model');
+  const filteredTools = filterItems(toolsList, 'tool');
+  const filteredAgents = filterItems(agentsList, 'agent');
 
   const registerLabels: Record<Tab, { label: string; wizard: 'model' | 'tool' | 'agent' }> = {
     models: { label: 'Register Model', wizard: 'model' },
@@ -258,6 +291,70 @@ function Assets() {
         </div>
       </div>
 
+      {/* Search & Filters */}
+      <div style={{ display: 'flex', gap: 10, marginBottom: 16, flexWrap: 'wrap', alignItems: 'center' }}>
+        <input
+          type="text"
+          placeholder="Search by name..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          style={{
+            minWidth: 220,
+            padding: '7px 12px',
+            borderRadius: 6,
+            border: '1px solid rgba(212, 168, 67, 0.10)',
+            backgroundColor: '#1A1A1A',
+            color: '#E8E8E8',
+            fontSize: 13,
+            fontFamily: 'inherit',
+            outline: 'none',
+          }}
+        />
+        <select
+          value={govFilter}
+          onChange={(e) => setGovFilter(e.target.value)}
+          style={{
+            padding: '7px 12px',
+            borderRadius: 6,
+            border: '1px solid rgba(212, 168, 67, 0.10)',
+            backgroundColor: '#1A1A1A',
+            color: '#E8E8E8',
+            fontSize: 13,
+            fontFamily: 'inherit',
+            cursor: 'pointer',
+            outline: 'none',
+          }}
+        >
+          <option value="all">All Governance</option>
+          <option value="full">Fully Governed</option>
+          <option value="partial">Partially Governed</option>
+          <option value="none">Ungoverned</option>
+        </select>
+        <select
+          value={sourceFilter}
+          onChange={(e) => setSourceFilter(e.target.value)}
+          style={{
+            padding: '7px 12px',
+            borderRadius: 6,
+            border: '1px solid rgba(212, 168, 67, 0.10)',
+            backgroundColor: '#1A1A1A',
+            color: '#E8E8E8',
+            fontSize: 13,
+            fontFamily: 'inherit',
+            cursor: 'pointer',
+            outline: 'none',
+          }}
+        >
+          <option value="all">All Sources</option>
+          <option value="Azure AI Foundry">Azure AI Foundry</option>
+          <option value="AWS Bedrock">AWS Bedrock</option>
+          <option value="Google Vertex">Google Vertex</option>
+          <option value="OpenAI">OpenAI</option>
+          <option value="Anthropic">Anthropic</option>
+          <option value="Self-Hosted">Self-Hosted</option>
+        </select>
+      </div>
+
       {/* Tab bar with register button */}
       <div style={tabBarRow}>
         <div style={tabBar}>
@@ -300,8 +397,8 @@ function Assets() {
                 </tr>
               </thead>
               <tbody>
-                {models.map((r, i) => (
-                  <tr key={i}>
+                {filteredModels.map((r, i) => (
+                  <tr key={i} style={{ cursor: 'pointer' }} onClick={() => setDetailItem({ name: r.model, provider: r.provider, source: r.source, endpoint: r.endpoint, region: r.region, governance: r.governance, health: r.health, policies: r.policies, namespace: 'default' })}>
                     <td style={{ ...td, fontWeight: 600, color: '#fff' }}>{r.model}</td>
                     <td style={td}>{r.provider}</td>
                     <td style={td}><SourceBadge source={r.source} /></td>
@@ -346,8 +443,8 @@ function Assets() {
                 </tr>
               </thead>
               <tbody>
-                {tools.map((r, i) => (
-                  <tr key={i}>
+                {filteredTools.map((r, i) => (
+                  <tr key={i} style={{ cursor: 'pointer' }} onClick={() => setDetailItem({ name: r.tool, provider: r.type, source: r.source, endpoint: r.endpoint, region: '—', governance: r.governance, health: r.health, policies: r.policies, namespace: r.namespace })}>
                     <td style={{ ...td, fontWeight: 600, color: '#fff' }}>{r.tool}</td>
                     <td style={td}>
                       <span style={badge('rgba(212, 168, 67, 0.1)', '#D4A843')}>{r.type}</span>
@@ -389,8 +486,8 @@ function Assets() {
                 </tr>
               </thead>
               <tbody>
-                {agents.map((r, i) => (
-                  <tr key={i}>
+                {filteredAgents.map((r, i) => (
+                  <tr key={i} style={{ cursor: 'pointer' }} onClick={() => setDetailItem({ name: r.agent, provider: r.protocol, source: r.source, endpoint: r.endpoint, region: '—', governance: r.governance, health: r.health, policies: r.policies, namespace: r.namespace })}>
                     <td style={{ ...td, fontWeight: 600, color: '#fff' }}>{r.agent}</td>
                     <td style={td}>
                       <span style={badge('rgba(212, 168, 67, 0.1)', '#D4A843')}>{r.protocol}</span>
@@ -411,15 +508,36 @@ function Assets() {
         </>
       )}
 
+      {/* Detail Panel Overlay */}
+      {detailItem && (
+        <div style={{ position: 'fixed', top: 0, right: 0, bottom: 0, width: 400, backgroundColor: '#1A1A1A', borderLeft: '1px solid rgba(212, 168, 67, 0.10)', borderTop: '3px solid #D4A843', zIndex: 1000, overflowY: 'auto', padding: 24, display: 'flex', flexDirection: 'column', gap: 16, boxShadow: '-4px 0 20px rgba(0,0,0,0.5)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ fontSize: 18, fontWeight: 700, color: '#fff' }}>{detailItem.name}</span>
+            <button onClick={() => setDetailItem(null)} style={{ background: 'none', border: 'none', color: '#999', fontSize: 20, cursor: 'pointer', padding: '0 4px', fontFamily: 'inherit', lineHeight: 1 }}>✕</button>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div><span style={{ fontSize: 11, color: '#888', textTransform: 'uppercase', letterSpacing: 0.4 }}>Provider</span><div style={{ fontSize: 13, color: '#ccc', marginTop: 2 }}>{detailItem.provider}</div></div>
+            <div><span style={{ fontSize: 11, color: '#888', textTransform: 'uppercase', letterSpacing: 0.4 }}>Source</span><div style={{ marginTop: 2 }}><SourceBadge source={detailItem.source} /></div></div>
+            <div><span style={{ fontSize: 11, color: '#888', textTransform: 'uppercase', letterSpacing: 0.4 }}>Endpoint</span><div style={{ fontSize: 13, color: '#9cdcfe', fontFamily: 'monospace', marginTop: 2 }}>{detailItem.endpoint}</div></div>
+            <div><span style={{ fontSize: 11, color: '#888', textTransform: 'uppercase', letterSpacing: 0.4 }}>Region</span><div style={{ fontSize: 13, color: '#ccc', marginTop: 2 }}>{detailItem.region}</div></div>
+            <div><span style={{ fontSize: 11, color: '#888', textTransform: 'uppercase', letterSpacing: 0.4 }}>Governance</span><div style={{ marginTop: 2 }}><GovernanceBadge status={detailItem.governance} /></div></div>
+            <div><span style={{ fontSize: 11, color: '#888', textTransform: 'uppercase', letterSpacing: 0.4 }}>Health</span><div style={{ marginTop: 2 }}><HealthBadge status={detailItem.health} /></div></div>
+            <div><span style={{ fontSize: 11, color: '#888', textTransform: 'uppercase', letterSpacing: 0.4 }}>Metrics</span><div style={{ fontSize: 13, color: '#ccc', marginTop: 2 }}>12,340 req/24h &nbsp;·&nbsp; 47ms latency</div></div>
+            <div><span style={{ fontSize: 11, color: '#888', textTransform: 'uppercase', letterSpacing: 0.4 }}>Applied Policies</span><div style={{ marginTop: 4, display: 'flex', gap: 4, flexWrap: 'wrap' }}>{detailItem.policies.map(p => <span key={p} style={policyBadge}>{p}</span>)}</div></div>
+            <div><span style={{ fontSize: 11, color: '#888', textTransform: 'uppercase', letterSpacing: 0.4 }}>Namespace</span><div style={{ fontSize: 13, color: '#9cdcfe', fontFamily: 'monospace', marginTop: 2 }}>{detailItem.namespace}</div></div>
+          </div>
+        </div>
+      )}
+
       {/* Registration Wizards */}
       {showWizard === 'model' && (
-        <RegisterModel onClose={() => setShowWizard(null)} onComplete={() => setShowWizard(null)} />
+        <RegisterModel onClose={() => setShowWizard(null)} onComplete={() => { setModelsList(prev => [...prev, { model: 'new-model', provider: 'Azure OpenAI', endpoint: 'East US', region: 'eastus', routing: 'Primary', policies: ['Rate limit'], health: 'healthy', traffic: '0 req', source: 'Foundry' as Source, governance: 'none' as Governance }]); setShowWizard(null); }} />
       )}
       {showWizard === 'tool' && (
-        <RegisterTool onClose={() => setShowWizard(null)} onComplete={() => setShowWizard(null)} />
+        <RegisterTool onClose={() => setShowWizard(null)} onComplete={() => { setToolsList(prev => [...prev, { tool: 'new-tool', type: 'REST API', endpoint: 'api.example.com', namespace: 'default', auth: 'API Key', policies: ['Rate limit'], health: 'active', invocations: '0', source: 'External' as Source, governance: 'none' as Governance }]); setShowWizard(null); }} />
       )}
       {showWizard === 'agent' && (
-        <RegisterAgent onClose={() => setShowWizard(null)} onComplete={() => setShowWizard(null)} />
+        <RegisterAgent onClose={() => setShowWizard(null)} onComplete={() => { setAgentsList(prev => [...prev, { agent: 'new-agent', protocol: 'RAPI', endpoint: 'agents.internal/new', namespace: 'default', models: 'gpt-4o', tools: '', policies: ['Rate limit'], health: 'active', source: 'Foundry' as Source, governance: 'none' as Governance }]); setShowWizard(null); }} />
       )}
     </div>
   );

@@ -8,7 +8,7 @@ interface Credential {
   type: string;
   namespace: string;
   target: string;
-  status: 'active' | 'expiring' | 'expired';
+  status: 'active' | 'expiring' | 'expired' | 'revoked';
   lastRotated: string;
   expires: string;
 }
@@ -36,7 +36,7 @@ interface HealthAlert {
 }
 
 // --- Mock Data ---
-const credentials: Credential[] = [
+const initialCredentials: Credential[] = [
   { name: 'azure-openai-eastus', type: 'API Key', namespace: 'retail-support', target: 'Azure OpenAI (East US)', status: 'active', lastRotated: '2 days ago', expires: '88 days' },
   { name: 'azure-openai-westus', type: 'API Key', namespace: 'retail-support', target: 'Azure OpenAI (West US)', status: 'active', lastRotated: '2 days ago', expires: '88 days' },
   { name: 'anthropic-prod', type: 'API Key', namespace: 'finance-analytics', target: 'Anthropic API', status: 'active', lastRotated: '14 days ago', expires: '76 days' },
@@ -303,18 +303,48 @@ const statusColors: Record<string, string> = {
   active: '#4ADE80',
   expiring: '#F59E0B',
   expired: '#EF4444',
+  revoked: '#EF4444',
 };
 
 const statusLabels: Record<string, string> = {
   active: '✓ Active',
   expiring: '⚠ Expiring',
   expired: '✗ Expired',
+  revoked: '✗ Revoked',
 };
 
 const Credentials: React.FC = () => {
   const [hoveredRow, setHoveredRow] = useState<number | null>(null);
   const [selectedCredential, setSelectedCredential] = useState<Credential | null>(null);
   const navigate = useNavigate();
+  const [credList, setCredList] = useState<Credential[]>(initialCredentials);
+  const [showAddCredential, setShowAddCredential] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [rotateMsg, setRotateMsg] = useState<string | null>(null);
+  const [editScopeMsg, setEditScopeMsg] = useState<string | null>(null);
+  const [credFormData, setCredFormData] = useState({ name: '', type: 'API Key', provider: '', namespace: 'ai-platform', expires: '' });
+
+  const filteredCreds = credList.filter(c => {
+    const matchesSearch = searchTerm === '' || c.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = statusFilter === 'all' || c.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
+
+  const handleAddCredential = () => {
+    const newCred: Credential = {
+      name: credFormData.name,
+      type: credFormData.type,
+      namespace: credFormData.namespace,
+      target: credFormData.provider,
+      status: 'active',
+      lastRotated: 'Just now',
+      expires: credFormData.expires || '90 days',
+    };
+    setCredList(prev => [...prev, newCred]);
+    setShowAddCredential(false);
+    setCredFormData({ name: '', type: 'API Key', provider: '', namespace: 'ai-platform', expires: '' });
+  };
 
   // --- Stat cards ---
   const stats: { label: string; value: number | string; color?: string }[] = [
@@ -377,6 +407,24 @@ const Credentials: React.FC = () => {
               {statusLabels[selectedCredential.status]}
             </span>
           </span>
+        </div>
+
+        {/* Action Buttons */}
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
+          <button
+            onClick={() => { setRotateMsg('Credential rotated successfully ✓'); setTimeout(() => setRotateMsg(null), 2000); }}
+            style={{ backgroundColor: 'transparent', color: '#D4A843', border: '1px solid #D4A843', borderRadius: 6, padding: '6px 16px', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}
+          >Rotate</button>
+          <button
+            onClick={() => { if (confirm('Revoke this credential?')) { setCredList(prev => prev.map(c => c.name === selectedCredential.name ? { ...c, status: 'revoked' as const } : c)); setSelectedCredential(null); } }}
+            style={{ backgroundColor: 'transparent', color: '#EF4444', border: '1px solid #EF4444', borderRadius: 6, padding: '6px 16px', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}
+          >Revoke</button>
+          <button
+            onClick={() => { setEditScopeMsg('Scope editing — coming soon'); setTimeout(() => setEditScopeMsg(null), 2000); }}
+            style={{ backgroundColor: 'transparent', color: '#D4A843', border: '1px solid #D4A843', borderRadius: 6, padding: '6px 16px', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}
+          >Edit Scope</button>
+          {rotateMsg && <span style={{ color: '#4ADE80', fontSize: 13 }}>{rotateMsg}</span>}
+          {editScopeMsg && <span style={{ color: '#D4A843', fontSize: 13 }}>{editScopeMsg}</span>}
         </div>
 
         {/* Impact Summary */}
@@ -564,7 +612,9 @@ const Credentials: React.FC = () => {
       {/* Top Action Bar */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
         <div style={{ display: 'flex', gap: 10 }}>
-          <button style={{
+          <button
+            onClick={() => setShowAddCredential(true)}
+            style={{
             backgroundColor: '#D4A843', color: '#0A0A0A', border: 'none', borderRadius: 6,
             padding: '8px 18px', fontWeight: 600, fontSize: 13, cursor: 'pointer',
           }}>
@@ -619,7 +669,7 @@ const Credentials: React.FC = () => {
         {healthAlerts.map((alert, i) => (
           <div
             key={i}
-            onClick={() => setSelectedCredential(credentials[alert.credentialIndex])}
+            onClick={() => setSelectedCredential(credList[alert.credentialIndex])}
             style={{
               ...card,
               padding: '12px 16px',
@@ -637,6 +687,26 @@ const Credentials: React.FC = () => {
         ))}
       </div>
 
+      {/* Search/Filter */}
+      <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+        <input
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          placeholder="Search credentials by name..."
+          style={{ flex: 1, backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit' }}
+        />
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          style={{ backgroundColor: '#1E1E1E', color: '#ccc', border: '1px solid rgba(212, 168, 67, 0.10)', borderRadius: 6, padding: '8px 12px', fontSize: 13, fontFamily: 'inherit' }}
+        >
+          <option value="all">All Status</option>
+          <option value="active">Active</option>
+          <option value="expiring">Expiring</option>
+          <option value="expired">Expired</option>
+        </select>
+      </div>
+
       {/* Credentials Table */}
       <div style={{ ...card, padding: 0, overflow: 'hidden' }}>
         <div style={{ padding: '16px 20px', borderBottom: '1px solid rgba(212, 168, 67, 0.10)', fontWeight: 600, fontSize: 14 }}>
@@ -652,7 +722,7 @@ const Credentials: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {credentials.map((c, i) => {
+              {filteredCreds.map((c, i) => {
                 const deps = credentialDependencies[c.name];
                 const depCount = deps ? deps.assets.length : 0;
                 return (
@@ -757,6 +827,52 @@ const Credentials: React.FC = () => {
           </div>
         </div>
       </div>
+      {/* Add Credential Modal */}
+      {showAddCredential && (
+        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+          <div style={{ backgroundColor: '#1A1A1A', borderTop: '3px solid #D4A843', borderRadius: 8, padding: 24, width: '100%', maxWidth: 500, border: '1px solid rgba(212, 168, 67, 0.10)' }}>
+            <h3 style={{ color: '#fff', fontSize: 16, fontWeight: 600, margin: '0 0 16px' }}>Add Credential</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div>
+                <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Name</label>
+                <input value={credFormData.name} onChange={e => setCredFormData(f => ({ ...f, name: e.target.value }))} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' as const }} />
+              </div>
+              <div>
+                <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Type</label>
+                <select value={credFormData.type} onChange={e => setCredFormData(f => ({ ...f, type: e.target.value }))} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit' }}>
+                  <option>API Key</option>
+                  <option>OAuth 2.0</option>
+                  <option>Managed Identity</option>
+                  <option>Service Account</option>
+                  <option>IAM Role</option>
+                  <option>Connection String</option>
+                </select>
+              </div>
+              <div>
+                <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Provider</label>
+                <input value={credFormData.provider} onChange={e => setCredFormData(f => ({ ...f, provider: e.target.value }))} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' as const }} />
+              </div>
+              <div>
+                <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Namespace</label>
+                <select value={credFormData.namespace} onChange={e => setCredFormData(f => ({ ...f, namespace: e.target.value }))} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit' }}>
+                  <option value="ai-platform">ai-platform</option>
+                  <option value="ml-inference">ml-inference</option>
+                  <option value="customer-support-ai">customer-support-ai</option>
+                  <option value="research-sandbox">research-sandbox</option>
+                </select>
+              </div>
+              <div>
+                <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Expires</label>
+                <input type="date" value={credFormData.expires} onChange={e => setCredFormData(f => ({ ...f, expires: e.target.value }))} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' as const }} />
+              </div>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 20 }}>
+              <button onClick={() => setShowAddCredential(false)} style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(212, 168, 67, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>Cancel</button>
+              <button onClick={handleAddCredential} style={{ backgroundColor: '#D4A843', color: '#0A0A0A', border: 'none', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>Create</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

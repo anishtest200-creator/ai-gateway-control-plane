@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 /* ── Mock Data ── */
-const routingRules = [
+const initialRoutes = [
   { name: 'GPT-4o Primary', source: '/v1/chat/completions (gpt-4o)', provider: 'Azure OpenAI', endpoint: 'East US', strategy: 'Primary', priority: 1, health: 'healthy', status: 'Active' },
   { name: 'GPT-4o Fallback', source: '/v1/chat/completions (gpt-4o)', provider: 'Azure OpenAI', endpoint: 'West US', strategy: 'Failover', priority: 2, health: 'healthy', status: 'Active' },
   { name: 'GPT-4o Emergency', source: '/v1/chat/completions (gpt-4o)', provider: 'OpenAI Direct', endpoint: 'api.openai.com', strategy: 'Failover', priority: 3, health: 'healthy', status: 'Standby' },
@@ -72,6 +72,40 @@ const healthLabel = (h: string) =>
 const Routing: React.FC = () => {
   const [filter, setFilter] = useState('all');
   const [hoveredRow, setHoveredRow] = useState<number | null>(null);
+  const [routes, setRoutes] = useState(initialRoutes);
+  const [showAddRoute, setShowAddRoute] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [editingRouteIndex, setEditingRouteIndex] = useState<number | null>(null);
+  const [formData, setFormData] = useState({ name: '', source: '', provider: 'Azure OpenAI', endpoint: '', strategy: 'Primary', priority: 1 });
+
+  const openAddModal = () => {
+    setEditingRouteIndex(null);
+    setFormData({ name: '', source: '', provider: 'Azure OpenAI', endpoint: '', strategy: 'Primary', priority: 1 });
+    setShowAddRoute(true);
+  };
+
+  const openEditModal = (idx: number) => {
+    const r = routes[idx];
+    setEditingRouteIndex(idx);
+    setFormData({ name: r.name, source: r.source, provider: r.provider, endpoint: r.endpoint, strategy: r.strategy, priority: r.priority ?? 1 });
+    setShowAddRoute(true);
+  };
+
+  const handleSaveRoute = () => {
+    const newRoute = { name: formData.name, source: formData.source, provider: formData.provider, endpoint: formData.endpoint, strategy: formData.strategy, priority: formData.priority as number | null, health: 'healthy', status: 'Active' };
+    if (editingRouteIndex !== null) {
+      setRoutes(prev => prev.map((r, i) => i === editingRouteIndex ? { ...r, ...newRoute } : r));
+    } else {
+      setRoutes(prev => [...prev, newRoute]);
+    }
+    setShowAddRoute(false);
+  };
+
+  const handleDeleteRoute = (idx: number) => {
+    if (confirm('Delete this route?')) {
+      setRoutes(prev => prev.filter((_, i) => i !== idx));
+    }
+  };
 
   const thStyle: React.CSSProperties = {
     textAlign: 'left',
@@ -96,8 +130,8 @@ const Routing: React.FC = () => {
   });
 
   const filtered = filter === 'all'
-    ? routingRules
-    : routingRules.filter((r) => r.provider.toLowerCase().includes(filter));
+    ? routes
+    : routes.filter((r) => r.provider.toLowerCase().includes(filter));
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
@@ -115,10 +149,12 @@ const Routing: React.FC = () => {
             cursor: 'pointer',
             fontFamily: 'inherit',
           }}
+          onClick={openAddModal}
         >
           + Add Route
         </button>
         <button
+          onClick={() => setShowImportModal(true)}
           style={{
             backgroundColor: 'transparent',
             color: '#ccc',
@@ -171,6 +207,7 @@ const Routing: React.FC = () => {
                 <th style={thStyle}>Priority</th>
                 <th style={thStyle}>Health</th>
                 <th style={thStyle}>Status</th>
+                <th style={thStyle}>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -179,7 +216,7 @@ const Routing: React.FC = () => {
                   key={r.name}
                   onMouseEnter={() => setHoveredRow(i)}
                   onMouseLeave={() => setHoveredRow(null)}
-                  style={{ cursor: 'pointer' }}
+                  style={{ cursor: 'pointer', borderLeft: hoveredRow === i ? '2px solid #D4A843' : '2px solid transparent' }}
                 >
                   <td style={{ ...tdStyle(i), color: '#D4A843', fontWeight: 600 }}>{r.name}</td>
                   <td style={tdStyle(i)}>
@@ -199,6 +236,16 @@ const Routing: React.FC = () => {
                   </td>
                   <td style={tdStyle(i)}>
                     <span style={statusPill(r.status)}>{r.status}</span>
+                  </td>
+                  <td style={tdStyle(i)}>
+                    <span
+                      onClick={(e) => { e.stopPropagation(); openEditModal(routes.indexOf(r)); }}
+                      style={{ color: '#D4A843', fontSize: 12, cursor: 'pointer', marginRight: 10 }}
+                    >Edit</span>
+                    <span
+                      onClick={(e) => { e.stopPropagation(); handleDeleteRoute(routes.indexOf(r)); }}
+                      style={{ color: '#D4A843', fontSize: 12, cursor: 'pointer' }}
+                    >Delete</span>
                   </td>
                 </tr>
               ))}
@@ -292,6 +339,64 @@ const Routing: React.FC = () => {
           </div>
         </div>
       </div>
+      {/* ── Add/Edit Route Modal ── */}
+      {showAddRoute && (
+        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+          <div style={{ backgroundColor: '#1A1A1A', borderTop: '3px solid #D4A843', borderRadius: 8, padding: 24, width: '100%', maxWidth: 500, border: '1px solid rgba(212, 168, 67, 0.10)' }}>
+            <h3 style={{ color: '#fff', fontSize: 16, fontWeight: 600, margin: '0 0 16px' }}>{editingRouteIndex !== null ? 'Edit Route' : 'Add Route'}</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div>
+                <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Rule Name</label>
+                <input value={formData.name} onChange={e => setFormData(f => ({ ...f, name: e.target.value }))} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' as const }} />
+              </div>
+              <div>
+                <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Source Pattern</label>
+                <input value={formData.source} onChange={e => setFormData(f => ({ ...f, source: e.target.value }))} placeholder="/api/v1/*" style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' as const }} />
+              </div>
+              <div>
+                <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Target Provider</label>
+                <select value={formData.provider} onChange={e => setFormData(f => ({ ...f, provider: e.target.value }))} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit' }}>
+                  <option>Azure OpenAI</option>
+                  <option>Anthropic</option>
+                  <option>Google Vertex</option>
+                  <option>OpenAI</option>
+                  <option>AWS Bedrock</option>
+                </select>
+              </div>
+              <div>
+                <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Endpoint URL</label>
+                <input value={formData.endpoint} onChange={e => setFormData(f => ({ ...f, endpoint: e.target.value }))} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' as const }} />
+              </div>
+              <div>
+                <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Strategy</label>
+                <select value={formData.strategy} onChange={e => setFormData(f => ({ ...f, strategy: e.target.value }))} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit' }}>
+                  <option>Primary</option>
+                  <option>Failover</option>
+                  <option>Load Balance</option>
+                </select>
+              </div>
+              <div>
+                <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Priority</label>
+                <input type="number" min={1} max={10} value={formData.priority} onChange={e => setFormData(f => ({ ...f, priority: Number(e.target.value) }))} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' as const }} />
+              </div>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 20 }}>
+              <button onClick={() => setShowAddRoute(false)} style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(212, 168, 67, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>Cancel</button>
+              <button onClick={handleSaveRoute} style={{ backgroundColor: '#D4A843', color: '#0A0A0A', border: 'none', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>{editingRouteIndex !== null ? 'Save Changes' : 'Create Route'}</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Import Rules Modal ── */}
+      {showImportModal && (
+        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+          <div style={{ backgroundColor: '#1A1A1A', borderTop: '3px solid #D4A843', borderRadius: 8, padding: 24, width: '100%', maxWidth: 400, border: '1px solid rgba(212, 168, 67, 0.10)', textAlign: 'center' as const }}>
+            <div style={{ fontSize: 14, color: '#E8E8E8', marginBottom: 16 }}>Import from JSON or YAML file — coming soon</div>
+            <button onClick={() => setShowImportModal(false)} style={{ backgroundColor: '#D4A843', color: '#0A0A0A', border: 'none', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>Close</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

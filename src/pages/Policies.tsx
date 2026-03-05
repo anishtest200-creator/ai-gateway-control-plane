@@ -368,12 +368,42 @@ const Policies: React.FC = () => {
   const [showSimulator, setShowSimulator] = useState(false)
   const [selectedSimPolicy, setSelectedSimPolicy] = useState<string>(policies[0]?.id ?? '')
   const [simEnabled, setSimEnabled] = useState(true)
+  const [showCreatePolicy, setShowCreatePolicy] = useState(false)
+  const [policyList, setPolicyList] = useState<Policy[]>(policies)
+  const [approvalList, setApprovalList] = useState<PendingApproval[]>(pendingApprovals)
+  const [policyFormData, setPolicyFormData] = useState({ name: '', category: 'authentication' as PolicyCategory, description: '', enforcement: 'Enforce', threshold: '' })
+
+  const handleCreatePolicy = () => {
+    const newId = 'p' + Date.now()
+    const newPolicy: Policy = {
+      id: newId,
+      name: policyFormData.name,
+      description: policyFormData.description,
+      category: policyFormData.category,
+      target: 'all-endpoints',
+      phase: 'runtime',
+      ruleCount: 1,
+      enabled: true,
+      appliedTo: 0,
+      namespace: 'global',
+      versions: [{ version: 1, date: new Date().toISOString().split('T')[0], description: 'Initial version', actor: 'current-user' }],
+      deployment: 'sandbox',
+    }
+    setPolicyList(prev => [...prev, newPolicy])
+    setPolicyStates(s => ({ ...s, [newId]: true }))
+    setShowCreatePolicy(false)
+    setPolicyFormData({ name: '', category: 'authentication', description: '', enforcement: 'Enforce', threshold: '' })
+  }
+
+  const handleApproval = (id: string, _action: 'approved' | 'rejected') => {
+    setApprovalList(prev => prev.filter(a => a.id !== id))
+  }
 
   const togglePolicy = (id: string) => setPolicyStates(s => ({ ...s, [id]: !s[id] }))
   const toggleRule = (id: string) => setRuleStates(s => ({ ...s, [id]: !s[id] }))
   const toggleGuardrail = (id: string) => setGuardrailStates(s => ({ ...s, [id]: !s[id] }))
 
-  const enabledPolicies = policies.filter(p => policyStates[p.id]).length
+  const enabledPolicies = policyList.filter(p => policyStates[p.id]).length
   const enabledGuardrails = guardrails.filter(g => guardrailStates[g.id]).length
 
   const toggleVersionHistory = (id: string) => setExpandedVersions(s => ({ ...s, [id]: !s[id] }))
@@ -395,7 +425,7 @@ const Policies: React.FC = () => {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
         {categories.map(cat => {
           const cfg = categoryConfig[cat]
-          const items = policies.filter(p => p.category === cat)
+          const items = policyList.filter(p => p.category === cat)
           if (items.length === 0) return null
           return (
             <div key={cat}>
@@ -802,7 +832,7 @@ const Policies: React.FC = () => {
           </tr>
         </thead>
         <tbody>
-          {pendingApprovals.map((a, i) => (
+          {approvalList.map((a, i) => (
             <tr
               key={a.id}
               onMouseEnter={() => setHoveredRow(`approval-${i}`)}
@@ -826,14 +856,18 @@ const Policies: React.FC = () => {
               <td style={{ padding: '10px 16px', color: colors.textDim, fontSize: 12 }}>{a.requestedAt}</td>
               <td style={{ padding: '10px 16px' }}>
                 <div style={{ display: 'flex', gap: 6 }}>
-                  <button style={{
+                  <button
+                    onClick={() => handleApproval(a.id, 'approved')}
+                    style={{
                     padding: '4px 12px', borderRadius: 4, border: 'none',
-                    backgroundColor: '#D4A843', color: '#0A0A0A', fontSize: 11,
+                    backgroundColor: 'rgba(74,222,128,0.15)', color: '#4ADE80', fontSize: 11,
                     fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
                   }}>Approve</button>
-                  <button style={{
+                  <button
+                    onClick={() => handleApproval(a.id, 'rejected')}
+                    style={{
                     padding: '4px 12px', borderRadius: 4, backgroundColor: 'transparent',
-                    border: '1px solid rgba(212, 168, 67, 0.10)', color: '#ccc', fontSize: 11,
+                    border: '1px solid rgba(239,68,68,0.3)', color: '#EF4444', fontSize: 11,
                     fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
                   }}>Reject</button>
                 </div>
@@ -856,23 +890,26 @@ const Policies: React.FC = () => {
   return (
     <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 20 }}>
       {/* Header */}
-      <div>
-        <h2 style={{ color: '#fff', fontSize: 20, fontWeight: 700, margin: 0 }}>Policy Management</h2>
-        <p style={{ color: colors.textMuted, fontSize: 13, margin: '4px 0 0' }}>
-          Configure runtime rules, asset access controls, and safety guardrails across your AI gateway.
-        </p>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16 }}>
+        <div>
+          <h2 style={{ color: '#fff', fontSize: 20, fontWeight: 700, margin: 0 }}>Policy Management</h2>
+          <p style={{ color: colors.textMuted, fontSize: 13, margin: '4px 0 0' }}>
+            Configure runtime rules, asset access controls, and safety guardrails across your AI gateway.
+          </p>
+        </div>
+        <button onClick={() => setShowCreatePolicy(true)} style={{ backgroundColor: '#D4A843', color: '#0A0A0A', border: 'none', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' }}>✚ Create Policy</button>
       </div>
 
       {/* Stats row */}
       <div style={{ display: 'flex', gap: 12 }}>
-        <StatCard accent={colors.gold} label="Runtime Rules" value={String(enabledPolicies)} sub={`of ${policies.length} enabled`} />
+        <StatCard accent={colors.gold} label="Runtime Rules" value={String(enabledPolicies)} sub={`of ${policyList.length} enabled`} />
         <StatCard accent={colors.purple} label="Asset Access Rules" value={String(accessRules.filter(r => ruleStates[r.id]).length)} sub={`of ${accessRules.length} enabled`} />
         <StatCard accent="#ef4444" label="Safety Guardrails" value={String(enabledGuardrails)} sub={`of ${guardrails.length} enabled`} />
-        <StatCard accent="#f59e0b" label="Pending Approvals" value={String(pendingApprovals.length)} sub="awaiting review" />
+        <StatCard accent="#f59e0b" label="Pending Approvals" value={String(approvalList.length)} sub="awaiting review" />
       </div>
 
       {/* Pending Approvals (always visible when there are items) */}
-      {pendingApprovals.length > 0 && (
+      {approvalList.length > 0 && (
         <div>
           <div style={sectionTitle}>Pending Approvals</div>
           {renderApprovals()}
@@ -910,7 +947,7 @@ const Policies: React.FC = () => {
                         color: colors.text, fontSize: 12, fontFamily: 'inherit',
                       }}
                     >
-                      {policies.map(p => (
+                      {policyList.map(p => (
                         <option key={p.id} value={p.id}>{p.name}</option>
                       ))}
                     </select>
@@ -922,6 +959,13 @@ const Policies: React.FC = () => {
                       {simEnabled ? 'Enable' : 'Disable'}
                     </span>
                   </div>
+                  {simEnabled && selectedSimPolicy && (
+                    <div style={{ backgroundColor: 'rgba(212, 168, 67, 0.08)', border: '1px solid rgba(212, 168, 67, 0.20)', borderRadius: 6, padding: '10px 14px', marginTop: 4 }}>
+                      <div style={{ fontSize: 12, color: colors.text, marginBottom: 4 }}>Estimated impact: <span style={{ color: colors.amber, fontWeight: 600 }}>~340 requests/hour</span> would be affected</div>
+                      <div style={{ fontSize: 12, color: colors.textMuted, marginBottom: 4 }}>Affected namespaces: <span style={{ color: colors.text }}>ai-platform, ml-inference</span></div>
+                      <div style={{ fontSize: 12, color: colors.textMuted }}>Risk level: <span style={{ color: colors.green, fontWeight: 600 }}>Low</span></div>
+                    </div>
+                  )}
                 </div>
                 {/* Results */}
                 {simResults && (
@@ -1000,6 +1044,52 @@ const Policies: React.FC = () => {
       {activeTab === 'access' && renderAccessRules()}
       {activeTab === 'guardrails' && renderGuardrails()}
       {activeTab === 'audit' && renderAuditTrail()}
+
+      {/* Create Policy Modal */}
+      {showCreatePolicy && (
+        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+          <div style={{ backgroundColor: '#1A1A1A', borderTop: '3px solid #D4A843', borderRadius: 8, padding: 24, width: '100%', maxWidth: 500, border: '1px solid rgba(212, 168, 67, 0.10)' }}>
+            <h3 style={{ color: '#fff', fontSize: 16, fontWeight: 600, margin: '0 0 16px' }}>Create Policy</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div>
+                <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Policy Name</label>
+                <input value={policyFormData.name} onChange={e => setPolicyFormData(f => ({ ...f, name: e.target.value }))} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' as const }} />
+              </div>
+              <div>
+                <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Category</label>
+                <select value={policyFormData.category} onChange={e => setPolicyFormData(f => ({ ...f, category: e.target.value as PolicyCategory }))} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit' }}>
+                  <option value="authentication">Authentication</option>
+                  <option value="rate-limits">Rate Limits</option>
+                  <option value="content-safety">Content Safety</option>
+                  <option value="routing">Routing</option>
+                  <option value="agent-execution">Agent Execution</option>
+                  <option value="credentials">Credentials</option>
+                </select>
+              </div>
+              <div>
+                <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Description</label>
+                <textarea value={policyFormData.description} onChange={e => setPolicyFormData(f => ({ ...f, description: e.target.value }))} rows={3} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit', resize: 'vertical' as const, boxSizing: 'border-box' as const }} />
+              </div>
+              <div>
+                <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Enforcement</label>
+                <select value={policyFormData.enforcement} onChange={e => setPolicyFormData(f => ({ ...f, enforcement: e.target.value }))} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit' }}>
+                  <option>Enforce</option>
+                  <option>Audit</option>
+                  <option>Disabled</option>
+                </select>
+              </div>
+              <div>
+                <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Threshold (optional)</label>
+                <input type="number" value={policyFormData.threshold} onChange={e => setPolicyFormData(f => ({ ...f, threshold: e.target.value }))} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' as const }} />
+              </div>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 20 }}>
+              <button onClick={() => setShowCreatePolicy(false)} style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(212, 168, 67, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>Cancel</button>
+              <button onClick={handleCreatePolicy} style={{ backgroundColor: '#D4A843', color: '#0A0A0A', border: 'none', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>Create Policy</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

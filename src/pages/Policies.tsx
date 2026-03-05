@@ -402,7 +402,7 @@ const Policies: React.FC = () => {
   const [createFlowCategory, setCreateFlowCategory] = useState<null | 'access' | 'runtime' | 'guardrail'>(null)
   const [policyList, setPolicyList] = useState<Policy[]>(policies)
   const [approvalList, setApprovalList] = useState<PendingApproval[]>(pendingApprovals)
-  const [policyFormData, setPolicyFormData] = useState({ name: '', category: 'authentication' as PolicyCategory, description: '', enforcement: 'Enforce', threshold: '' })
+  const [policyFormData, setPolicyFormData] = useState({ name: '', category: 'authentication' as PolicyCategory, description: '', enforcement: 'Enforce', threshold: '', target: 'all' })
 
   // Dual-path creation flow state
   const [createFlowMethod, setCreateFlowMethod] = useState<null | 'library' | 'ai'>(null)
@@ -419,6 +419,10 @@ const Policies: React.FC = () => {
     assetType: string; identities: string;
   }>({ name: '', type: 'who', description: '', assetType: 'Model', identities: '' })
   const [accessRuleAssignments, setAccessRuleAssignments] = useState<Record<string, boolean>>({})
+
+  // Policy (runtime/guardrail) 2-step creation state
+  const [policyFormStep, setPolicyFormStep] = useState(1)
+  const [policyAssignments, setPolicyAssignments] = useState<Record<string, boolean>>({})
 
   const allAssets = [
     { name: 'GPT-4o', type: 'Model', namespace: 'retail-support' },
@@ -469,16 +473,17 @@ const Policies: React.FC = () => {
 
   const handleCreatePolicy = () => {
     const newId = 'p' + Date.now()
+    const assigned = Object.entries(policyAssignments).filter(([, v]) => v).map(([k]) => k)
     const newPolicy: Policy = {
       id: newId,
       name: policyFormData.name,
       description: policyFormData.description,
       category: policyFormData.category,
-      target: 'all-endpoints',
+      target: policyFormData.target,
       phase: 'runtime',
       ruleCount: 1,
       enabled: true,
-      appliedTo: 0,
+      appliedTo: assigned.length || 0,
       namespace: 'global',
       versions: [{ version: 1, date: new Date().toISOString().split('T')[0], description: 'Initial version', actor: 'current-user' }],
       deployment: 'sandbox',
@@ -488,7 +493,9 @@ const Policies: React.FC = () => {
     setShowCreateFlow(false)
     setCreateFlowCategory(null)
     resetCreateFlowState()
-    setPolicyFormData({ name: '', category: 'authentication', description: '', enforcement: 'Enforce', threshold: '' })
+    setPolicyFormData({ name: '', category: 'authentication', description: '', enforcement: 'Enforce', threshold: '', target: 'all' })
+    setPolicyFormStep(1)
+    setPolicyAssignments({})
   }
 
   const handleApproval = (id: string, _action: 'approved' | 'rejected') => {
@@ -594,11 +601,11 @@ const Policies: React.FC = () => {
         if (input.includes('audit') || input.includes('log only')) enforcement = 'Audit'
         if (input.includes('block') || input.includes('enforce')) enforcement = 'Enforce'
 
-        setPolicyFormData({ name, category, description, enforcement, threshold })
+        setPolicyFormData({ name, category, description, enforcement, threshold, target: 'all' })
       } else if (createFlowCategory === 'guardrail') {
         let category: PolicyCategory = 'content-safety'
         let enforcement = 'block'
-        let threshold = 'all-models'
+        let target = 'model-endpoints'
         let name = 'AI-Generated Guardrail'
         const description = aiComposeInput
 
@@ -612,7 +619,7 @@ const Policies: React.FC = () => {
           category = 'authentication'
           name = 'Prompt Injection Guard'
           enforcement = 'warn'
-          threshold = 'chat-completions'
+          target = 'model-endpoints'
         } else if (input.includes('copyright') || input.includes('intellectual property')) {
           name = 'Copyright Content Filter'
           enforcement = 'log'
@@ -623,17 +630,18 @@ const Policies: React.FC = () => {
           category = 'agent-execution'
           name = 'Agent Action Monitor'
           enforcement = 'log'
-          threshold = 'agent-endpoints'
+          target = 'agent-endpoints'
         }
 
         if (input.includes('block')) enforcement = 'block'
         else if (input.includes('warn')) enforcement = 'warn'
         else if (input.includes('log') || input.includes('audit')) enforcement = 'log'
 
-        if (input.includes('chat') || input.includes('completion')) threshold = 'chat-completions'
-        else if (input.includes('agent-endpoint') || (input.includes('agent') && input.includes('endpoint'))) threshold = 'agent-endpoints'
+        if (input.includes('agent-endpoint') || (input.includes('agent') && input.includes('endpoint'))) target = 'agent-endpoints'
+        else if (input.includes('tool')) target = 'tool-endpoints'
+        else if (input.includes('namespace')) target = 'namespaces'
 
-        setPolicyFormData({ name, category, description, enforcement, threshold })
+        setPolicyFormData({ name, category, description, enforcement, threshold: '', target })
       }
 
       setAiCompiling(false)
@@ -647,6 +655,8 @@ const Policies: React.FC = () => {
     setAiCompiling(false)
     setAiCompiled(false)
     setTemplateSelected(false)
+    setPolicyFormStep(1)
+    setPolicyAssignments({})
   }
 
   /* ---- Tab: Runtime Rules ---- */
@@ -1338,13 +1348,27 @@ const Policies: React.FC = () => {
                               assetType: at.prefill.assetType ?? f.assetType,
                               identities: at.prefill.identities ?? '',
                             }))
+                          } else if (createFlowCategory === 'guardrail') {
+                            const gt = t as GuardrailTemplate
+                            const targetMap: Record<string, string> = {
+                              'all-models': 'model-endpoints', 'chat-completions': 'model-endpoints',
+                              'agent-endpoints': 'agent-endpoints', 'all-endpoints': 'all',
+                            }
+                            setPolicyFormData(f => ({
+                              ...f, name: gt.name, category: gt.prefill.category,
+                              description: gt.prefill.description,
+                              enforcement: gt.prefill.enforcement,
+                              target: targetMap[gt.prefill.threshold] ?? 'all',
+                              threshold: '',
+                            }))
                           } else {
-                            const rt = t as RuntimeRuleTemplate | GuardrailTemplate
+                            const rt = t as RuntimeRuleTemplate
                             setPolicyFormData(f => ({
                               ...f, name: rt.name, category: rt.prefill.category,
                               description: rt.prefill.description,
                               enforcement: rt.prefill.enforcement,
                               threshold: rt.prefill.threshold ?? '',
+                              target: 'all',
                             }))
                           }
                           setTemplateSelected(true)
@@ -1452,97 +1476,308 @@ const Policies: React.FC = () => {
               </div>
             )}
 
-            {/* Runtime Rule form */}
+            {/* Runtime Rule form (2-step) */}
             {createFlowCategory === 'runtime' && showFormStep && (
               <>
-                <h3 style={{ color: '#fff', fontSize: 16, fontWeight: 600, margin: '0 0 16px' }}>
-                  {aiCompiled || templateSelected ? 'Review Runtime Rule' : 'Create Runtime Rule'}
-                </h3>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                  <div>
-                    <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Policy Name</label>
-                    <input value={policyFormData.name} onChange={e => setPolicyFormData(f => ({ ...f, name: e.target.value }))} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' as const }} />
-                  </div>
-                  <div>
-                    <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Category</label>
-                    <select value={policyFormData.category} onChange={e => setPolicyFormData(f => ({ ...f, category: e.target.value as PolicyCategory }))} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit' }}>
-                      <option value="authentication">Authentication</option>
-                      <option value="rate-limits">Rate Limits</option>
-                      <option value="content-safety">Content Safety</option>
-                      <option value="routing">Routing</option>
-                      <option value="agent-execution">Agent Execution</option>
-                      <option value="credentials">Credentials</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Description</label>
-                    <textarea value={policyFormData.description} onChange={e => setPolicyFormData(f => ({ ...f, description: e.target.value }))} rows={3} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit', resize: 'vertical' as const, boxSizing: 'border-box' as const }} />
-                  </div>
-                  <div>
-                    <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Enforcement</label>
-                    <select value={policyFormData.enforcement} onChange={e => setPolicyFormData(f => ({ ...f, enforcement: e.target.value }))} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit' }}>
-                      <option>Enforce</option>
-                      <option>Audit</option>
-                      <option>Disabled</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Threshold (optional)</label>
-                    <input type="number" value={policyFormData.threshold} onChange={e => setPolicyFormData(f => ({ ...f, threshold: e.target.value }))} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' as const }} />
-                  </div>
+                {/* Step indicator */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20 }}>
+                  {['Define', 'Assign'].map((label, idx) => {
+                    const step = idx + 1
+                    const active = policyFormStep === step
+                    const done = policyFormStep > step
+                    return (
+                      <React.Fragment key={label}>
+                        {idx > 0 && <div style={{ flex: 1, height: 1, backgroundColor: done ? '#D4A843' : 'rgba(212,168,67,0.15)' }} />}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                          <span style={{
+                            width: 22, height: 22, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            fontSize: 11, fontWeight: 600,
+                            backgroundColor: active ? '#D4A843' : done ? 'rgba(212,168,67,0.25)' : '#1E1E1E',
+                            color: active ? '#0A0A0A' : done ? '#D4A843' : '#666',
+                            border: active ? 'none' : '1px solid rgba(212,168,67,0.15)',
+                          }}>{done ? '✓' : step}</span>
+                          <span style={{ fontSize: 12, color: active ? '#fff' : '#888', fontWeight: active ? 600 : 400 }}>{label}</span>
+                        </div>
+                      </React.Fragment>
+                    )
+                  })}
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, marginTop: 20 }}>
-                  <button onClick={handleFormBack} style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(212, 168, 67, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>← Back</button>
-                  <button onClick={handleCreatePolicy} style={{ backgroundColor: '#D4A843', color: '#0A0A0A', border: 'none', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>Create Runtime Rule</button>
-                </div>
+
+                {policyFormStep === 1 && (
+                  <>
+                    <h3 style={{ color: '#fff', fontSize: 16, fontWeight: 600, margin: '0 0 16px' }}>
+                      {aiCompiled || templateSelected ? 'Review Runtime Rule' : 'Create Runtime Rule'}
+                    </h3>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                      <div>
+                        <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Policy Name</label>
+                        <input value={policyFormData.name} onChange={e => setPolicyFormData(f => ({ ...f, name: e.target.value }))} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' as const }} />
+                      </div>
+                      <div>
+                        <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>
+                          Category
+                          {(templateSelected || aiCompiled) && <span style={{ color: '#888', fontSize: 11, marginLeft: 6 }}>{aiCompiled ? '(from AI)' : '(from template)'}</span>}
+                        </label>
+                        <select value={policyFormData.category} onChange={e => setPolicyFormData(f => ({ ...f, category: e.target.value as PolicyCategory }))} disabled={templateSelected || aiCompiled} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit', ...((templateSelected || aiCompiled) ? { opacity: 0.6, cursor: 'not-allowed' } : {}) }}>
+                          <option value="authentication">Authentication</option>
+                          <option value="rate-limits">Rate Limits</option>
+                          <option value="content-safety">Content Safety</option>
+                          <option value="routing">Routing</option>
+                          <option value="agent-execution">Agent Execution</option>
+                          <option value="credentials">Credentials</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Description</label>
+                        <textarea value={policyFormData.description} onChange={e => setPolicyFormData(f => ({ ...f, description: e.target.value }))} rows={3} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit', resize: 'vertical' as const, boxSizing: 'border-box' as const }} />
+                      </div>
+                      <div>
+                        <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Enforcement</label>
+                        <select value={policyFormData.enforcement} onChange={e => setPolicyFormData(f => ({ ...f, enforcement: e.target.value }))} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit' }}>
+                          <option>Enforce</option>
+                          <option>Audit</option>
+                          <option>Disabled</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Target</label>
+                        <select value={policyFormData.target} onChange={e => setPolicyFormData(f => ({ ...f, target: e.target.value }))} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit' }}>
+                          <option value="model-endpoints">Model Endpoints</option>
+                          <option value="tool-endpoints">Tool Endpoints</option>
+                          <option value="agent-endpoints">Agent Endpoints</option>
+                          <option value="namespaces">Namespaces</option>
+                          <option value="all">All</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Threshold (optional)</label>
+                        <input type="number" value={policyFormData.threshold} onChange={e => setPolicyFormData(f => ({ ...f, threshold: e.target.value }))} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' as const }} />
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, marginTop: 20 }}>
+                      <button onClick={() => { handleFormBack(); setPolicyFormStep(1) }} style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(212, 168, 67, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>← Back</button>
+                      <button disabled={!policyFormData.name} onClick={() => setPolicyFormStep(2)} style={{
+                        backgroundColor: !policyFormData.name ? '#555' : '#D4A843', color: !policyFormData.name ? '#999' : '#0A0A0A',
+                        border: 'none', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: !policyFormData.name ? 'not-allowed' : 'pointer', fontFamily: 'inherit',
+                      }}>Next: Assign →</button>
+                    </div>
+                  </>
+                )}
+
+                {policyFormStep === 2 && (() => {
+                  const typeEmojis: Record<string, string> = { Model: '🧠', Agent: '🤖', Tool: '🔧', Namespace: '🗂' }
+                  const assetTypes = ['Model', 'Agent', 'Tool', 'Namespace']
+                  const targetTypeMap: Record<string, string> = { 'model-endpoints': 'Model', 'tool-endpoints': 'Tool', 'agent-endpoints': 'Agent', 'namespaces': 'Namespace' }
+                  const filteredAssets = policyFormData.target === 'all'
+                    ? allAssets
+                    : allAssets.filter(a => a.type === targetTypeMap[policyFormData.target])
+                  const assignedCount = Object.values(policyAssignments).filter(Boolean).length
+                  return (
+                    <>
+                      <h3 style={{ color: '#fff', fontSize: 16, fontWeight: 600, margin: '0 0 4px' }}>Assign to Assets</h3>
+                      <p style={{ color: '#888', fontSize: 12, margin: '0 0 16px' }}>
+                        Select which {policyFormData.target === 'all' ? 'assets' : targetTypeMap[policyFormData.target]?.toLowerCase() + 's'} this rule applies to, or skip to apply globally.
+                      </p>
+                      <div style={{ maxHeight: 300, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 14, paddingRight: 4 }}>
+                        {assetTypes.map(aType => {
+                          const items = filteredAssets.filter(a => a.type === aType)
+                          if (items.length === 0) return null
+                          const checkedCount = items.filter(a => policyAssignments[a.name]).length
+                          return (
+                            <div key={aType}>
+                              <div style={{ fontSize: 12, color: '#888', fontWeight: 600, marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                                {typeEmojis[aType]} {aType}s ({checkedCount}/{items.length})
+                              </div>
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                                {items.map(a => {
+                                  const checked = !!policyAssignments[a.name]
+                                  return (
+                                    <label key={a.name} style={{
+                                      display: 'flex', alignItems: 'center', gap: 10, padding: '6px 10px', borderRadius: 6,
+                                      backgroundColor: checked ? 'rgba(212,168,67,0.08)' : 'transparent',
+                                      border: '1px solid ' + (checked ? 'rgba(212,168,67,0.25)' : 'rgba(212,168,67,0.06)'),
+                                      cursor: 'pointer', transition: 'all 0.15s',
+                                    }}>
+                                      <input type="checkbox" checked={checked} onChange={() => setPolicyAssignments(prev => ({ ...prev, [a.name]: !prev[a.name] }))} style={{ accentColor: '#D4A843' }} />
+                                      <span style={{ fontSize: 13, color: '#E8E8E8', flex: 1 }}>{a.name}</span>
+                                      <span style={{ fontSize: 11, color: '#666' }}>{a.namespace}</span>
+                                    </label>
+                                  )
+                                })}
+                              </div>
+                            </div>
+                          )
+                        })}
+                        {filteredAssets.length === 0 && (
+                          <div style={{ textAlign: 'center', color: '#666', fontSize: 13, padding: 20 }}>No matching assets</div>
+                        )}
+                      </div>
+                      {assignedCount > 0 && (
+                        <div style={{ marginTop: 12, padding: '8px 12px', backgroundColor: 'rgba(212,168,67,0.06)', borderRadius: 6, fontSize: 12, color: '#D4A843' }}>
+                          {assignedCount} asset{assignedCount !== 1 ? 's' : ''} selected
+                        </div>
+                      )}
+                      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, marginTop: 20 }}>
+                        <button onClick={() => setPolicyFormStep(1)} style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(212, 168, 67, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>← Back</button>
+                        <div style={{ display: 'flex', gap: 10 }}>
+                          <button onClick={() => { setPolicyAssignments({}); handleCreatePolicy() }} style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(212, 168, 67, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>Skip (apply globally)</button>
+                          <button onClick={handleCreatePolicy} style={{ backgroundColor: '#D4A843', color: '#0A0A0A', border: 'none', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
+                            {assignedCount > 0 ? `Create & Assign (${assignedCount})` : 'Create Runtime Rule'}
+                          </button>
+                        </div>
+                      </div>
+                    </>
+                  )
+                })()}
               </>
             )}
 
-            {/* Guardrail form */}
+            {/* Guardrail form (2-step) */}
             {createFlowCategory === 'guardrail' && showFormStep && (
               <>
-                <h3 style={{ color: '#fff', fontSize: 16, fontWeight: 600, margin: '0 0 16px' }}>
-                  {aiCompiled || templateSelected ? 'Review Safety Guardrail' : 'Create Safety Guardrail'}
-                </h3>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                  <div>
-                    <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Guardrail Name</label>
-                    <input value={policyFormData.name} onChange={e => setPolicyFormData(f => ({ ...f, name: e.target.value }))} placeholder="e.g. Custom PII Filter" style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' as const }} />
-                  </div>
-                  <div>
-                    <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Category</label>
-                    <select value={policyFormData.category} onChange={e => setPolicyFormData(f => ({ ...f, category: e.target.value as PolicyCategory }))} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit' }}>
-                      <option value="content-safety">Content Safety</option>
-                      <option value="authentication">Security</option>
-                      <option value="agent-execution">Agent Safety</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Description</label>
-                    <textarea value={policyFormData.description} onChange={e => setPolicyFormData(f => ({ ...f, description: e.target.value }))} rows={2} placeholder="Describe what this guardrail detects or blocks..." style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit', resize: 'vertical' as const, boxSizing: 'border-box' as const }} />
-                  </div>
-                  <div>
-                    <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Severity</label>
-                    <select value={policyFormData.enforcement} onChange={e => setPolicyFormData(f => ({ ...f, enforcement: e.target.value }))} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit' }}>
-                      <option value="block">🛑 Block — prevent request/response</option>
-                      <option value="warn">⚠️ Warn — flag but allow through</option>
-                      <option value="log">📝 Log — record for audit only</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Target</label>
-                    <select value={policyFormData.threshold} onChange={e => setPolicyFormData(f => ({ ...f, threshold: e.target.value }))} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit' }}>
-                      <option value="all-models">All Models</option>
-                      <option value="chat-completions">Chat Completions</option>
-                      <option value="agent-endpoints">Agent Endpoints</option>
-                      <option value="all-endpoints">All Endpoints</option>
-                    </select>
-                  </div>
+                {/* Step indicator */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20 }}>
+                  {['Define', 'Assign'].map((label, idx) => {
+                    const step = idx + 1
+                    const active = policyFormStep === step
+                    const done = policyFormStep > step
+                    return (
+                      <React.Fragment key={label}>
+                        {idx > 0 && <div style={{ flex: 1, height: 1, backgroundColor: done ? '#D4A843' : 'rgba(212,168,67,0.15)' }} />}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                          <span style={{
+                            width: 22, height: 22, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            fontSize: 11, fontWeight: 600,
+                            backgroundColor: active ? '#D4A843' : done ? 'rgba(212,168,67,0.25)' : '#1E1E1E',
+                            color: active ? '#0A0A0A' : done ? '#D4A843' : '#666',
+                            border: active ? 'none' : '1px solid rgba(212,168,67,0.15)',
+                          }}>{done ? '✓' : step}</span>
+                          <span style={{ fontSize: 12, color: active ? '#fff' : '#888', fontWeight: active ? 600 : 400 }}>{label}</span>
+                        </div>
+                      </React.Fragment>
+                    )
+                  })}
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, marginTop: 20 }}>
-                  <button onClick={handleFormBack} style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(212, 168, 67, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>← Back</button>
-                  <button onClick={handleCreatePolicy} style={{ backgroundColor: '#D4A843', color: '#0A0A0A', border: 'none', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>Create Guardrail</button>
-                </div>
+
+                {policyFormStep === 1 && (
+                  <>
+                    <h3 style={{ color: '#fff', fontSize: 16, fontWeight: 600, margin: '0 0 16px' }}>
+                      {aiCompiled || templateSelected ? 'Review Safety Guardrail' : 'Create Safety Guardrail'}
+                    </h3>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                      <div>
+                        <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Guardrail Name</label>
+                        <input value={policyFormData.name} onChange={e => setPolicyFormData(f => ({ ...f, name: e.target.value }))} placeholder="e.g. Custom PII Filter" style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' as const }} />
+                      </div>
+                      <div>
+                        <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>
+                          Category
+                          {(templateSelected || aiCompiled) && <span style={{ color: '#888', fontSize: 11, marginLeft: 6 }}>{aiCompiled ? '(from AI)' : '(from template)'}</span>}
+                        </label>
+                        <select value={policyFormData.category} onChange={e => setPolicyFormData(f => ({ ...f, category: e.target.value as PolicyCategory }))} disabled={templateSelected || aiCompiled} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit', ...((templateSelected || aiCompiled) ? { opacity: 0.6, cursor: 'not-allowed' } : {}) }}>
+                          <option value="content-safety">Content Safety</option>
+                          <option value="authentication">Security</option>
+                          <option value="agent-execution">Agent Safety</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Description</label>
+                        <textarea value={policyFormData.description} onChange={e => setPolicyFormData(f => ({ ...f, description: e.target.value }))} rows={2} placeholder="Describe what this guardrail detects or blocks..." style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit', resize: 'vertical' as const, boxSizing: 'border-box' as const }} />
+                      </div>
+                      <div>
+                        <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Severity</label>
+                        <select value={policyFormData.enforcement} onChange={e => setPolicyFormData(f => ({ ...f, enforcement: e.target.value }))} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit' }}>
+                          <option value="block">🛑 Block — prevent request/response</option>
+                          <option value="warn">⚠️ Warn — flag but allow through</option>
+                          <option value="log">📝 Log — record for audit only</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Target</label>
+                        <select value={policyFormData.target} onChange={e => setPolicyFormData(f => ({ ...f, target: e.target.value }))} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit' }}>
+                          <option value="model-endpoints">Model Endpoints</option>
+                          <option value="tool-endpoints">Tool Endpoints</option>
+                          <option value="agent-endpoints">Agent Endpoints</option>
+                          <option value="namespaces">Namespaces</option>
+                          <option value="all">All</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, marginTop: 20 }}>
+                      <button onClick={() => { handleFormBack(); setPolicyFormStep(1) }} style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(212, 168, 67, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>← Back</button>
+                      <button disabled={!policyFormData.name} onClick={() => setPolicyFormStep(2)} style={{
+                        backgroundColor: !policyFormData.name ? '#555' : '#D4A843', color: !policyFormData.name ? '#999' : '#0A0A0A',
+                        border: 'none', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: !policyFormData.name ? 'not-allowed' : 'pointer', fontFamily: 'inherit',
+                      }}>Next: Assign →</button>
+                    </div>
+                  </>
+                )}
+
+                {policyFormStep === 2 && (() => {
+                  const typeEmojis: Record<string, string> = { Model: '🧠', Agent: '🤖', Tool: '🔧', Namespace: '🗂' }
+                  const assetTypes = ['Model', 'Agent', 'Tool', 'Namespace']
+                  const targetTypeMap: Record<string, string> = { 'model-endpoints': 'Model', 'tool-endpoints': 'Tool', 'agent-endpoints': 'Agent', 'namespaces': 'Namespace' }
+                  const filteredAssets = policyFormData.target === 'all'
+                    ? allAssets
+                    : allAssets.filter(a => a.type === targetTypeMap[policyFormData.target])
+                  const assignedCount = Object.values(policyAssignments).filter(Boolean).length
+                  return (
+                    <>
+                      <h3 style={{ color: '#fff', fontSize: 16, fontWeight: 600, margin: '0 0 4px' }}>Assign to Assets</h3>
+                      <p style={{ color: '#888', fontSize: 12, margin: '0 0 16px' }}>
+                        Select which {policyFormData.target === 'all' ? 'assets' : targetTypeMap[policyFormData.target]?.toLowerCase() + 's'} this guardrail applies to, or skip to apply globally.
+                      </p>
+                      <div style={{ maxHeight: 300, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 14, paddingRight: 4 }}>
+                        {assetTypes.map(aType => {
+                          const items = filteredAssets.filter(a => a.type === aType)
+                          if (items.length === 0) return null
+                          const checkedCount = items.filter(a => policyAssignments[a.name]).length
+                          return (
+                            <div key={aType}>
+                              <div style={{ fontSize: 12, color: '#888', fontWeight: 600, marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                                {typeEmojis[aType]} {aType}s ({checkedCount}/{items.length})
+                              </div>
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                                {items.map(a => {
+                                  const checked = !!policyAssignments[a.name]
+                                  return (
+                                    <label key={a.name} style={{
+                                      display: 'flex', alignItems: 'center', gap: 10, padding: '6px 10px', borderRadius: 6,
+                                      backgroundColor: checked ? 'rgba(212,168,67,0.08)' : 'transparent',
+                                      border: '1px solid ' + (checked ? 'rgba(212,168,67,0.25)' : 'rgba(212,168,67,0.06)'),
+                                      cursor: 'pointer', transition: 'all 0.15s',
+                                    }}>
+                                      <input type="checkbox" checked={checked} onChange={() => setPolicyAssignments(prev => ({ ...prev, [a.name]: !prev[a.name] }))} style={{ accentColor: '#D4A843' }} />
+                                      <span style={{ fontSize: 13, color: '#E8E8E8', flex: 1 }}>{a.name}</span>
+                                      <span style={{ fontSize: 11, color: '#666' }}>{a.namespace}</span>
+                                    </label>
+                                  )
+                                })}
+                              </div>
+                            </div>
+                          )
+                        })}
+                        {filteredAssets.length === 0 && (
+                          <div style={{ textAlign: 'center', color: '#666', fontSize: 13, padding: 20 }}>No matching assets</div>
+                        )}
+                      </div>
+                      {assignedCount > 0 && (
+                        <div style={{ marginTop: 12, padding: '8px 12px', backgroundColor: 'rgba(212,168,67,0.06)', borderRadius: 6, fontSize: 12, color: '#D4A843' }}>
+                          {assignedCount} asset{assignedCount !== 1 ? 's' : ''} selected
+                        </div>
+                      )}
+                      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, marginTop: 20 }}>
+                        <button onClick={() => setPolicyFormStep(1)} style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(212, 168, 67, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>← Back</button>
+                        <div style={{ display: 'flex', gap: 10 }}>
+                          <button onClick={() => { setPolicyAssignments({}); handleCreatePolicy() }} style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(212, 168, 67, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>Skip (apply globally)</button>
+                          <button onClick={handleCreatePolicy} style={{ backgroundColor: '#D4A843', color: '#0A0A0A', border: 'none', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
+                            {assignedCount > 0 ? `Create & Assign (${assignedCount})` : 'Create Guardrail'}
+                          </button>
+                        </div>
+                      </div>
+                    </>
+                  )
+                })()}
               </>
             )}
 

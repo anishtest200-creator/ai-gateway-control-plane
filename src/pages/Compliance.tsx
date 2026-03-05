@@ -210,6 +210,8 @@ const Compliance: React.FC = () => {
   const [activeFramework, setActiveFramework] = useState('soc2')
   const [hoveredRow, setHoveredRow] = useState<string | null>(null)
   const [hoveredEvent, setHoveredEvent] = useState<number | null>(null)
+  const [compToast, setCompToast] = useState<string | null>(null)
+  const showToast = (msg: string) => { setCompToast(msg); setTimeout(() => setCompToast(null), 3000); }
 
   const fw = frameworks.find((f) => f.key === activeFramework)!
   const score = computeScore(fw.controls)
@@ -222,6 +224,7 @@ const Compliance: React.FC = () => {
 
   /* ── render ── */
   return (
+    <>
     <div style={{ padding: 32, maxWidth: 1280, margin: '0 auto' }}>
       {/* ── Header ── */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24 }}>
@@ -245,6 +248,7 @@ const Compliance: React.FC = () => {
               fontSize: 13,
               cursor: 'pointer',
             }}
+            onClick={() => showToast('✓ Evidence pack generated — downloading ZIP')}
           >
             Generate Evidence Pack
           </button>
@@ -259,6 +263,7 @@ const Compliance: React.FC = () => {
               fontSize: 13,
               cursor: 'pointer',
             }}
+            onClick={() => showToast('✓ Compliance report exported to PDF')}
           >
             Export Report
           </button>
@@ -509,6 +514,12 @@ const Compliance: React.FC = () => {
         </div>
       </div>
     </div>
+      {compToast && (
+        <div style={{ position: 'fixed', bottom: 24, right: 24, backgroundColor: '#1A1A1A', border: '1px solid #D4A843', borderRadius: 8, padding: '12px 20px', color: '#D4A843', fontSize: 13, fontWeight: 600, zIndex: 1001, boxShadow: '0 4px 12px rgba(0,0,0,0.5)' }}>
+          {compToast}
+        </div>
+      )}
+    </>
   )
 }
 

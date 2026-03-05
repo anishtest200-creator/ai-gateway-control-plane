@@ -586,7 +586,7 @@ const Layout: React.FC<LayoutProps> = ({ onSignOut }) => {
               </div>
             )}
           </div>
-          <button className={styles.topBarIconBtn} title="Settings">
+          <button className={styles.topBarIconBtn} title="Settings" onClick={() => navigate('/')}>
             <Settings24Regular style={{ fontSize: 18 }} />
           </button>
           <button
@@ -651,10 +651,10 @@ const Layout: React.FC<LayoutProps> = ({ onSignOut }) => {
             })}
           </nav>
           <div className={styles.sidebarFooter}>
-            <button className={styles.sidebarFooterItem} onClick={() => window.open('/docs', '_blank')}>
+            <button className={styles.sidebarFooterItem} onClick={() => { onSignOut?.(); setTimeout(() => window.location.href = '/docs', 100); }}>
               <DocumentText24Regular style={{ fontSize: 16 }} /> Docs
             </button>
-            <button className={styles.sidebarFooterItem} onClick={() => window.open('/docs', '_blank')}>
+            <button className={styles.sidebarFooterItem} onClick={() => { onSignOut?.(); setTimeout(() => window.location.href = '/docs', 100); }}>
               <PlugConnected24Regular style={{ fontSize: 16 }} /> API Reference
             </button>
             <button className={styles.sidebarFooterItem} onClick={() => window.open('https://github.com/anishta_microsoft/ai-gateway-control-plane/issues', '_blank')}>

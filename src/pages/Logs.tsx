@@ -288,6 +288,7 @@ const Logs: React.FC = () => {
             cursor: 'pointer',
             transition: 'all 0.15s',
           }}
+          onClick={() => { /* mock refresh — data already static */ }}
         >
           Refresh
         </button>

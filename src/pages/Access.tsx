@@ -438,11 +438,24 @@ const Access: React.FC = () => {
   const [requestSearch, setRequestSearch] = useState('')
   const [requestStatusFilter, setRequestStatusFilter] = useState('all')
   const [auditSearch, setAuditSearch] = useState('')
+  const [requests, setRequests] = useState(accessRequests)
+  const [showInvite, setShowInvite] = useState(false)
+  const [inviteEmail, setInviteEmail] = useState('')
+  const [inviteRole, setInviteRole] = useState('Viewer')
+  const [inviteNs, setInviteNs] = useState('platform')
+  const [actionFeedback, setActionFeedback] = useState<string | null>(null)
 
   const users = consumers.filter(c => c.type === 'user')
   const services = consumers.filter(c => c.type === 'application' || c.type === 'service-principal')
   const apiKeyConsumers = consumers.filter(c => c.apiKeyPrefix)
-  const pendingRequests = accessRequests.filter(r => r.status === 'pending')
+  const pendingRequests = requests.filter(r => r.status === 'pending')
+
+  const showFeedback = (msg: string) => { setActionFeedback(msg); setTimeout(() => setActionFeedback(null), 2500); }
+
+  const handleRequestAction = (id: string, action: 'approved' | 'denied') => {
+    setRequests(prev => prev.map(r => r.id === id ? { ...r, status: action, reviewedBy: 'anishta@microsoft.com', reviewedAt: new Date().toISOString() } : r))
+    showFeedback(action === 'approved' ? '✓ Request approved' : '✗ Request denied')
+  }
 
   /* --- filtered lists --- */
   const filteredUsers = users.filter(c => {
@@ -457,7 +470,7 @@ const Access: React.FC = () => {
     return matchSearch && matchStatus
   })
 
-  const filteredRequests = accessRequests.filter(r => {
+  const filteredRequests = requests.filter(r => {
     const matchSearch = !requestSearch || r.requesterName.toLowerCase().includes(requestSearch.toLowerCase()) || r.targetName.toLowerCase().includes(requestSearch.toLowerCase())
     const matchStatus = requestStatusFilter === 'all' || r.status === requestStatusFilter
     return matchSearch && matchStatus
@@ -491,6 +504,7 @@ const Access: React.FC = () => {
   }
 
   return (
+    <>
     <div style={{ color: colors.text, display: 'flex', flexDirection: 'column', gap: 20 }}>
 
       {/* --------- HEADER STATS ROW --------- */}
@@ -499,7 +513,7 @@ const Access: React.FC = () => {
         <StatCard label="Service Identities" value={services.length} accent={colors.purple} />
         <StatCard label="API Keys" value={apiKeyConsumers.length} accent={colors.amber} />
         <StatCard label="Pending Requests" value={pendingRequests.length} accent={pendingRequests.length > 0 ? colors.amber : colors.green} />
-        <button style={{ ...primaryBtn, alignSelf: 'center', whiteSpace: 'nowrap' }}>
+        <button style={{ ...primaryBtn, alignSelf: 'center', whiteSpace: 'nowrap' }} onClick={() => setShowInvite(true)}>
           + Invite User
         </button>
       </div>
@@ -608,9 +622,9 @@ const Access: React.FC = () => {
                 </div>
               </div>
               <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
-                <button style={secondaryBtn}>Copy Endpoint</button>
-                <button style={{ ...secondaryBtn, color: colors.amber, borderColor: colors.amber }}>Rotate</button>
-                <button style={{ ...secondaryBtn, color: colors.red, borderColor: colors.red }}>Revoke</button>
+                <button style={secondaryBtn} onClick={() => { navigator.clipboard?.writeText(`https://gateway.azure.com/v1/${c.namespace}`); showFeedback('✓ Endpoint copied to clipboard'); }}>Copy Endpoint</button>
+                <button style={{ ...secondaryBtn, color: colors.amber, borderColor: colors.amber }} onClick={() => showFeedback('✓ API key rotated — new key issued')}>Rotate</button>
+                <button style={{ ...secondaryBtn, color: colors.red, borderColor: colors.red }} onClick={() => { if (confirm(`Revoke API key ${c.apiKeyPrefix}... for ${c.displayName}?`)) showFeedback('✓ API key revoked'); }}>Revoke</button>
               </div>
             </div>
           ))}
@@ -656,8 +670,8 @@ const Access: React.FC = () => {
                     </div>
                     {r.status === 'pending' && (
                       <div style={{ display: 'flex', gap: 8 }}>
-                        <button style={primaryBtn}>Approve</button>
-                        <button style={{ ...secondaryBtn, color: colors.red, borderColor: colors.red }}>Deny</button>
+                        <button style={primaryBtn} onClick={() => handleRequestAction(r.id, 'approved')}>Approve</button>
+                        <button style={{ ...secondaryBtn, color: colors.red, borderColor: colors.red }} onClick={() => handleRequestAction(r.id, 'denied')}>Deny</button>
                       </div>
                     )}
                   </div>
@@ -718,6 +732,49 @@ const Access: React.FC = () => {
         </div>
       )}
     </div>
+
+      {/* --------- INVITE USER MODAL --------- */}
+      {showInvite && (
+        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}
+          onClick={(e) => { if (e.target === e.currentTarget) setShowInvite(false); }}>
+          <div style={{ backgroundColor: '#1A1A1A', borderRadius: 12, padding: 24, width: 400, borderTop: `3px solid ${colors.gold}` }}>
+            <h3 style={{ margin: '0 0 16px', color: '#fff', fontSize: 16 }}>Invite User</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div>
+                <div style={{ fontSize: 12, color: '#999', marginBottom: 4 }}>Email</div>
+                <input value={inviteEmail} onChange={e => setInviteEmail(e.target.value)} placeholder="user@contoso.com"
+                  style={{ width: '100%', boxSizing: 'border-box', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', borderRadius: 6, padding: '8px 12px', color: '#E8E8E8', fontSize: 13 }} />
+              </div>
+              <div>
+                <div style={{ fontSize: 12, color: '#999', marginBottom: 4 }}>Role</div>
+                <select value={inviteRole} onChange={e => setInviteRole(e.target.value)}
+                  style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', borderRadius: 6, padding: '8px 12px', color: '#E8E8E8', fontSize: 13 }}>
+                  <option>Viewer</option><option>Editor</option><option>Admin</option>
+                </select>
+              </div>
+              <div>
+                <div style={{ fontSize: 12, color: '#999', marginBottom: 4 }}>Namespace</div>
+                <select value={inviteNs} onChange={e => setInviteNs(e.target.value)}
+                  style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', borderRadius: 6, padding: '8px 12px', color: '#E8E8E8', fontSize: 13 }}>
+                  <option value="platform">platform</option><option value="research">research</option><option value="customer-support">customer-support</option><option value="finance">finance</option>
+                </select>
+              </div>
+              <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 8 }}>
+                <button onClick={() => setShowInvite(false)} style={secondaryBtn}>Cancel</button>
+                <button onClick={() => { setShowInvite(false); setInviteEmail(''); showFeedback(`✓ Invitation sent to ${inviteEmail || 'user'}`); }} style={primaryBtn}>Send Invite</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* --------- FEEDBACK TOAST --------- */}
+      {actionFeedback && (
+        <div style={{ position: 'fixed', bottom: 24, right: 24, backgroundColor: '#1A1A1A', border: `1px solid ${colors.gold}`, borderRadius: 8, padding: '12px 20px', color: colors.gold, fontSize: 13, fontWeight: 600, zIndex: 1001, boxShadow: '0 4px 12px rgba(0,0,0,0.5)' }}>
+          {actionFeedback}
+        </div>
+      )}
+    </>
   )
 }
 

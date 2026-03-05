@@ -1173,6 +1173,7 @@ const Observability: React.FC = () => {
                 fontWeight: 600,
                 cursor: 'pointer',
               }}
+              onClick={() => { setToastMsg('Chargeback report exported to CSV'); setTimeout(() => setToastMsg(null), 3000); }}
             >
               Export Chargeback CSV
             </button>
@@ -1187,6 +1188,7 @@ const Observability: React.FC = () => {
                 fontWeight: 600,
                 cursor: 'pointer',
               }}
+              onClick={() => { setToastMsg('PDF report exported'); setTimeout(() => setToastMsg(null), 3000); }}
             >
               Export PDF Report
             </button>

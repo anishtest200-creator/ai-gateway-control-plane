@@ -497,7 +497,7 @@ const Policies: React.FC = () => {
                                       border: `1px solid ${colors.border}`, color: colors.textMuted, fontSize: 10,
                                       fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', marginLeft: 8,
                                       whiteSpace: 'nowrap',
-                                    }}>↩ Rollback</button>
+                                    }} onClick={() => alert(`Rolled back to ${v.version}`)}>↩ Rollback</button>
                                   )}
                                 </div>
                               ))}
@@ -1007,7 +1007,7 @@ const Policies: React.FC = () => {
                         padding: '6px 16px', borderRadius: 6, border: 'none',
                         backgroundColor: colors.gold, color: '#0A0A0A', fontSize: 12,
                         fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
-                      }}>Apply Change</button>
+                      }} onClick={() => { setShowSimulator(false); alert('✓ Policy change applied'); }}>Apply Change</button>
                       <button
                         onClick={() => setShowSimulator(false)}
                         style={{

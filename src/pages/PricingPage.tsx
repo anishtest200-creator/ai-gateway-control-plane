@@ -1336,6 +1336,7 @@ const PricingPage: FC<PricingPageProps> = ({ onLogin, onSignup }) => {
         </button>
         <button
           style={btnOutline}
+          onClick={() => alert('Contact sales@azure-ai-gateway.com for Enterprise pricing')}
           onMouseEnter={(e) => {
             e.currentTarget.style.borderColor = C.white;
             e.currentTarget.style.transform = 'translateY(-2px)';

@@ -689,7 +689,7 @@ const Namespaces: React.FC = () => {
               padding: '6px 14px', borderRadius: 6, border: '1px solid rgba(212, 168, 67, 0.3)',
               backgroundColor: 'rgba(212, 168, 67, 0.1)', color: colors.gold,
               fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
-            }}>
+            }} onClick={() => alert('Navigate to Secrets page to add a credential scoped to this namespace')}>
               + Add Credential
             </button>
           </div>

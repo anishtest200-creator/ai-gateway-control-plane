@@ -324,6 +324,8 @@ const Credentials: React.FC = () => {
   const [rotateMsg, setRotateMsg] = useState<string | null>(null);
   const [editScopeMsg, setEditScopeMsg] = useState<string | null>(null);
   const [credFormData, setCredFormData] = useState({ name: '', type: 'API Key', provider: '', namespace: 'ai-platform', expires: '' });
+  const [credToast, setCredToast] = useState<string | null>(null);
+  const showCredToast = (msg: string) => { setCredToast(msg); setTimeout(() => setCredToast(null), 3000); };
 
   const filteredCreds = credList.filter(c => {
     const matchesSearch = searchTerm === '' || c.name.toLowerCase().includes(searchTerm.toLowerCase());
@@ -572,7 +574,7 @@ const Credentials: React.FC = () => {
               <button style={{
                 backgroundColor: '#EF4444', color: '#fff', border: 'none', borderRadius: 6,
                 padding: '8px 18px', fontWeight: 600, fontSize: 13, cursor: 'pointer', whiteSpace: 'nowrap',
-              }}>
+              }} onClick={() => { if (confirm('Revoke this credential immediately? All dependent assets will be affected.')) { showCredToast('✓ Credential revoked'); setSelectedCredential(null); } }}>
                 Revoke Immediately
               </button>
               <span style={{ color: '#EF4444', fontSize: 12 }}>
@@ -583,7 +585,7 @@ const Credentials: React.FC = () => {
               <button style={{
                 backgroundColor: '#7a5c00', color: '#fff', border: 'none', borderRadius: 6,
                 padding: '8px 18px', fontWeight: 600, fontSize: 13, cursor: 'pointer', whiteSpace: 'nowrap',
-              }}>
+              }} onClick={() => showCredToast('✓ Credential rotated — all references updated')}>
                 Rotate & Update References
               </button>
               <span style={{ color: '#D4A843', fontSize: 12 }}>
@@ -594,7 +596,7 @@ const Credentials: React.FC = () => {
               <button style={{
                 backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(212, 168, 67, 0.10)', borderRadius: 6,
                 padding: '8px 18px', fontWeight: 600, fontSize: 13, cursor: 'pointer', whiteSpace: 'nowrap',
-              }}>
+              }} onClick={() => showCredToast(`✓ Alert sent to ${d.namespaces.length} namespace admin${d.namespaces.length !== 1 ? 's' : ''}`)}>
                 Notify Stakeholders
               </button>
               <span style={{ color: '#999', fontSize: 12 }}>
@@ -623,7 +625,7 @@ const Credentials: React.FC = () => {
           <button style={{
             backgroundColor: 'transparent', color: '#F59E0B', border: '1px solid #f5a623',
             borderRadius: 6, padding: '8px 18px', fontWeight: 600, fontSize: 13, cursor: 'pointer',
-          }}>
+          }} onClick={() => showCredToast('✓ All expiring credentials rotated')}>
             Rotate All Expiring
           </button>
         </div>
@@ -871,6 +873,11 @@ const Credentials: React.FC = () => {
               <button onClick={handleAddCredential} style={{ backgroundColor: '#D4A843', color: '#0A0A0A', border: 'none', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>Create</button>
             </div>
           </div>
+        </div>
+      )}
+      {credToast && (
+        <div style={{ position: 'fixed', bottom: 24, right: 24, backgroundColor: '#1A1A1A', border: '1px solid #D4A843', borderRadius: 8, padding: '12px 20px', color: '#D4A843', fontSize: 13, fontWeight: 600, zIndex: 1001, boxShadow: '0 4px 12px rgba(0,0,0,0.5)' }}>
+          {credToast}
         </div>
       )}
     </div>

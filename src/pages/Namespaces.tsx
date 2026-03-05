@@ -435,7 +435,6 @@ const Namespaces: React.FC = () => {
   const [formName, setFormName] = useState('')
   const [formEnv, setFormEnv] = useState<'production' | 'staging' | 'development' | 'sandbox'>('production')
   const [formDesc, setFormDesc] = useState('')
-  const [formBudget, setFormBudget] = useState('')
   const [formOwner, setFormOwner] = useState('')
   const [showAddMember, setShowAddMember] = useState(false)
   const [newMemberEmail, setNewMemberEmail] = useState('')
@@ -453,14 +452,12 @@ const Namespaces: React.FC = () => {
       setFormName(ns.displayName)
       setFormEnv(ns.environment)
       setFormDesc(ns.description)
-      setFormBudget('')
       setFormOwner(ns.owner)
     } else {
       setEditingNs(null)
       setFormName('')
       setFormEnv('production')
       setFormDesc('')
-      setFormBudget('')
       setFormOwner('')
     }
     setShowCreateModal(true)
@@ -1232,10 +1229,6 @@ const Namespaces: React.FC = () => {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
               <label style={{ fontSize: 12, color: colors.textMuted }}>Description</label>
               <textarea value={formDesc} onChange={(e) => setFormDesc(e.target.value)} rows={3} style={{ padding: '8px 12px', borderRadius: 6, border: `1px solid ${colors.border}`, backgroundColor: '#111', color: colors.text, fontSize: 13, fontFamily: 'inherit', outline: 'none', resize: 'vertical' }} />
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-              <label style={{ fontSize: 12, color: colors.textMuted }}>Token Budget</label>
-              <input type="number" value={formBudget} onChange={(e) => setFormBudget(e.target.value)} placeholder="e.g. 100000" style={{ padding: '8px 12px', borderRadius: 6, border: `1px solid ${colors.border}`, backgroundColor: '#111', color: colors.text, fontSize: 13, fontFamily: 'inherit', outline: 'none' }} />
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
               <label style={{ fontSize: 12, color: colors.textMuted }}>Owner</label>

@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom'
 /* ------------------------------------------------------------------ */
 
 type PolicyCategory = 'authentication' | 'credentials' | 'rate-limits' | 'content-safety' | 'routing' | 'agent-execution'
-type AccessRuleType = 'role-based' | 'namespace-access' | 'domain-access'
+type AccessRuleType = 'who' | 'where'
 
 interface PolicyVersion {
   version: number
@@ -181,17 +181,15 @@ const policies: Policy[] = _basePolicies.map(p => ({
 }))
 
 const accessRules: AssetAccessRule[] = [
-  { id: 'ar1', name: 'Model Invoke RBAC', description: 'Only users with AI-Developer or ML-Engineer role can invoke GPT-4 class models.', type: 'role-based', assetType: 'Model', namespace: 'global', enabled: true, config: { allowedRoles: ['AI-Developer', 'ML-Engineer', 'Admin'] } },
-  { id: 'ar2', name: 'Tool Execute Permissions', description: 'Restrict tool execution to service principals and managed identities only.', type: 'role-based', assetType: 'Tool', namespace: 'production', enabled: true, config: { allowedRoles: ['ServicePrincipal', 'ManagedIdentity'] } },
-  { id: 'ar3', name: 'Agent Operator Role', description: 'Only Agent-Operator and Admin roles can invoke or configure production agents.', type: 'role-based', assetType: 'Agent', namespace: 'production', enabled: true, config: { allowedRoles: ['Agent-Operator', 'Admin'] } },
-  { id: 'ar4', name: 'Read-Only Analyst Access', description: 'Analyst role can query models but cannot modify configurations or deploy.', type: 'role-based', assetType: 'Model', namespace: 'global', enabled: true, config: { allowedRoles: ['Analyst'] } },
-  { id: 'ar5', name: 'Cross-Namespace Model Import', description: 'Allow staging namespace to import and use models from production namespace.', type: 'namespace-access', assetType: 'Model', namespace: 'staging', enabled: true, config: { allowedNamespaces: ['production'] } },
-  { id: 'ar6', name: 'Agent Sharing Policy', description: 'Restrict agent imports to approved partner and production namespaces only.', type: 'namespace-access', assetType: 'Agent', namespace: 'global', enabled: true, config: { allowedNamespaces: ['partners', 'production'] } },
-  { id: 'ar7', name: 'Sandbox Isolation', description: 'Sandbox namespace cannot access production or staging models, tools, or agents.', type: 'namespace-access', assetType: 'Model', namespace: 'sandbox', enabled: true, config: { allowedNamespaces: ['sandbox', 'dev'] } },
-  { id: 'ar8', name: 'Tool Catalog Sharing', description: 'Allow all namespaces to discover shared tools but restrict execution to approved ones.', type: 'namespace-access', assetType: 'Tool', namespace: 'global', enabled: true, config: { allowedNamespaces: ['production', 'staging', 'dev'] } },
-  { id: 'ar9', name: 'Internal Domain Only', description: 'Restrict all model invocations to requests originating from @contoso.com domain.', type: 'domain-access', assetType: 'Model', namespace: 'global', enabled: true, config: { allowedDomains: ['contoso.com', 'contoso.onmicrosoft.com'] } },
-  { id: 'ar10', name: 'Partner Domain Access', description: 'Allow partner domains to invoke shared tools in the partners namespace.', type: 'domain-access', assetType: 'Tool', namespace: 'partners', enabled: true, config: { allowedDomains: ['partner-a.com', 'partner-b.com'] } },
-  { id: 'ar11', name: 'Agent Access by Domain', description: 'Only users from engineering domains can invoke data-pipeline agents.', type: 'domain-access', assetType: 'Agent', namespace: 'production', enabled: true, config: { allowedDomains: ['eng.contoso.com'] } },
+  { id: 'ar1', name: 'Model Invoke RBAC', description: 'Only users with AI-Developer or ML-Engineer role can invoke GPT-4 class models.', type: 'who', assetType: 'Model', namespace: 'global', enabled: true, config: { identities: ['AI-Developer', 'ML-Engineer', 'Admin'] } },
+  { id: 'ar2', name: 'Tool Execute Permissions', description: 'Restrict tool execution to service principals and managed identities only.', type: 'who', assetType: 'Tool', namespace: 'production', enabled: true, config: { identities: ['ServicePrincipal', 'ManagedIdentity'] } },
+  { id: 'ar3', name: 'Agent Operator Role', description: 'Only Agent-Operator and Admin roles can invoke or configure production agents.', type: 'who', assetType: 'Agent', namespace: 'production', enabled: true, config: { identities: ['Agent-Operator', 'Admin'] } },
+  { id: 'ar4', name: 'Read-Only Analyst Access', description: 'Analyst role can query models but cannot modify configurations or deploy.', type: 'who', assetType: 'Model', namespace: 'global', enabled: true, config: { identities: ['Analyst'] } },
+  { id: 'ar5', name: 'Internal Domain Only', description: 'Restrict all model invocations to identities from @contoso.com domain.', type: 'who', assetType: 'Model', namespace: 'global', enabled: true, config: { identities: ['contoso.com', 'contoso.onmicrosoft.com'] } },
+  { id: 'ar6', name: 'Cross-Namespace Model Import', description: 'Allow staging namespace to import and use models from production namespace.', type: 'where', assetType: 'Model', namespace: 'staging', enabled: true, config: { allowedNamespaces: ['production'] } },
+  { id: 'ar7', name: 'Agent Sharing Policy', description: 'Restrict agent imports to approved partner and production namespaces only.', type: 'where', assetType: 'Agent', namespace: 'global', enabled: true, config: { allowedNamespaces: ['partners', 'production'] } },
+  { id: 'ar8', name: 'Sandbox Isolation', description: 'Sandbox namespace cannot access production or staging models, tools, or agents.', type: 'where', assetType: 'Model', namespace: 'sandbox', enabled: true, config: { allowedNamespaces: ['sandbox', 'dev'] } },
+  { id: 'ar9', name: 'Tool Catalog Sharing', description: 'Allow all namespaces to discover shared tools but restrict execution to approved ones.', type: 'where', assetType: 'Tool', namespace: 'global', enabled: true, config: { allowedNamespaces: ['production', 'staging', 'dev'] } },
 ]
 
 const guardrails: RAIGuardrail[] = [
@@ -295,9 +293,8 @@ const categoryConfig: Record<PolicyCategory, { label: string; color: string; bg:
 }
 
 const accessRuleConfig: Record<AccessRuleType, { label: string; color: string; bg: string; icon: string; desc: string }> = {
-  'role-based': { label: 'Role-Based Access', color: '#c084fc', bg: '#2d1a4d', icon: '🔑', desc: 'Control access by user or service principal roles' },
-  'namespace-access': { label: 'Namespace Access', color: '#4ade80', bg: '#1a3a2a', icon: '🛡', desc: 'Control which namespaces can share and import assets' },
-  'domain-access': { label: 'Domain Access', color: '#38bdf8', bg: '#1a2d3d', icon: '🌐', desc: 'Restrict access by identity domain or tenant' },
+  'who': { label: 'Who Can Access', color: '#c084fc', bg: '#2d1a4d', icon: '🔑', desc: 'Control access by roles, groups, service principals, or domains' },
+  'where': { label: 'Where It\'s Accessible', color: '#4ade80', bg: '#1a3a2a', icon: '🛡', desc: 'Control which namespaces can share, import, and use assets' },
 }
 
 const severityConfig: Record<'block' | 'warn' | 'log', { color: string; bg: string; label: string }> = {
@@ -362,8 +359,8 @@ const Policies: React.FC = () => {
   const [accessRuleList, setAccessRuleList] = useState<AssetAccessRule[]>(accessRules)
   const [accessRuleForm, setAccessRuleForm] = useState<{
     name: string; type: AccessRuleType; description: string; namespace: string;
-    assetType: string; roles: string; namespaces: string; domains: string;
-  }>({ name: '', type: 'role-based', description: '', namespace: 'global', assetType: 'Model', roles: '', namespaces: '', domains: '' })
+    assetType: string; identities: string; allowedNamespaces: string;
+  }>({ name: '', type: 'who', description: '', namespace: 'global', assetType: 'Model', identities: '', allowedNamespaces: '' })
   const [accessRuleAssignments, setAccessRuleAssignments] = useState<Record<string, boolean>>({})
 
   const allAssets = [
@@ -385,9 +382,8 @@ const Policies: React.FC = () => {
   const handleCreateAccessRule = () => {
     const f = accessRuleForm
     const configMap: Record<AccessRuleType, Record<string, unknown>> = {
-      'role-based': { allowedRoles: f.roles.split(',').map(s => s.trim()).filter(Boolean) },
-      'namespace-access': { allowedNamespaces: f.namespaces.split(',').map(s => s.trim()).filter(Boolean) },
-      'domain-access': { allowedDomains: f.domains.split(',').map(s => s.trim()).filter(Boolean) },
+      'who': { identities: f.identities.split(',').map(s => s.trim()).filter(Boolean) },
+      'where': { allowedNamespaces: f.allowedNamespaces.split(',').map(s => s.trim()).filter(Boolean) },
     }
     const newRule: AssetAccessRule = {
       id: 'ar' + Date.now(), name: f.name, description: f.description, type: f.type,
@@ -399,7 +395,7 @@ const Policies: React.FC = () => {
     setShowCreateFlow(false)
     setCreateFlowCategory(null)
     setAccessRuleStep(1)
-    setAccessRuleForm({ name: '', type: 'role-based', description: '', namespace: 'global', assetType: 'Model', roles: '', namespaces: '', domains: '' })
+    setAccessRuleForm({ name: '', type: 'who', description: '', namespace: 'global', assetType: 'Model', identities: '', allowedNamespaces: '' })
     setAccessRuleAssignments({})
     void assigned // assignment data would be sent to backend
   }
@@ -601,30 +597,21 @@ const Policies: React.FC = () => {
     const detailStyle: CSSProperties = { color: colors.textDim, fontSize: 11 }
 
     switch (rule.type) {
-      case 'role-based':
+      case 'who':
         return (
           <span style={detailStyle}>
-            Allowed roles:{' '}
-            {(cfg.allowedRoles as string[]).map(role => (
-              <span key={role} style={badge('rgba(192,132,252,0.12)', '#c084fc')}>{role}</span>
+            Allowed identities:{' '}
+            {(cfg.identities as string[]).map(id => (
+              <span key={id} style={badge('rgba(192,132,252,0.12)', '#c084fc')}>{id}</span>
             ))}
           </span>
         )
-      case 'namespace-access':
+      case 'where':
         return (
           <span style={detailStyle}>
             Allowed namespaces:{' '}
             {(cfg.allowedNamespaces as string[]).map(ns => (
               <span key={ns} style={badge('rgba(74,222,128,0.12)', '#4ade80')}>{ns}</span>
-            ))}
-          </span>
-        )
-      case 'domain-access':
-        return (
-          <span style={detailStyle}>
-            Allowed domains:{' '}
-            {(cfg.allowedDomains as string[]).map(d => (
-              <span key={d} style={badge('rgba(56,189,248,0.12)', '#38bdf8')}>{d}</span>
             ))}
           </span>
         )
@@ -1228,25 +1215,18 @@ const Policies: React.FC = () => {
                           </select>
                         </div>
                       </div>
-                      {accessRuleForm.type === 'role-based' && (
+                      {accessRuleForm.type === 'who' && (
                         <div>
-                          <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Allowed Roles <span style={{ color: '#666' }}>(comma-separated)</span></label>
-                          <input value={accessRuleForm.roles} onChange={e => setAccessRuleForm(f => ({ ...f, roles: e.target.value }))} placeholder="e.g. AI-Developer, ML-Engineer, Admin" style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' as const }} />
-                          {accessRuleForm.roles && <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginTop: 6 }}>{accessRuleForm.roles.split(',').map(r => r.trim()).filter(Boolean).map(r => <span key={r} style={badge('rgba(192,132,252,0.12)', '#c084fc')}>{r}</span>)}</div>}
+                          <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Allowed Identities <span style={{ color: '#666' }}>(roles, groups, domains — comma-separated)</span></label>
+                          <input value={accessRuleForm.identities} onChange={e => setAccessRuleForm(f => ({ ...f, identities: e.target.value }))} placeholder="e.g. AI-Developer, ML-Engineer, contoso.com" style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' as const }} />
+                          {accessRuleForm.identities && <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginTop: 6 }}>{accessRuleForm.identities.split(',').map(r => r.trim()).filter(Boolean).map(r => <span key={r} style={badge('rgba(192,132,252,0.12)', '#c084fc')}>{r}</span>)}</div>}
                         </div>
                       )}
-                      {accessRuleForm.type === 'namespace-access' && (
+                      {accessRuleForm.type === 'where' && (
                         <div>
                           <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Allowed Namespaces <span style={{ color: '#666' }}>(comma-separated)</span></label>
-                          <input value={accessRuleForm.namespaces} onChange={e => setAccessRuleForm(f => ({ ...f, namespaces: e.target.value }))} placeholder="e.g. production, staging" style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' as const }} />
-                          {accessRuleForm.namespaces && <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginTop: 6 }}>{accessRuleForm.namespaces.split(',').map(n => n.trim()).filter(Boolean).map(n => <span key={n} style={badge('rgba(74,222,128,0.12)', '#4ade80')}>{n}</span>)}</div>}
-                        </div>
-                      )}
-                      {accessRuleForm.type === 'domain-access' && (
-                        <div>
-                          <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Allowed Domains <span style={{ color: '#666' }}>(comma-separated)</span></label>
-                          <input value={accessRuleForm.domains} onChange={e => setAccessRuleForm(f => ({ ...f, domains: e.target.value }))} placeholder="e.g. contoso.com, partner-a.com" style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' as const }} />
-                          {accessRuleForm.domains && <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginTop: 6 }}>{accessRuleForm.domains.split(',').map(d => d.trim()).filter(Boolean).map(d => <span key={d} style={badge('rgba(56,189,248,0.12)', '#38bdf8')}>{d}</span>)}</div>}
+                          <input value={accessRuleForm.allowedNamespaces} onChange={e => setAccessRuleForm(f => ({ ...f, allowedNamespaces: e.target.value }))} placeholder="e.g. production, staging" style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' as const }} />
+                          {accessRuleForm.allowedNamespaces && <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginTop: 6 }}>{accessRuleForm.allowedNamespaces.split(',').map(n => n.trim()).filter(Boolean).map(n => <span key={n} style={badge('rgba(74,222,128,0.12)', '#4ade80')}>{n}</span>)}</div>}
                         </div>
                       )}
                     </div>

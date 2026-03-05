@@ -730,7 +730,7 @@ const Policies: React.FC = () => {
                                       border: `1px solid ${colors.border}`, color: colors.textMuted, fontSize: 10,
                                       fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', marginLeft: 8,
                                       whiteSpace: 'nowrap',
-                                    }} onClick={() => alert(`Rolled back to ${v.version}`)}>↩ Rollback</button>
+                                    }} onClick={() => navigate('/')}>↩ Rollback</button>
                                   )}
                                 </div>
                               ))}

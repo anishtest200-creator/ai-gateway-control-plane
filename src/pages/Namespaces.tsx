@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import type { CSSProperties } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -425,6 +426,7 @@ const sectionTitle: CSSProperties = {
 type TabKey = 'all' | 'managed' | 'personal'
 
 const Namespaces: React.FC = () => {
+  const navigate = useNavigate()
   const [search, setSearch] = useState('')
   const [activeTab, setActiveTab] = useState<TabKey>('all')
   const [selectedNs, setSelectedNs] = useState<Namespace | null>(null)
@@ -742,7 +744,7 @@ const Namespaces: React.FC = () => {
               padding: '6px 14px', borderRadius: 6, border: '1px solid rgba(129, 140, 248, 0.3)',
               backgroundColor: 'rgba(129, 140, 248, 0.1)', color: colors.gold,
               fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
-            }} onClick={() => alert('Navigate to Secrets page to add a credential scoped to this namespace')}>
+            }} onClick={() => navigate('/credentials')}>
               + Add Credential
             </button>
           </div>

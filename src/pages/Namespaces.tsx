@@ -706,6 +706,24 @@ const Namespaces: React.FC = () => {
 
   return (
     <div style={{ color: colors.text, display: 'flex', flexDirection: 'column', gap: 20 }}>
+      {/* Stat cards (matches Access page) */}
+      <div style={{ display: 'flex', gap: 14, alignItems: 'stretch' }}>
+        {[
+          { label: 'Namespaces', value: nsList.length, color: colors.gold },
+          { label: 'Managed', value: managedCount, color: colors.purple },
+          { label: 'Personal', value: personalCount, color: colors.blue },
+          { label: 'Total Assets', value: nsList.reduce((s, n) => s + n.totalAssets, 0), color: colors.green },
+        ].map((s) => (
+          <div key={s.label} style={{ backgroundColor: colors.card, border: `1px solid ${colors.border}`, borderRadius: 8, padding: 16, flex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: s.color, display: 'inline-block', flexShrink: 0 }} />
+              <span style={{ color: colors.textMuted, fontSize: 12 }}>{s.label}</span>
+            </div>
+            <span style={{ color: '#fff', fontSize: 28, fontWeight: 700, lineHeight: 1.1 }}>{s.value}</span>
+          </div>
+        ))}
+      </div>
+
       {/* Toolbar */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -729,24 +747,6 @@ const Namespaces: React.FC = () => {
         }}>
           + Create Namespace
         </button>
-      </div>
-
-      {/* Stat cards (matches Access page) */}
-      <div style={{ display: 'flex', gap: 14, alignItems: 'stretch' }}>
-        {[
-          { label: 'Namespaces', value: nsList.length, color: colors.gold },
-          { label: 'Managed', value: managedCount, color: colors.purple },
-          { label: 'Personal', value: personalCount, color: colors.blue },
-          { label: 'Total Assets', value: nsList.reduce((s, n) => s + n.totalAssets, 0), color: colors.green },
-        ].map((s) => (
-          <div key={s.label} style={{ backgroundColor: colors.card, border: `1px solid ${colors.border}`, borderRadius: 8, padding: 16, flex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: s.color, display: 'inline-block', flexShrink: 0 }} />
-              <span style={{ color: colors.textMuted, fontSize: 12 }}>{s.label}</span>
-            </div>
-            <span style={{ color: '#fff', fontSize: 28, fontWeight: 700, lineHeight: 1.1 }}>{s.value}</span>
-          </div>
-        ))}
       </div>
 
       {/* Tabs */}

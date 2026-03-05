@@ -396,12 +396,6 @@ const navItems: NavItem[] = [
     activeIcon: <People24Filled />,
   },
   {
-    path: '/compliance',
-    label: 'Compliance',
-    icon: <Shield24Regular />,
-    activeIcon: <Shield24Filled />,
-  },
-  {
     path: '/test-console',
     label: 'Playground',
     icon: <Play24Regular />,
@@ -420,7 +414,6 @@ const pageTitles: Record<string, string> = {
   '/logs': 'Audit Log',
   '/namespaces': 'Namespaces',
   '/access': 'Access Control',
-  '/compliance': 'Compliance',
   '/test-console': 'Playground',
 };
 
@@ -435,7 +428,6 @@ const pageSubtitles: Record<string, string> = {
   '/logs': 'Complete request and response audit trail',
   '/namespaces': 'Team boundaries, quotas, and isolation policies',
   '/access': 'Roles, permissions, and identity management',
-  '/compliance': 'Framework mapping and evidence generation',
   '/test-console': 'Test routing rules and policy enforcement live',
 };
 

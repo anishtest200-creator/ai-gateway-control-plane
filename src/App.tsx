@@ -16,7 +16,6 @@ import Observability from './pages/Observability'
 import Logs from './pages/Logs'
 import Namespaces from './pages/Namespaces'
 import Access from './pages/Access'
-import Compliance from './pages/Compliance'
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -49,7 +48,6 @@ function App() {
         <Route path="logs" element={<Logs />} />
         <Route path="namespaces" element={<Namespaces />} />
         <Route path="access" element={<Access />} />
-        <Route path="compliance" element={<Compliance />} />
         <Route path="test-console" element={<TestConsole />} />
       </Route>
     </Routes>

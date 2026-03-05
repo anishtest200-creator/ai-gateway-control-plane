@@ -106,7 +106,7 @@ export default function GovernanceDashboard() {
   const severityColor: Record<string, string> = { critical: colors.red, warning: colors.amber, info: colors.blue }
 
   return (
-    <div style={{ padding: 24, maxWidth: 1280, margin: '0 auto' }}>
+    <div style={{ padding: 24 }}>
 
       {/* ═══════════════════════════════════════════════════════════ */}
       {/* 1. QUICK START                                              */}

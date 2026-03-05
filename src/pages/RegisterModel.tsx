@@ -513,27 +513,6 @@ function RegisterModel({ onClose, onComplete }: { onClose: () => void; onComplet
 
   // Step 2
   const renderEndpointStep = () => {
-    const credSelect = (key: 'bedrockCredential' | 'vertexCredential' | 'openaiCredential' | 'anthropicCredential' | 'customCredential', allowNone = false) => (
-      <div style={fieldGroup}>
-        <label style={label}>Credential</label>
-        <select style={select} value={form[key]} onChange={(e) => {
-          const val = e.target.value;
-          if (val === '__new') { setShowInlineCred(key); } else { set(key, val); }
-        }}>
-          <option value="">Select credential…</option>
-          {allowNone && <option value="none">None</option>}
-          {allCredentialOptions.map((c) => <option key={c} value={c}>{c}</option>)}
-          <option value="__new">+ Add new credential</option>
-        </select>
-        {showInlineCred === key && (
-          <InlineCredentialForm
-            onSave={(name) => { setDynamicCredentials(prev => [...prev, name]); set(key, name); setShowInlineCred(null); }}
-            onCancel={() => { set(key, '' as FormData[typeof key]); setShowInlineCred(null); }}
-          />
-        )}
-      </div>
-    );
-
     return (
       <>
         <div style={title}>Configure model endpoint</div>
@@ -590,7 +569,6 @@ function RegisterModel({ onClose, onComplete }: { onClose: () => void; onComplet
               <label style={label}>Display Name</label>
               <input style={input} value={form.bedrockDisplayName} onChange={(e) => set('bedrockDisplayName', e.target.value)} />
             </div>
-            {credSelect('bedrockCredential')}
           </>
         )}
 
@@ -616,7 +594,6 @@ function RegisterModel({ onClose, onComplete }: { onClose: () => void; onComplet
                 <option value="gemini-1.0-pro">gemini-1.0-pro</option>
               </select>
             </div>
-            {credSelect('vertexCredential')}
           </>
         )}
 
@@ -634,7 +611,6 @@ function RegisterModel({ onClose, onComplete }: { onClose: () => void; onComplet
               <label style={label}>API Base URL</label>
               <input style={input} value={form.openaiBaseUrl} onChange={(e) => set('openaiBaseUrl', e.target.value)} />
             </div>
-            {credSelect('openaiCredential')}
           </>
         )}
 
@@ -652,7 +628,6 @@ function RegisterModel({ onClose, onComplete }: { onClose: () => void; onComplet
               <label style={label}>API Base URL</label>
               <input style={input} value={form.anthropicBaseUrl} onChange={(e) => set('anthropicBaseUrl', e.target.value)} />
             </div>
-            {credSelect('anthropicCredential')}
           </>
         )}
 
@@ -677,7 +652,6 @@ function RegisterModel({ onClose, onComplete }: { onClose: () => void; onComplet
                 <option value="custom">Custom</option>
               </select>
             </div>
-            {credSelect('customCredential', true)}
           </>
         )}
       </>

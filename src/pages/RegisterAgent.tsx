@@ -590,23 +590,6 @@ function RegisterAgent({ onClose, onComplete }: { onClose: () => void; onComplet
 
   // Step 2 — Configure Endpoint
   const renderEndpointStep = () => {
-    const credSelect = (key: 'bedrockCredential' | 'vertexCredential') => (
-      <div style={fieldGroup}>
-        <label style={label}>Credential</label>
-        <select style={select} value={form[key]} onChange={(e) => { if (e.target.value === '__new') { setShowInlineCred(key); } else { set(key, e.target.value); } }}>
-          <option value="">Select credential…</option>
-          {allCredentialOptions.map((c) => <option key={c} value={c}>{c}</option>)}
-          <option value="__new">+ Add new credential</option>
-        </select>
-        {showInlineCred === key && (
-          <InlineCredentialForm
-            onSave={(name) => { setDynamicCredentials(prev => [...prev, name]); set(key, name); setShowInlineCred(null); }}
-            onCancel={() => { set(key, ''); setShowInlineCred(null); }}
-          />
-        )}
-      </div>
-    );
-
     return (
       <>
         <div style={title}>Configure agent endpoint</div>
@@ -675,7 +658,6 @@ function RegisterAgent({ onClose, onComplete }: { onClose: () => void; onComplet
               <label style={label}>Display Name</label>
               <input style={input} value={form.bedrockDisplayName} onChange={(e) => set('bedrockDisplayName', e.target.value)} />
             </div>
-            {credSelect('bedrockCredential')}
           </>
         )}
 
@@ -702,7 +684,6 @@ function RegisterAgent({ onClose, onComplete }: { onClose: () => void; onComplet
               <label style={label}>Display Name</label>
               <input style={input} value={form.vertexDisplayName} onChange={(e) => set('vertexDisplayName', e.target.value)} />
             </div>
-            {credSelect('vertexCredential')}
           </>
         )}
 

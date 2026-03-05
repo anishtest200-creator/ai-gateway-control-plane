@@ -314,7 +314,7 @@ const card: CSSProperties = {
   backgroundColor: colors.card,
   border: `1px solid ${colors.border}`,
   borderRadius: 8,
-  padding: 16,
+  padding: 14,
 }
 
 const badge = (bg: string, fg: string): CSSProperties => ({
@@ -509,9 +509,11 @@ const Namespaces: React.FC = () => {
       { emoji: '💡', label: 'Skills', count: ns.assetCount.skills },
     ]
 
+    const peopleCount = ns.members.length + ns.serviceIdentities.length
+
     return (
       <div style={{ color: colors.text, display: 'flex', flexDirection: 'column', gap: 20 }}>
-        {/* Header */}
+        {/* Header with inline description */}
         <div>
           <button
             onClick={() => setSelectedNs(null)}
@@ -523,10 +525,10 @@ const Namespaces: React.FC = () => {
           >
             ← Namespaces
           </button>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: 8 }}>
             <span style={{
               width: 44, height: 44, borderRadius: 10, backgroundColor: tc.bg,
-              display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 22,
+              display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, flexShrink: 0,
             }}>
               {tc.icon}
             </span>
@@ -543,25 +545,21 @@ const Namespaces: React.FC = () => {
                 <span style={{ color: colors.textDim, fontSize: 12 }}>Owner: {ns.owner}</span>
                 <span style={{ color: colors.textDim, fontSize: 12 }}>Created: {ns.createdAt}</span>
               </div>
+              <div style={{ fontSize: 13, color: colors.textMuted, lineHeight: 1.5, marginTop: 6 }}>{ns.description}</div>
             </div>
           </div>
         </div>
 
-        {/* Description */}
-        <div style={card}>
-          <div style={{ fontSize: 12, fontWeight: 600, color: colors.textMuted, textTransform: 'uppercase', letterSpacing: 0.3, marginBottom: 6 }}>
-            Description
-          </div>
-          <div style={{ fontSize: 13, color: colors.text, lineHeight: 1.5 }}>{ns.description}</div>
-        </div>
-
-        {/* Stats grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 12 }}>
-          {statItems.map(s => (
-            <div key={s.label} style={{ ...card, textAlign: 'center' }}>
-              <div style={{ fontSize: 28, fontWeight: 700, color: s.color, lineHeight: 1.1 }}>{s.value}</div>
-              <div style={{ fontSize: 12, color: colors.textMuted, marginTop: 4 }}>{s.label}</div>
-            </div>
+        {/* Inline stat row */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+          {statItems.map((s, i) => (
+            <React.Fragment key={s.label}>
+              {i > 0 && <span style={{ color: colors.textDim, fontSize: 12 }}>·</span>}
+              <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: 4 }}>
+                <span style={{ fontSize: 18, fontWeight: 700, color: s.color }}>{s.value}</span>
+                <span style={{ fontSize: 12, color: colors.textMuted }}>{s.label}</span>
+              </span>
+            </React.Fragment>
           ))}
         </div>
 
@@ -587,13 +585,13 @@ const Namespaces: React.FC = () => {
           </div>
         </div>
 
-        {/* Members section */}
+        {/* People & Identities section */}
         <div>
           <div style={sectionHeader}>
             <div style={sectionTitle}>
               <span style={{ fontSize: 16 }}>👥</span>
-              <span>Members</span>
-              <span style={badge('rgba(167, 139, 250, 0.15)', colors.purple)}>{ns.members.length}</span>
+              <span>People &amp; Identities</span>
+              <span style={badge('rgba(167, 139, 250, 0.15)', colors.purple)}>{peopleCount}</span>
             </div>
             <button onClick={() => setShowAddMember(!showAddMember)} style={{
               padding: '6px 14px', borderRadius: 6, border: '1px solid rgba(212, 168, 67, 0.3)',
@@ -629,40 +627,37 @@ const Namespaces: React.FC = () => {
                 )
               })}
             </div>
+            {ns.serviceIdentities.length > 0 && (
+              <>
+                <div style={{ fontSize: 11, fontWeight: 600, color: colors.textDim, textTransform: 'uppercase', letterSpacing: 0.5, marginTop: 12, marginBottom: 8 }}>Service Identities</div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {ns.serviceIdentities.map(si => (
+                    <div key={si.name} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '6px 0', borderBottom: `1px solid ${colors.border}` }}>
+                      <span style={{ fontFamily: 'monospace', fontSize: 12, color: '#9cdcfe', fontWeight: 500 }}>{si.name}</span>
+                      <span style={{ color: colors.textMuted, fontSize: 12 }}>{si.purpose}</span>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
           </div>
         </div>
 
-        {/* Service Identities section */}
-        {ns.serviceIdentities.length > 0 && (
-          <div>
-            <div style={sectionHeader}>
-              <div style={sectionTitle}>
-                <span style={{ fontSize: 16 }}>🤖</span>
-                <span>Service Identities</span>
-                <span style={badge('rgba(245,158,11,0.15)', colors.amber)}>{ns.serviceIdentities.length}</span>
-              </div>
-            </div>
-            <div style={card}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                {ns.serviceIdentities.map(si => (
-                  <div key={si.name} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '6px 0', borderBottom: `1px solid ${colors.border}` }}>
-                    <span style={{ fontFamily: 'monospace', fontSize: 12, color: '#9cdcfe', fontWeight: 500 }}>{si.name}</span>
-                    <span style={{ color: colors.textMuted, fontSize: 12 }}>{si.purpose}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Policies section */}
+        {/* Policies & Credentials section */}
         <div>
           <div style={sectionHeader}>
             <div style={sectionTitle}>
               <span style={{ fontSize: 16 }}>🛡</span>
-              <span>Policies</span>
-              <span style={badge('rgba(74, 222, 128, 0.15)', colors.green)}>{ns.policies.length}</span>
+              <span>Policies &amp; Credentials</span>
+              <span style={badge('rgba(74, 222, 128, 0.15)', colors.green)}>{ns.policies.length + ns.credentials.length}</span>
             </div>
+            <button style={{
+              padding: '6px 14px', borderRadius: 6, border: '1px solid rgba(212, 168, 67, 0.3)',
+              backgroundColor: 'rgba(212, 168, 67, 0.1)', color: colors.gold,
+              fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
+            }} onClick={() => alert('Navigate to Secrets page to add a credential scoped to this namespace')}>
+              + Add Credential
+            </button>
           </div>
           <div style={card}>
             {ns.policies.length > 0 ? (
@@ -674,26 +669,7 @@ const Namespaces: React.FC = () => {
             ) : (
               <span style={{ color: colors.textDim, fontStyle: 'italic', fontSize: 13 }}>No policies configured</span>
             )}
-          </div>
-        </div>
-
-        {/* Credentials section */}
-        <div>
-          <div style={sectionHeader}>
-            <div style={sectionTitle}>
-              <span style={{ fontSize: 16 }}>🔑</span>
-              <span>Credentials</span>
-              <span style={badge('rgba(248,113,113,0.15)', '#f87171')}>{ns.credentials.length}</span>
-            </div>
-            <button style={{
-              padding: '6px 14px', borderRadius: 6, border: '1px solid rgba(212, 168, 67, 0.3)',
-              backgroundColor: 'rgba(212, 168, 67, 0.1)', color: colors.gold,
-              fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
-            }} onClick={() => alert('Navigate to Secrets page to add a credential scoped to this namespace')}>
-              + Add Credential
-            </button>
-          </div>
-          <div style={card}>
+            <div style={{ fontSize: 11, fontWeight: 600, color: colors.textDim, textTransform: 'uppercase', letterSpacing: 0.5, marginTop: 12, marginBottom: 8 }}>Credentials</div>
             {ns.credentials.length > 0 ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {ns.credentials.map(cr => {
@@ -744,7 +720,7 @@ const Namespaces: React.FC = () => {
               color: colors.text, fontSize: 13, fontFamily: 'inherit', outline: 'none',
             }}
           />
-          <span style={{ color: colors.textMuted, fontSize: 13 }}>{filtered.length} namespaces</span>
+          <span style={{ color: colors.textMuted, fontSize: 13 }}>{filtered.length} result{filtered.length !== 1 ? 's' : ''}</span>
         </div>
         <button onClick={() => openCreateModal()} style={{
           padding: '8px 18px', borderRadius: 6, border: 'none',
@@ -753,6 +729,24 @@ const Namespaces: React.FC = () => {
         }}>
           + Create Namespace
         </button>
+      </div>
+
+      {/* Compact stats */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '0 2px' }}>
+        {[
+          { label: 'namespaces', value: nsList.length, color: colors.gold },
+          { label: 'managed', value: managedCount, color: colors.purple },
+          { label: 'personal', value: personalCount, color: colors.blue },
+          { label: 'total assets', value: nsList.reduce((s, n) => s + n.totalAssets, 0), color: colors.green },
+        ].map((s, i) => (
+          <React.Fragment key={s.label}>
+            {i > 0 && <span style={{ color: colors.textDim, fontSize: 12 }}>·</span>}
+            <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: 4 }}>
+              <span style={{ fontSize: 18, fontWeight: 700, color: s.color }}>{s.value}</span>
+              <span style={{ fontSize: 12, color: colors.textMuted }}>{s.label}</span>
+            </span>
+          </React.Fragment>
+        ))}
       </div>
 
       {/* Tabs */}
@@ -783,12 +777,12 @@ const Namespaces: React.FC = () => {
           const ec = envConfig[ns.environment]
           const isHovered = hoveredCard === ns.id
 
-          const assetItems: { emoji: string; label: string; count: number }[] = [
-            { emoji: '🧠', label: 'models', count: ns.assetCount.models },
-            { emoji: '🔧', label: 'tools', count: ns.assetCount.tools },
-            { emoji: '🖥', label: 'MCP', count: ns.assetCount.mcpServers },
-            { emoji: '🤖', label: 'agents', count: ns.assetCount.agents },
-            { emoji: '💡', label: 'skills', count: ns.assetCount.skills },
+          const assetParts = [
+            { label: 'models', count: ns.assetCount.models, color: colors.blue },
+            { label: 'tools', count: ns.assetCount.tools, color: colors.green },
+            { label: 'MCP', count: ns.assetCount.mcpServers, color: colors.amber },
+            { label: 'agents', count: ns.assetCount.agents, color: colors.purple },
+            { label: 'skills', count: ns.assetCount.skills, color: '#f87171' },
           ].filter(a => a.count > 0)
 
           return (
@@ -805,28 +799,20 @@ const Namespaces: React.FC = () => {
                 borderColor: isHovered ? 'rgba(212, 168, 67, 0.20)' : String(colors.border),
                 display: 'flex',
                 flexDirection: 'column',
-                gap: 10,
+                gap: 8,
               }}
             >
-              {/* Header */}
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+              {/* Row 1: Icon + Name + Env badge + Menu */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <span style={{
-                  width: 40, height: 40, borderRadius: 10, backgroundColor: tc.bg,
+                  width: 32, height: 32, borderRadius: 8, backgroundColor: tc.bg,
                   display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 20, flexShrink: 0,
+                  fontSize: 16, flexShrink: 0,
                 }}>
                   {tc.icon}
                 </span>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-                    <span style={{ fontSize: 14, fontWeight: 600, color: '#fff' }}>{ns.displayName}</span>
-                    <span style={badge(tc.bg, tc.color)}>
-                      {ns.type === 'managed' ? 'Managed' : 'Personal'}
-                    </span>
-                    <span style={badge(ec.bg, ec.color)}>{ns.environment}</span>
-                  </div>
-                  <div style={{ fontFamily: 'monospace', fontSize: 11, color: '#9cdcfe', marginTop: 2 }}>{ns.name}</div>
-                </div>
+                <span style={{ fontSize: 14, fontWeight: 700, color: '#fff', flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={`${ns.displayName} (${ns.name})`}>{ns.displayName}</span>
+                <span style={badge(ec.bg, ec.color)}>{ns.environment}</span>
                 <div style={{ position: 'relative', flexShrink: 0 }}>
                   <button onClick={(e) => { e.stopPropagation(); setMenuOpenId(menuOpenId === ns.id ? null : ns.id); }} style={{ background: 'none', border: 'none', color: colors.textMuted, fontSize: 18, cursor: 'pointer', padding: '0 4px', lineHeight: 1 }}>⋯</button>
                   {menuOpenId === ns.id && (
@@ -838,50 +824,31 @@ const Namespaces: React.FC = () => {
                 </div>
               </div>
 
-              {/* Description */}
-              <div style={{ color: colors.textMuted, fontSize: 13, lineHeight: 1.4 }}>
-                {ns.description.length > 120 ? ns.description.slice(0, 120) + '…' : ns.description}
+              {/* Row 2: Description */}
+              <div style={{ color: colors.textMuted, fontSize: 13, lineHeight: 1.4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {ns.description.length > 100 ? ns.description.slice(0, 100) + '…' : ns.description}
               </div>
 
-              {/* Asset counts */}
-              {assetItems.length > 0 && (
-                <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-                  {assetItems.map(a => (
-                    <span key={a.label} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 12, color: colors.textMuted }}>
-                      <span>{a.emoji}</span>
-                      <span style={{ fontWeight: 600, color: colors.text }}>{a.count}</span>
-                      <span>{a.label}</span>
-                    </span>
+              {/* Row 3: Compact asset stats */}
+              {assetParts.length > 0 && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                  {assetParts.map((a, i) => (
+                    <React.Fragment key={a.label}>
+                      {i > 0 && <span style={{ color: colors.textDim, fontSize: 11 }}>·</span>}
+                      <span style={{ fontSize: 12 }}>
+                        <span style={{ fontWeight: 700, color: a.color }}>{a.count}</span>
+                        {' '}
+                        <span style={{ color: colors.textMuted }}>{a.label}</span>
+                      </span>
+                    </React.Fragment>
                   ))}
                 </div>
               )}
 
-              {/* Policies */}
-              <div style={{ borderTop: `1px solid ${colors.border}`, paddingTop: 8 }}>
-                {ns.policies.length > 0 ? (
-                  <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-                    {ns.policies.slice(0, 4).map(p => (
-                      <span key={p} style={badge('rgba(212, 168, 67, 0.10)', colors.gold)}>{p}</span>
-                    ))}
-                    {ns.policies.length > 4 && (
-                      <span style={{ fontSize: 11, color: colors.textDim }}>+{ns.policies.length - 4} more</span>
-                    )}
-                  </div>
-                ) : (
-                  <span style={{ color: colors.textDim, fontStyle: 'italic', fontSize: 12 }}>No policies</span>
-                )}
-              </div>
-
-              {/* Members */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: colors.textMuted }}>
-                <span>👥</span>
+              {/* Row 4: Owner + Members */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 12, color: colors.textDim }}>
+                <span>{ns.owner}</span>
                 <span>{ns.members.length} member{ns.members.length !== 1 ? 's' : ''}</span>
-                {ns.serviceIdentities.length > 0 && (
-                  <>
-                    <span style={{ color: colors.textDim }}>•</span>
-                    <span>{ns.serviceIdentities.length} service identit{ns.serviceIdentities.length !== 1 ? 'ies' : 'y'}</span>
-                  </>
-                )}
               </div>
             </div>
           )

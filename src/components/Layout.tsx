@@ -342,6 +342,7 @@ const navItems: NavItem[] = [
     label: 'Overview',
     icon: <Shield24Regular />,
     activeIcon: <Shield24Filled />,
+    section: 'Overview',
   },
   {
     path: '/traffic',

@@ -5,7 +5,7 @@ import InlineCredentialForm from '../components/InlineCredentialForm';
 
 // --- Types ---
 type ToolType = 'mcp' | 'rest' | 'saas';
-type ToolSource = 'foundry' | 'openapi' | 'external' | 'convert';
+type ToolSource = 'foundry' | 'openapi' | 'external';
 type AuthMethod = 'none' | 'apikey' | 'oauth2' | 'managed-identity' | 'entra-token' | 'custom-header';
 type DataClassification = 'public' | 'internal' | 'confidential' | 'restricted';
 
@@ -421,11 +421,10 @@ const toolTypes: { id: ToolType; name: string; desc: string; sub: string; icon: 
   { id: 'saas', name: 'SaaS Connector', desc: 'Pre-built SaaS integration', sub: 'Auto-converted to MCP — Salesforce, ServiceNow, Jira, and more', icon: '◈', accent: '#b388ff' },
 ];
 
-const toolSources: { id: ToolSource; name: string; desc: string; exclusive?: boolean }[] = [
+const toolSources: { id: ToolSource; name: string; desc: string }[] = [
   { id: 'foundry', name: 'Import from Foundry', desc: 'Import tools registered in your Foundry project' },
   { id: 'openapi', name: 'Import from OpenAPI', desc: 'Generate from OpenAPI/Swagger specification' },
   { id: 'external', name: 'External Endpoint', desc: 'Register an existing endpoint manually' },
-  { id: 'convert', name: 'Convert API → MCP', desc: 'Convert a REST API to MCP protocol', exclusive: true },
 ];
 
 const mcpToolsMock = [
@@ -464,16 +463,9 @@ const saasScopes: Record<string, string[]> = {
   custom: ['Read', 'Write', 'Admin'],
 };
 
-const convertPreviewTools = [
-  { name: 'getCustomerById', desc: 'Retrieve customer details by ID', method: 'GET', path: '/customers/{id}' },
-  { name: 'createOrder', desc: 'Create a new order', method: 'POST', path: '/orders' },
-  { name: 'getOrderStatus', desc: 'Check order status', method: 'GET', path: '/orders/{id}/status' },
-];
-
 const credentialOptions = ['prod-api-key', 'dev-api-key', 'oauth-salesforce', 'oauth-servicenow', 'managed-identity-prod'];
 const consumers = ['retail-support-agent', 'finance-analyst', 'hr-assistant', 'dev-copilot', 'data-pipeline', 'qa-bot'];
 const namespaces = ['retail-support', 'finance-analytics', 'hr-automation', 'dev-sandbox'];
-const existingRestApis = ['salesforce-crm', 'order-lookup-rest', 'weather-api', 'jira-tickets'];
 
 // --- Toggle Component ---
 function ToggleButton({ on, onToggle }: { on: boolean; onToggle: () => void }) {
@@ -504,7 +496,6 @@ function RegisterTool({ onClose, onComplete }: { onClose: () => void; onComplete
       if (form.toolType === 'rest' && form.toolSource === 'openapi') return form.openapiEndpoints.length > 0;
       if (form.toolType === 'rest' && form.toolSource === 'external') return form.restDisplayName !== '' && form.restBaseUrl !== '';
       if (form.toolType === 'saas') return form.saasConnector !== '' && form.saasInstanceUrl !== '';
-      if (form.toolSource === 'convert') return form.convertMcpName !== '';
     }
     if (step === 5) return form.namespace !== '';
     return true;
@@ -603,23 +594,17 @@ function RegisterTool({ onClose, onComplete }: { onClose: () => void; onComplete
         <>
           <label style={{ ...label, marginBottom: 10 }}>Registration Source</label>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
-            {toolSources.filter((s) => s.id !== 'convert' || form.toolType === 'rest').map((s) => (
+            {toolSources.map((s) => (
               <div
                 key={s.id}
                 style={{
                   ...sourceCardStyle('#60cdff', form.toolSource === s.id),
                   borderTop: form.toolSource === s.id ? '3px solid #60cdff' : '3px solid #333',
-                  position: 'relative' as const,
                 }}
                 onClick={() => set('toolSource', s.id)}
               >
                 <div style={{ fontSize: 13, fontWeight: 600, color: '#fff', marginBottom: 4 }}>
                   {s.name}
-                  {s.exclusive && (
-                    <span style={{ ...badge('rgba(255,183,77,0.15)', '#ffb74d'), marginLeft: 8, fontSize: 10 }}>
-                      ★ Gateway Exclusive
-                    </span>
-                  )}
                 </div>
                 <div style={{ fontSize: 12, color: '#888' }}>{s.desc}</div>
               </div>
@@ -639,7 +624,7 @@ function RegisterTool({ onClose, onComplete }: { onClose: () => void; onComplete
         <div style={title}>Configure endpoint</div>
         <div style={subtitle}>Provide connection details for the existing tool — the gateway will mediate all access through this endpoint</div>
 
-        {form.toolType === 'rest' && form.toolSource !== 'convert' && (
+        {form.toolType === 'rest' && (
           <div style={{ marginBottom: 16 }}>
             <label style={{ ...label, marginBottom: 8 }}>Registration Mode</label>
             <div style={{ display: 'flex', gap: 10 }}>
@@ -867,52 +852,6 @@ function RegisterTool({ onClose, onComplete }: { onClose: () => void; onComplete
                 ))}
               </div>
             </div>
-          </>
-        )}
-
-        {/* Convert API → MCP */}
-        {form.toolSource === 'convert' && (
-          <>
-            <div style={fieldGroup}>
-              <label style={label}>Source API</label>
-              <select style={select} value={form.convertSourceApi} onChange={(e) => set('convertSourceApi', e.target.value)}>
-                <option value="">Select existing REST API or enter new…</option>
-                {existingRestApis.map((a) => <option key={a} value={a}>{a}</option>)}
-                <option value="__new">+ Register new API</option>
-              </select>
-            </div>
-            <div style={fieldGroup}>
-              <label style={label}>OpenAPI Spec URL</label>
-              <input style={input} placeholder="https://api.myservice.com/openapi.yaml" value={form.convertSpecUrl} onChange={(e) => set('convertSpecUrl', e.target.value)} />
-            </div>
-            <div style={fieldGroup}>
-              <label style={label}>MCP Server Name</label>
-              <input style={input} placeholder="my-service-mcp" value={form.convertMcpName} onChange={(e) => set('convertMcpName', e.target.value)} />
-            </div>
-            <div style={{ ...fieldGroup, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <div>
-                <div style={{ fontSize: 13, fontWeight: 600, color: '#e0e0e0' }}>Auto-generate tool descriptions</div>
-                <div style={{ fontSize: 12, color: '#888' }}>Use AI to generate semantic descriptions for each tool</div>
-              </div>
-              <ToggleButton on={form.convertAutoDescriptions} onToggle={() => set('convertAutoDescriptions', !form.convertAutoDescriptions)} />
-            </div>
-            {form.convertMcpName && (
-              <div style={fieldGroup}>
-                <label style={label}>Preview — Generated MCP Tools</label>
-                <div style={{ backgroundColor: '#1a1a1a', border: '1px solid #333', borderRadius: 6, padding: 12 }}>
-                  {convertPreviewTools.map((t) => (
-                    <div key={t.name} style={{ padding: '6px 0', borderBottom: '1px solid #262626' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 2 }}>
-                        <span style={{ fontFamily: 'monospace', color: '#9cdcfe', fontSize: 12 }}>{t.name}</span>
-                        <span style={badge('rgba(96,205,255,0.1)', '#60cdff')}>{t.method}</span>
-                        <span style={{ fontFamily: 'monospace', color: '#666', fontSize: 11 }}>{t.path}</span>
-                      </div>
-                      <div style={{ fontSize: 11, color: '#888', paddingLeft: 2 }}>{t.desc}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
           </>
         )}
 
@@ -1308,7 +1247,6 @@ function RegisterTool({ onClose, onComplete }: { onClose: () => void; onComplete
     if (form.toolType === 'rest' && form.toolSource === 'openapi') return `${form.openapiEndpoints.length} endpoints`;
     if (form.toolType === 'rest' && form.toolSource === 'external') return form.restDisplayName || '—';
     if (form.toolType === 'saas') return saasConnectors.find((c) => c.id === form.saasConnector)?.name ?? '—';
-    if (form.toolSource === 'convert') return form.convertMcpName || '—';
     return '—';
   };
 
@@ -1318,7 +1256,6 @@ function RegisterTool({ onClose, onComplete }: { onClose: () => void; onComplete
     if (form.toolType === 'rest' && form.toolSource === 'openapi') return form.openapiBaseUrl || form.openapiSpecUrl || '—';
     if (form.toolType === 'rest' && form.toolSource === 'external') return form.restBaseUrl || '—';
     if (form.toolType === 'saas') return form.saasInstanceUrl || '—';
-    if (form.toolSource === 'convert') return form.convertSpecUrl || form.convertSourceApi || '—';
     return '—';
   };
 
@@ -1356,6 +1293,12 @@ function RegisterTool({ onClose, onComplete }: { onClose: () => void; onComplete
             form.toolType === 'rest' ? '#66bb6a' : '#b388ff',
           )}>{getToolTypeLabel()}</span>
           <span style={badge('rgba(96,205,255,0.1)', '#60cdff')}>{getSourceLabel()}</span>
+          {form.toolType === 'rest' && (
+            <span style={badge(
+              form.restImportMode === 'mcp' ? 'rgba(79,195,247,0.15)' : 'rgba(102,187,106,0.15)',
+              form.restImportMode === 'mcp' ? '#4fc3f7' : '#66bb6a',
+            )}>{form.restImportMode === 'mcp' ? '⬡ As MCP' : '⬢ As REST'}</span>
+          )}
           <span style={{ marginLeft: 8 }}>{getToolDisplay()}</span>
         </div>
       </div>

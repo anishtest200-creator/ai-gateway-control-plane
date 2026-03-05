@@ -303,6 +303,57 @@ const severityConfig: Record<'block' | 'warn' | 'log', { color: string; bg: stri
   log: { color: '#a78bfa', bg: '#1e1a3d', label: '📝 Log' },
 }
 
+
+/* ------------------------------------------------------------------ */
+/*  Template Libraries                                                  */
+/* ------------------------------------------------------------------ */
+
+interface AccessRuleTemplate {
+  icon: string; name: string; description: string; tags: string[]
+  prefill: {
+    type: AccessRuleType; description: string
+    assetType?: string; namespace?: string; identities?: string
+    sourceNamespace?: string; allowedNamespaces?: string
+  }
+}
+
+interface RuntimeRuleTemplate {
+  icon: string; name: string; description: string; tags: string[]
+  prefill: { category: PolicyCategory; description: string; enforcement: string; threshold?: string }
+}
+
+interface GuardrailTemplate {
+  icon: string; name: string; description: string; tags: string[]
+  prefill: { category: PolicyCategory; description: string; enforcement: string; threshold: string }
+}
+
+const accessRuleTemplates: AccessRuleTemplate[] = [
+  { icon: '🏢', name: 'Restrict to Internal Identities', description: 'Only internal roles and domains can access assets', tags: ['rbac', 'identity'], prefill: { type: 'who', description: 'Only internal roles and domains can access assets', identities: 'Internal-User, contoso.com' } },
+  { icon: '🔐', name: 'Production Model RBAC', description: 'Require ML-Engineer or Admin role for production models', tags: ['rbac', 'production'], prefill: { type: 'who', description: 'Require ML-Engineer or Admin role for production models', assetType: 'Model', namespace: 'production', identities: 'ML-Engineer, Admin' } },
+  { icon: '⚙️', name: 'Service Principal Only', description: 'Restrict to service principals and managed identities', tags: ['service-principal', 'identity'], prefill: { type: 'who', description: 'Restrict to service principals and managed identities', identities: 'ServicePrincipal, ManagedIdentity' } },
+  { icon: '🔒', name: 'Sandbox Isolation', description: 'Prevent sandbox from accessing production namespaces', tags: ['namespace', 'isolation'], prefill: { type: 'where', description: 'Prevent sandbox from accessing production namespaces', sourceNamespace: 'sandbox', allowedNamespaces: 'sandbox, dev' } },
+  { icon: '🔄', name: 'Cross-Environment Promotion', description: 'Allow staging to import from production', tags: ['cross-environment', 'promotion'], prefill: { type: 'where', description: 'Allow staging to import from production', sourceNamespace: 'production', allowedNamespaces: 'staging' } },
+  { icon: '🤝', name: 'Partner Namespace Access', description: 'Grant partner namespaces read access to shared assets', tags: ['partner', 'namespace'], prefill: { type: 'where', description: 'Grant partner namespaces read access to shared assets', sourceNamespace: 'global', allowedNamespaces: 'partners' } },
+]
+
+const runtimeRuleTemplates: RuntimeRuleTemplate[] = [
+  { icon: '⏱', name: 'Standard Rate Limit', description: '100 requests per minute per consumer', tags: ['rate-limit', 'throttle'], prefill: { category: 'rate-limits', description: '100 requests per minute per consumer', enforcement: 'Enforce', threshold: '100' } },
+  { icon: '💰', name: 'Token Budget Cap', description: 'Limit token consumption to 50K TPM', tags: ['token', 'budget'], prefill: { category: 'rate-limits', description: 'Limit token consumption to 50K TPM', enforcement: 'Enforce', threshold: '50000' } },
+  { icon: '🔑', name: 'API Key Authentication', description: 'Require API key header on all requests', tags: ['api-key', 'auth'], prefill: { category: 'authentication', description: 'Require API key header on all requests', enforcement: 'Enforce' } },
+  { icon: '⏳', name: 'Request Timeout', description: '30-second timeout for all model endpoints', tags: ['timeout', 'routing'], prefill: { category: 'routing', description: '30-second timeout for all model endpoints', enforcement: 'Enforce', threshold: '30' } },
+  { icon: '🔌', name: 'Circuit Breaker', description: 'Open circuit after 5 consecutive failures', tags: ['circuit-breaker', 'resilience'], prefill: { category: 'routing', description: 'Open circuit after 5 consecutive failures', enforcement: 'Enforce', threshold: '5' } },
+  { icon: '📋', name: 'Audit Mode', description: 'Log all requests without enforcement', tags: ['audit', 'logging'], prefill: { category: 'authentication', description: 'Log all requests without enforcement', enforcement: 'Audit' } },
+]
+
+const guardrailTemplates: GuardrailTemplate[] = [
+  { icon: '🛡', name: 'Block Hate Speech', description: 'Detect and block hate speech, slurs, discriminatory language', tags: ['hate-speech', 'content-safety'], prefill: { category: 'content-safety', description: 'Detect and block hate speech, slurs, discriminatory language', enforcement: 'block', threshold: 'all-models' } },
+  { icon: '🔒', name: 'PII Detection & Redaction', description: 'Detect SSNs, credit cards, emails in outputs', tags: ['pii', 'privacy'], prefill: { category: 'content-safety', description: 'Detect SSNs, credit cards, emails in outputs', enforcement: 'block', threshold: 'all-models' } },
+  { icon: '🔑', name: 'Prompt Injection Shield', description: 'Detect and warn on prompt injection patterns', tags: ['injection', 'security'], prefill: { category: 'authentication', description: 'Detect and warn on prompt injection patterns', enforcement: 'warn', threshold: 'chat-completions' } },
+  { icon: '📋', name: 'Copyright Content Filter', description: 'Log when outputs contain potentially copyrighted content', tags: ['copyright', 'compliance'], prefill: { category: 'content-safety', description: 'Log when outputs contain potentially copyrighted content', enforcement: 'log', threshold: 'all-models' } },
+  { icon: '🤖', name: 'Agent Action Audit', description: 'Log all high-risk agent actions (API calls, payments)', tags: ['agent', 'audit'], prefill: { category: 'agent-execution', description: 'Log all high-risk agent actions (API calls, payments)', enforcement: 'log', threshold: 'agent-endpoints' } },
+  { icon: '🚨', name: 'Self-Harm Content Block', description: 'Block self-harm content with immediate escalation', tags: ['self-harm', 'safety'], prefill: { category: 'content-safety', description: 'Block self-harm content with immediate escalation', enforcement: 'block', threshold: 'all-models' } },
+]
+
 /* ------------------------------------------------------------------ */
 /*  Helpers                                                            */
 /* ------------------------------------------------------------------ */
@@ -354,6 +405,13 @@ const Policies: React.FC = () => {
   const [approvalList, setApprovalList] = useState<PendingApproval[]>(pendingApprovals)
   const [policyFormData, setPolicyFormData] = useState({ name: '', category: 'authentication' as PolicyCategory, description: '', enforcement: 'Enforce', threshold: '' })
 
+  // Dual-path creation flow state
+  const [createFlowMethod, setCreateFlowMethod] = useState<null | 'library' | 'ai'>(null)
+  const [aiComposeInput, setAiComposeInput] = useState('')
+  const [aiCompiling, setAiCompiling] = useState(false)
+  const [aiCompiled, setAiCompiled] = useState(false)
+  const [templateSelected, setTemplateSelected] = useState(false)
+
   // Access Rule creation state
   const [accessRuleStep, setAccessRuleStep] = useState(1)
   const [accessRuleList, setAccessRuleList] = useState<AssetAccessRule[]>(accessRules)
@@ -396,6 +454,7 @@ const Policies: React.FC = () => {
     const assigned = Object.values(accessRuleAssignments).filter(Boolean).length
     setShowCreateFlow(false)
     setCreateFlowCategory(null)
+    resetCreateFlowState()
     setAccessRuleStep(1)
     setAccessRuleForm({ name: '', type: 'who', description: '', namespace: 'global', assetType: 'Model', identities: '', sourceNamespace: 'global', allowedNamespaces: '' })
     setAccessRuleAssignments({})
@@ -422,6 +481,7 @@ const Policies: React.FC = () => {
     setPolicyStates(s => ({ ...s, [newId]: true }))
     setShowCreateFlow(false)
     setCreateFlowCategory(null)
+    resetCreateFlowState()
     setPolicyFormData({ name: '', category: 'authentication', description: '', enforcement: 'Enforce', threshold: '' })
   }
 
@@ -437,6 +497,155 @@ const Policies: React.FC = () => {
   const enabledGuardrails = guardrails.filter(g => guardrailStates[g.id]).length
 
   const toggleVersionHistory = (id: string) => setExpandedVersions(s => ({ ...s, [id]: !s[id] }))
+
+  const handleFormBack = () => {
+    if (createFlowMethod === 'library') {
+      setTemplateSelected(false)
+    } else if (createFlowMethod === 'ai') {
+      setAiCompiled(false)
+    } else {
+      setCreateFlowMethod(null)
+    }
+  }
+
+  const handleAICompile = () => {
+    setAiCompiling(true)
+    setTimeout(() => {
+      const input = aiComposeInput.toLowerCase()
+
+      if (createFlowCategory === 'access') {
+        let type: AccessRuleType = 'who'
+        let name = 'AI-Generated Access Rule'
+        const description = aiComposeInput
+        let namespace = 'global'
+        let assetType = 'Model'
+        let identities = ''
+        let sourceNamespace = 'global'
+        let allowedNamespaces = ''
+
+        if (input.includes('namespace') || input.includes('staging') || input.includes('sandbox') || input.includes('import') || input.includes('cross-environment')) {
+          type = 'where'
+          name = 'Namespace Access Policy'
+          if (input.includes('sandbox')) { sourceNamespace = 'sandbox'; allowedNamespaces = 'sandbox, dev' }
+          else if (input.includes('staging')) { sourceNamespace = 'production'; allowedNamespaces = 'staging' }
+          else { sourceNamespace = 'global'; allowedNamespaces = 'production, staging' }
+        } else {
+          type = 'who'
+          if (input.includes('engineer') || input.includes('admin') || input.includes('role')) {
+            const parts: string[] = []
+            if (input.includes('engineer')) parts.push('ML-Engineer')
+            if (input.includes('admin')) parts.push('Admin')
+            if (parts.length === 0) parts.push('AI-Developer')
+            identities = parts.join(', ')
+            name = 'Role-Based Access Rule'
+          } else if (input.includes('service principal') || input.includes('managed identity')) {
+            identities = 'ServicePrincipal, ManagedIdentity'
+            name = 'Service Identity Rule'
+          } else if (input.includes('internal') || input.includes('domain') || input.includes('contoso')) {
+            identities = 'Internal-User, contoso.com'
+            name = 'Internal Access Rule'
+          } else {
+            identities = 'AI-Developer'
+            name = 'Custom Access Rule'
+          }
+          if (input.includes('agent')) assetType = 'Agent'
+          else if (input.includes('tool')) assetType = 'Tool'
+          if (input.includes('production')) namespace = 'production'
+        }
+
+        setAccessRuleForm(f => ({ ...f, name, type, description, namespace, assetType, identities, sourceNamespace, allowedNamespaces }))
+      } else if (createFlowCategory === 'runtime') {
+        let category: PolicyCategory = 'authentication'
+        let enforcement = 'Enforce'
+        let threshold = ''
+        let name = 'AI-Generated Runtime Rule'
+        const description = aiComposeInput
+
+        if (input.includes('rate limit') || input.includes('per minute') || input.includes('rpm')) {
+          category = 'rate-limits'
+          const match = input.match(/(\d+)/)
+          if (match) threshold = match[1]
+          name = 'Custom Rate Limit'
+        } else if (input.includes('token') || input.includes('tpm')) {
+          category = 'rate-limits'
+          const match = input.match(/(\d+)/)
+          if (match) threshold = match[1]
+          name = 'Token Budget Policy'
+        } else if (input.includes('api key') || input.includes('auth')) {
+          category = 'authentication'
+          name = 'Custom Auth Rule'
+        } else if (input.includes('timeout')) {
+          category = 'routing'
+          const match = input.match(/(\d+)/)
+          if (match) threshold = match[1]
+          name = 'Request Timeout Rule'
+        } else if (input.includes('circuit') || input.includes('breaker')) {
+          category = 'routing'
+          const match = input.match(/(\d+)/)
+          if (match) threshold = match[1]
+          name = 'Circuit Breaker Rule'
+        } else if (input.includes('agent') || input.includes('tool call')) {
+          category = 'agent-execution'
+          name = 'Agent Execution Rule'
+        }
+
+        if (input.includes('audit') || input.includes('log only')) enforcement = 'Audit'
+        if (input.includes('block') || input.includes('enforce')) enforcement = 'Enforce'
+
+        setPolicyFormData({ name, category, description, enforcement, threshold })
+      } else if (createFlowCategory === 'guardrail') {
+        let category: PolicyCategory = 'content-safety'
+        let enforcement = 'block'
+        let threshold = 'all-models'
+        let name = 'AI-Generated Guardrail'
+        const description = aiComposeInput
+
+        if (input.includes('pii') || input.includes('personal') || input.includes('redact') || input.includes('ssn') || input.includes('credit card')) {
+          name = 'PII Detection Rule'
+          enforcement = 'block'
+        } else if (input.includes('hate') || input.includes('discriminat') || input.includes('slur')) {
+          name = 'Hate Speech Filter'
+          enforcement = 'block'
+        } else if (input.includes('injection') || input.includes('jailbreak')) {
+          category = 'authentication'
+          name = 'Prompt Injection Guard'
+          enforcement = 'warn'
+          threshold = 'chat-completions'
+        } else if (input.includes('copyright') || input.includes('intellectual property')) {
+          name = 'Copyright Content Filter'
+          enforcement = 'log'
+        } else if (input.includes('self-harm') || input.includes('suicide')) {
+          name = 'Self-Harm Content Block'
+          enforcement = 'block'
+        } else if (input.includes('agent') || input.includes('action') || input.includes('payment')) {
+          category = 'agent-execution'
+          name = 'Agent Action Monitor'
+          enforcement = 'log'
+          threshold = 'agent-endpoints'
+        }
+
+        if (input.includes('block')) enforcement = 'block'
+        else if (input.includes('warn')) enforcement = 'warn'
+        else if (input.includes('log') || input.includes('audit')) enforcement = 'log'
+
+        if (input.includes('chat') || input.includes('completion')) threshold = 'chat-completions'
+        else if (input.includes('agent-endpoint') || (input.includes('agent') && input.includes('endpoint'))) threshold = 'agent-endpoints'
+
+        setPolicyFormData({ name, category, description, enforcement, threshold })
+      }
+
+      setAiCompiling(false)
+      setAiCompiled(true)
+    }, 1500)
+  }
+
+  const resetCreateFlowState = () => {
+    setCreateFlowMethod(null)
+    setAiComposeInput('')
+    setAiCompiling(false)
+    setAiCompiled(false)
+    setTemplateSelected(false)
+  }
 
   /* ---- Tab: Runtime Rules ---- */
   const renderRuntimeRules = () => {
@@ -902,7 +1111,7 @@ const Policies: React.FC = () => {
           >
             🔍 Simulate Impact
           </button>
-          <button onClick={() => { setShowCreateFlow(true); setCreateFlowCategory(null) }} style={{ backgroundColor: '#D4A843', color: '#0A0A0A', border: 'none', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' }}>✚ Create Policy</button>
+          <button onClick={() => { setShowCreateFlow(true); setCreateFlowCategory(null); setCreateFlowMethod(null); setAiComposeInput(''); setAiCompiling(false); setAiCompiled(false); setTemplateSelected(false) }} style={{ backgroundColor: '#D4A843', color: '#0A0A0A', border: 'none', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' }}>✚ Create Policy</button>
         </div>
       </div>
 
@@ -1032,11 +1241,18 @@ const Policies: React.FC = () => {
       {activeTab === 'approvals' && renderApprovals()}
 
       {/* Unified Create Policy Modal */}
-      {showCreateFlow && (
+      {showCreateFlow && (() => {
+        const showFormStep = createFlowCategory !== null && createFlowMethod !== null && (
+          (createFlowMethod === 'library' && templateSelected) ||
+          (createFlowMethod === 'ai' && aiCompiled)
+        )
+        const isLibraryView = createFlowCategory !== null && createFlowMethod === 'library' && !templateSelected
+        return (
         <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
-          <div style={{ backgroundColor: '#1A1A1A', borderTop: '3px solid #D4A843', borderRadius: 8, padding: 24, width: '100%', maxWidth: 560, border: '1px solid rgba(212, 168, 67, 0.10)' }}>
+          <div style={{ backgroundColor: '#1A1A1A', borderTop: '3px solid #D4A843', borderRadius: 8, padding: 24, width: '100%', maxWidth: isLibraryView ? 640 : 560, border: '1px solid rgba(212, 168, 67, 0.10)', transition: 'max-width 0.2s' }}>
+            <style>{`@keyframes aiPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }`}</style>
 
-            {/* Category picker */}
+            {/* Step 1: Category picker */}
             {createFlowCategory === null && (
               <>
                 <h3 style={{ color: '#fff', fontSize: 16, fontWeight: 600, margin: '0 0 4px' }}>Create Policy</h3>
@@ -1073,10 +1289,190 @@ const Policies: React.FC = () => {
               </>
             )}
 
-            {/* Runtime Rule form */}
-            {createFlowCategory === 'runtime' && (
+            {/* Step 2: Method picker (Library / AI) */}
+            {createFlowCategory !== null && createFlowMethod === null && (
               <>
-                <h3 style={{ color: '#fff', fontSize: 16, fontWeight: 600, margin: '0 0 16px' }}>Create Runtime Rule</h3>
+                <h3 style={{ color: '#fff', fontSize: 16, fontWeight: 600, margin: '0 0 4px' }}>
+                  {createFlowCategory === 'access' ? 'Create Access Rule' : createFlowCategory === 'runtime' ? 'Create Runtime Rule' : 'Create Guardrail'}
+                </h3>
+                <p style={{ color: '#888', fontSize: 12, margin: '0 0 20px' }}>How would you like to create this policy?</p>
+                <div style={{ display: 'flex', gap: 12 }}>
+                  {([
+                    { key: 'library' as const, icon: '📚', label: 'From Library', desc: 'Choose from pre-built policy templates', color: colors.gold, bg: colors.goldMuted },
+                    { key: 'ai' as const, icon: '✨', label: 'Describe with AI', desc: 'Describe what you need in plain English', color: colors.purple, bg: 'rgba(167,139,250,0.15)' },
+                  ]).map(method => (
+                    <button
+                      key={method.key}
+                      onClick={() => setCreateFlowMethod(method.key)}
+                      style={{
+                        flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,
+                        padding: '20px 16px', borderRadius: 8, backgroundColor: 'transparent',
+                        border: '1px solid rgba(212,168,67,0.10)', cursor: 'pointer',
+                        fontFamily: 'inherit', textAlign: 'center', transition: 'all 0.15s',
+                      }}
+                      onMouseEnter={e => { e.currentTarget.style.backgroundColor = method.bg; e.currentTarget.style.borderColor = method.color }}
+                      onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.borderColor = 'rgba(212,168,67,0.10)' }}
+                    >
+                      <span style={{ fontSize: 28 }}>{method.icon}</span>
+                      <div style={{ color: '#fff', fontWeight: 600, fontSize: 14 }}>{method.label}</div>
+                      <div style={{ color: '#888', fontSize: 12 }}>{method.desc}</div>
+                    </button>
+                  ))}
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'flex-start', marginTop: 20 }}>
+                  <button onClick={() => setCreateFlowCategory(null)} style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(212, 168, 67, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>← Back</button>
+                </div>
+              </>
+            )}
+
+            {/* Step 3a: Library grid */}
+            {createFlowCategory !== null && createFlowMethod === 'library' && !templateSelected && (() => {
+              const templates = createFlowCategory === 'access' ? accessRuleTemplates
+                : createFlowCategory === 'runtime' ? runtimeRuleTemplates
+                : guardrailTemplates
+              const categoryColor = createFlowCategory === 'access' ? '#c084fc'
+                : createFlowCategory === 'runtime' ? colors.gold
+                : '#f87171'
+              return (
+                <>
+                  <h3 style={{ color: '#fff', fontSize: 16, fontWeight: 600, margin: '0 0 4px' }}>Policy Templates</h3>
+                  <p style={{ color: '#888', fontSize: 12, margin: '0 0 16px' }}>Select a template to customize</p>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, maxHeight: 400, overflowY: 'auto', paddingRight: 4 }}>
+                    {templates.map((t, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => {
+                          if (createFlowCategory === 'access') {
+                            const at = t as AccessRuleTemplate
+                            setAccessRuleForm(f => ({
+                              ...f, name: at.name, type: at.prefill.type,
+                              description: at.prefill.description,
+                              assetType: at.prefill.assetType ?? f.assetType,
+                              namespace: at.prefill.namespace ?? f.namespace,
+                              identities: at.prefill.identities ?? '',
+                              sourceNamespace: at.prefill.sourceNamespace ?? f.sourceNamespace,
+                              allowedNamespaces: at.prefill.allowedNamespaces ?? '',
+                            }))
+                          } else {
+                            const rt = t as RuntimeRuleTemplate | GuardrailTemplate
+                            setPolicyFormData(f => ({
+                              ...f, name: rt.name, category: rt.prefill.category,
+                              description: rt.prefill.description,
+                              enforcement: rt.prefill.enforcement,
+                              threshold: rt.prefill.threshold ?? '',
+                            }))
+                          }
+                          setTemplateSelected(true)
+                        }}
+                        style={{
+                          display: 'flex', flexDirection: 'column', gap: 6, padding: '12px 14px',
+                          borderRadius: 8, backgroundColor: '#0F0F0F',
+                          border: '1px solid rgba(212,168,67,0.10)', cursor: 'pointer',
+                          fontFamily: 'inherit', textAlign: 'left', transition: 'all 0.15s',
+                        }}
+                        onMouseEnter={e => { e.currentTarget.style.borderColor = categoryColor; e.currentTarget.style.backgroundColor = '#161616' }}
+                        onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(212,168,67,0.10)'; e.currentTarget.style.backgroundColor = '#0F0F0F' }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <span style={{ fontSize: 18 }}>{t.icon}</span>
+                          <span style={{ color: '#fff', fontWeight: 600, fontSize: 13, lineHeight: 1.3 }}>{t.name}</span>
+                        </div>
+                        <div style={{ color: '#999', fontSize: 11, lineHeight: 1.4 }}>{t.description}</div>
+                        <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginTop: 2 }}>
+                          {t.tags.map(tag => (
+                            <span key={tag} style={{ display: 'inline-block', padding: '2px 6px', borderRadius: 4, fontSize: 10, fontWeight: 600, backgroundColor: 'rgba(212,168,67,0.08)', color: '#888' }}>{tag}</span>
+                          ))}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'flex-start', marginTop: 16 }}>
+                    <button onClick={() => setCreateFlowMethod(null)} style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(212, 168, 67, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>← Back</button>
+                  </div>
+                </>
+              )
+            })()}
+
+            {/* Step 3b: AI Compose */}
+            {createFlowCategory !== null && createFlowMethod === 'ai' && !aiCompiled && (
+              <>
+                <h3 style={{ color: '#fff', fontSize: 16, fontWeight: 600, margin: '0 0 4px' }}>✨ Describe Your Policy</h3>
+                <p style={{ color: '#888', fontSize: 12, margin: '0 0 16px' }}>Describe what you need in plain English and we'll compile it into a structured policy.</p>
+                <textarea
+                  value={aiComposeInput}
+                  onChange={e => setAiComposeInput(e.target.value)}
+                  rows={5}
+                  placeholder={
+                    createFlowCategory === 'access'
+                      ? 'e.g. Only ML engineers and admins should be able to invoke production models...'
+                      : createFlowCategory === 'runtime'
+                        ? 'e.g. Rate limit all API calls to 100 requests per minute per consumer...'
+                        : 'e.g. Block any prompts or responses containing hate speech or discriminatory language...'
+                  }
+                  disabled={aiCompiling}
+                  style={{
+                    width: '100%', backgroundColor: '#0F0F0F',
+                    border: '1px solid rgba(167,139,250,0.25)', color: '#E8E8E8',
+                    padding: '12px 14px', borderRadius: 8, fontSize: 13,
+                    fontFamily: 'inherit', resize: 'vertical' as const,
+                    boxSizing: 'border-box' as const, lineHeight: 1.5,
+                    opacity: aiCompiling ? 0.5 : 1,
+                  }}
+                />
+                {aiCompiling && (
+                  <div style={{
+                    display: 'flex', alignItems: 'center', gap: 10,
+                    padding: '12px 16px', borderRadius: 8, marginTop: 12,
+                    backgroundColor: 'rgba(167,139,250,0.08)',
+                    border: '1px solid rgba(167,139,250,0.15)',
+                  }}>
+                    <span style={{ animation: 'aiPulse 1s ease-in-out infinite', display: 'inline-block', fontSize: 16 }}>✨</span>
+                    <span style={{ color: colors.purple, fontSize: 13, fontWeight: 500 }}>Compiling your policy...</span>
+                  </div>
+                )}
+                <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, marginTop: 16 }}>
+                  <button
+                    onClick={() => { setCreateFlowMethod(null); setAiComposeInput('') }}
+                    disabled={aiCompiling}
+                    style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(212, 168, 67, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: aiCompiling ? 'not-allowed' : 'pointer', fontFamily: 'inherit', opacity: aiCompiling ? 0.5 : 1 }}
+                  >← Back</button>
+                  <button
+                    onClick={handleAICompile}
+                    disabled={!aiComposeInput.trim() || aiCompiling}
+                    style={{
+                      backgroundColor: (!aiComposeInput.trim() || aiCompiling) ? '#444' : colors.purple,
+                      color: (!aiComposeInput.trim() || aiCompiling) ? '#888' : '#fff',
+                      border: 'none', borderRadius: 6, padding: '8px 20px',
+                      fontSize: 13, fontWeight: 600,
+                      cursor: (!aiComposeInput.trim() || aiCompiling) ? 'not-allowed' : 'pointer',
+                      fontFamily: 'inherit',
+                    }}
+                  >✨ Compile Policy</button>
+                </div>
+              </>
+            )}
+
+            {/* Step 4: Review forms (pre-filled from library or AI) */}
+
+            {/* AI-compiled notice */}
+            {showFormStep && aiCompiled && (
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: 8,
+                padding: '8px 14px', borderRadius: 6, marginBottom: 16,
+                backgroundColor: 'rgba(167,139,250,0.08)',
+                border: '1px solid rgba(167,139,250,0.12)',
+              }}>
+                <span style={{ fontSize: 14 }}>✨</span>
+                <span style={{ color: colors.purple, fontSize: 12, fontWeight: 500 }}>AI-compiled — review before saving</span>
+              </div>
+            )}
+
+            {/* Runtime Rule form */}
+            {createFlowCategory === 'runtime' && showFormStep && (
+              <>
+                <h3 style={{ color: '#fff', fontSize: 16, fontWeight: 600, margin: '0 0 16px' }}>
+                  {aiCompiled || templateSelected ? 'Review Runtime Rule' : 'Create Runtime Rule'}
+                </h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                   <div>
                     <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Policy Name</label>
@@ -1111,16 +1507,18 @@ const Policies: React.FC = () => {
                   </div>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, marginTop: 20 }}>
-                  <button onClick={() => setCreateFlowCategory(null)} style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(212, 168, 67, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>← Back</button>
+                  <button onClick={handleFormBack} style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(212, 168, 67, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>← Back</button>
                   <button onClick={handleCreatePolicy} style={{ backgroundColor: '#D4A843', color: '#0A0A0A', border: 'none', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>Create Runtime Rule</button>
                 </div>
               </>
             )}
 
             {/* Guardrail form */}
-            {createFlowCategory === 'guardrail' && (
+            {createFlowCategory === 'guardrail' && showFormStep && (
               <>
-                <h3 style={{ color: '#fff', fontSize: 16, fontWeight: 600, margin: '0 0 16px' }}>Create Safety Guardrail</h3>
+                <h3 style={{ color: '#fff', fontSize: 16, fontWeight: 600, margin: '0 0 16px' }}>
+                  {aiCompiled || templateSelected ? 'Review Safety Guardrail' : 'Create Safety Guardrail'}
+                </h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                   <div>
                     <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Guardrail Name</label>
@@ -1157,14 +1555,14 @@ const Policies: React.FC = () => {
                   </div>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, marginTop: 20 }}>
-                  <button onClick={() => setCreateFlowCategory(null)} style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(212, 168, 67, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>← Back</button>
+                  <button onClick={handleFormBack} style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(212, 168, 67, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>← Back</button>
                   <button onClick={handleCreatePolicy} style={{ backgroundColor: '#D4A843', color: '#0A0A0A', border: 'none', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>Create Guardrail</button>
                 </div>
               </>
             )}
 
             {/* Access Rule form (2-step) */}
-            {createFlowCategory === 'access' && (
+            {createFlowCategory === 'access' && showFormStep && (
               <>
                 {/* Step indicator */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20 }}>
@@ -1192,7 +1590,9 @@ const Policies: React.FC = () => {
 
                 {accessRuleStep === 1 && (
                   <>
-                    <h3 style={{ color: '#fff', fontSize: 16, fontWeight: 600, margin: '0 0 16px' }}>Define Access Rule</h3>
+                    <h3 style={{ color: '#fff', fontSize: 16, fontWeight: 600, margin: '0 0 16px' }}>
+                      {aiCompiled || templateSelected ? 'Review Access Rule' : 'Define Access Rule'}
+                    </h3>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                       <div>
                         <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Rule Name</label>
@@ -1258,7 +1658,7 @@ const Policies: React.FC = () => {
                       )}
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, marginTop: 20 }}>
-                      <button onClick={() => { setCreateFlowCategory(null); setAccessRuleStep(1) }} style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(212, 168, 67, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>← Back</button>
+                      <button onClick={() => { handleFormBack(); setAccessRuleStep(1) }} style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(212, 168, 67, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>← Back</button>
                       <button disabled={!accessRuleForm.name} onClick={() => setAccessRuleStep(2)} style={{
                         backgroundColor: !accessRuleForm.name ? '#555' : '#D4A843', color: !accessRuleForm.name ? '#999' : '#0A0A0A',
                         border: 'none', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: !accessRuleForm.name ? 'not-allowed' : 'pointer', fontFamily: 'inherit',
@@ -1337,7 +1737,9 @@ const Policies: React.FC = () => {
 
           </div>
         </div>
-      )}
+        )
+      })()}
+
     </div>
   )
 }

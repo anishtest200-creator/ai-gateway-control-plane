@@ -336,7 +336,7 @@ const Observability: React.FC = () => {
   const [timeRange, setTimeRange] = useState<'24h' | '7d' | '30d'>('24h');
   const [nsFilter, setNsFilter] = useState<string>('all');
   const [hoveredRow, setHoveredRow] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'usage' | 'cost' | 'budgets'>('usage');
+  const [activeTab, setActiveTab] = useState<'live' | 'usage' | 'cost' | 'budgets'>('live');
   const [editingBudget, setEditingBudget] = useState<string | null>(null);
   const [budgetEdits, setBudgetEdits] = useState<Record<string, number>>({});
   const [toastMsg, setToastMsg] = useState<string | null>(null);
@@ -380,6 +380,7 @@ const Observability: React.FC = () => {
   // Time multiplier label
   const rangeLabel =
     timeRange === '24h' ? 'last 24 hours' : timeRange === '7d' ? 'last 7 days' : 'last 30 days';
+  const mult = timeRange === '24h' ? 1 : timeRange === '7d' ? 7 : 30;
 
   // Filtered consumers
   const filteredConsumers =
@@ -533,6 +534,7 @@ const Observability: React.FC = () => {
       {/* ── Tab Switcher ───────────────────────────────────────── */}
       <div style={{ display: 'flex', gap: 0, marginBottom: 16, borderBottom: `1px solid ${colors.border}` }}>
         {([
+          { key: 'live' as const, label: 'Live' },
           { key: 'usage' as const, label: 'Usage' },
           { key: 'cost' as const, label: 'Cost' },
           { key: 'budgets' as const, label: 'Budgets' },
@@ -557,6 +559,143 @@ const Observability: React.FC = () => {
           </button>
         ))}
       </div>
+
+      {/* ── Live Tab ────────────────────────────────────────────── */}
+      {activeTab === 'live' && (
+        <div>
+          {/* Live Stats */}
+          <div style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
+            <StatCard value={formatNumber(Math.round(1200000 * mult))} label="Total Requests" sub={rangeLabel} accent={colors.green} />
+            <StatCard value="47ms" label="Avg Latency (P50)" sub="All endpoints" accent={colors.green} />
+            <StatCard value={formatNumber(Math.round(2847 * mult))} label="Policy Blocks" sub={rangeLabel} accent={colors.amber} />
+            <StatCard value="156" label="Active Endpoints" sub="Healthy" accent={colors.green} />
+          </div>
+
+          <div style={{ display: 'flex', gap: 12 }}>
+            {/* Left — Provider distribution + Policy enforcement */}
+            <div style={{ flex: '0 0 60%', display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {/* Requests by Provider */}
+              <div style={card}>
+                <div style={sectionTitle}>Requests by Provider</div>
+                {[
+                  { label: 'Azure OpenAI', pct: 45, value: '520K', color: '#4F6BED' },
+                  { label: 'Anthropic', pct: 25, value: '290K', color: '#D4875E' },
+                  { label: 'Google Vertex', pct: 15, value: '174K', color: '#34A853' },
+                  { label: 'AWS Bedrock', pct: 10, value: '116K', color: '#FF9900' },
+                  { label: 'Self-Hosted', pct: 5, value: '58K', color: colors.purple },
+                ].map(p => (
+                  <div key={p.label} style={{ marginBottom: 10 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4, fontSize: 12 }}>
+                      <span style={{ color: colors.text }}>{p.label}</span>
+                      <span style={{ color: colors.textMuted }}>{p.pct}% ({p.value})</span>
+                    </div>
+                    <div style={{ height: 6, backgroundColor: 'rgba(212,168,67,0.06)', borderRadius: 3, overflow: 'hidden' }}>
+                      <div style={{ height: '100%', width: `${p.pct}%`, backgroundColor: p.color, borderRadius: 3 }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Policy Enforcement */}
+              <div style={card}>
+                <div style={sectionTitle}>Policy Enforcement</div>
+                {[
+                  { label: 'Passed', value: formatNumber(Math.round(1197153 * mult)), pct: 99.7, color: colors.green },
+                  { label: 'Rate Limited', value: formatNumber(Math.round(1892 * mult)), pct: 0.16, color: colors.amber },
+                  { label: 'Blocked (Safety)', value: formatNumber(Math.round(847 * mult)), pct: 0.07, color: colors.red },
+                  { label: 'Auth Denied', value: formatNumber(Math.round(108 * mult)), pct: 0.01, color: colors.red },
+                ].map(e => (
+                  <div key={e.label} style={{ marginBottom: 10 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4, fontSize: 12 }}>
+                      <span style={{ color: colors.text }}>{e.label}</span>
+                      <span style={{ color: colors.textMuted }}>{e.value}</span>
+                    </div>
+                    <div style={{ height: 6, backgroundColor: 'rgba(212,168,67,0.06)', borderRadius: 3, overflow: 'hidden' }}>
+                      <div style={{ height: '100%', width: `${Math.max(e.pct, 1.5)}%`, backgroundColor: e.color, borderRadius: 3 }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Right — Namespace health + Activity feed */}
+            <div style={{ flex: '0 0 calc(40% - 12px)', display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {/* Top Namespaces */}
+              <div style={card}>
+                <div style={sectionTitle}>Top Namespaces</div>
+                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <thead>
+                    <tr>
+                      {['Namespace', 'Requests', 'Tokens', 'Status'].map(h => (
+                        <th key={h} style={thStyle}>{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {[
+                      { name: 'retail-support', requests: '312K', tokens: '4.2B', status: 'Healthy' as const },
+                      { name: 'finance-analytics', requests: '245K', tokens: '3.1B', status: 'Healthy' as const },
+                      { name: 'hr-automation', requests: '189K', tokens: '2.8B', status: 'Warning' as const },
+                      { name: 'customer-ops', requests: '156K', tokens: '1.9B', status: 'Healthy' as const },
+                      { name: 'dev-sandbox', requests: '98K', tokens: '0.8B', status: 'Healthy' as const },
+                    ].map(ns => (
+                      <tr
+                        key={ns.name}
+                        onClick={() => navigate('/namespaces')}
+                        onMouseEnter={() => setHoveredRow(ns.name)}
+                        onMouseLeave={() => setHoveredRow(null)}
+                        style={{ cursor: 'pointer', backgroundColor: hoveredRow === ns.name ? '#1A1A1A' : 'transparent', transition: 'all 0.15s' }}
+                      >
+                        <td style={{ ...tdStyle, fontFamily: 'monospace', fontSize: 12, color: colors.gold }}>{ns.name}</td>
+                        <td style={tdStyle}>{ns.requests}</td>
+                        <td style={tdStyle}>{ns.tokens}</td>
+                        <td style={tdStyle}>
+                          <span style={{
+                            display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 600,
+                            color: ns.status === 'Healthy' ? colors.green : colors.amber,
+                            backgroundColor: ns.status === 'Healthy' ? 'rgba(74,222,128,0.12)' : 'rgba(245,158,11,0.12)',
+                            padding: '2px 8px', borderRadius: 4,
+                          }}>
+                            <span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: ns.status === 'Healthy' ? colors.green : colors.amber }} />
+                            {ns.status}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Recent Activity */}
+              <div style={card}>
+                <div style={sectionTitle}>Recent Activity</div>
+                {[
+                  { text: 'Rate limit triggered — finance-analytics namespace', time: '2 min ago', color: colors.amber },
+                  { text: 'New model endpoint registered — claude-sonnet-4-20250514', time: '15 min ago', color: '#60A5FA' },
+                  { text: 'Backup activated — Azure OpenAI East US → West US', time: '32 min ago', color: colors.red },
+                  { text: 'Content safety block — prompt injection detected', time: '1h ago', color: colors.red },
+                  { text: 'Credential rotation completed — retail-support namespace', time: '2h ago', color: colors.green },
+                ].map((a, i, arr) => (
+                  <div
+                    key={i}
+                    onClick={() => navigate('/logs')}
+                    style={{
+                      display: 'flex', alignItems: 'flex-start', gap: 8, padding: '8px 0',
+                      cursor: 'pointer', borderBottom: i < arr.length - 1 ? `1px solid ${colors.border}` : 'none',
+                    }}
+                  >
+                    <span style={{ width: 7, height: 7, borderRadius: '50%', backgroundColor: a.color, flexShrink: 0, marginTop: 4 }} />
+                    <div style={{ flex: 1 }}>
+                      <div style={{ color: colors.text, fontSize: 12, lineHeight: 1.4 }}>{a.text}</div>
+                      <div style={{ color: colors.textDim, fontSize: 11, marginTop: 2 }}>{a.time}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Stats Grid (Usage + Cost tabs) ──────────────────── */}
       {(activeTab === 'usage' || activeTab === 'cost') && (

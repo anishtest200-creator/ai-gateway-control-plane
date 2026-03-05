@@ -7,7 +7,6 @@ import DocsPage from './pages/DocsPage'
 import DemoPage from './pages/DemoPage'
 import GovernanceDashboard from './pages/GovernanceDashboard'
 import TestConsole from './pages/TestConsole'
-import Traffic from './pages/Traffic'
 import Credentials from './pages/Credentials'
 import Assets from './pages/Assets'
 import Routing from './pages/Routing'
@@ -39,7 +38,6 @@ function App() {
     <Routes>
       <Route path="/" element={<Layout onSignOut={() => setIsAuthenticated(false)} />}>
         <Route index element={<GovernanceDashboard />} />
-        <Route path="traffic" element={<Traffic />} />
         <Route path="routing" element={<Routing />} />
         <Route path="policies" element={<Policies />} />
         <Route path="credentials" element={<Credentials />} />

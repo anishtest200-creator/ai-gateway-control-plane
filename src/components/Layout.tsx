@@ -363,17 +363,11 @@ const navItems: NavItem[] = [
     activeIcon: <Shield24Filled />,
   },
   {
-    path: '/traffic',
-    label: 'Traffic',
-    icon: <DataUsage24Regular />,
-    activeIcon: <DataUsage24Filled />,
-    section: 'Monitor',
-  },
-  {
     path: '/observability',
     label: 'Metrics',
     icon: <DataUsage24Regular />,
     activeIcon: <DataUsage24Filled />,
+    section: 'Monitor',
   },
   {
     path: '/logs',
@@ -405,7 +399,6 @@ const navItems: NavItem[] = [
 
 const pageTitles: Record<string, string> = {
   '/': 'Overview',
-  '/traffic': 'Traffic',
   '/routing': 'Routing',
   '/policies': 'Policies',
   '/credentials': 'Credentials',
@@ -419,12 +412,11 @@ const pageTitles: Record<string, string> = {
 
 const pageSubtitles: Record<string, string> = {
   '/': 'Gateway health, policy coverage, and alerts at a glance',
-  '/traffic': 'Real-time request volume, latency, and error rates',
   '/routing': 'Multi-provider rules, backup chains, and load balancing',
   '/policies': 'Configure runtime rules, asset access controls, and safety guardrails across your AI gateway.',
   '/credentials': 'API keys, managed identities, and secret rotation',
   '/assets': 'Registered models, tools, and agents',
-  '/observability': 'Usage metrics, cost attribution, and trend analysis',
+  '/observability': 'Live traffic, usage metrics, cost attribution, and budgets',
   '/logs': 'Complete request and response audit trail',
   '/namespaces': 'Team boundaries, quotas, and isolation policies',
   '/access': 'Roles, permissions, and identity management',
@@ -467,7 +459,7 @@ const Layout: React.FC<LayoutProps> = ({ onSignOut }) => {
   }, []);
 
   const getPageTitle = (): string => {
-    return pageTitles[location.pathname] || 'Traffic Dashboard';
+    return pageTitles[location.pathname] || 'Overview';
   };
 
   let lastSection = '';

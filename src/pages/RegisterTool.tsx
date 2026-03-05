@@ -596,7 +596,7 @@ function RegisterTool({ onClose, onComplete }: { onClose: () => void; onComplete
         <>
           <label style={{ ...label, marginBottom: 10 }}>Registration Source</label>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
-            {toolSources.map((s) => (
+            {toolSources.filter((s) => !(form.toolType === 'mcp' && s.id === 'openapi')).map((s) => (
               <div
                 key={s.id}
                 style={{

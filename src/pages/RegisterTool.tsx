@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { CSSProperties } from 'react';
+import InlineCredentialForm from '../components/InlineCredentialForm';
 
 // --- Types ---
 type ToolType = 'mcp' | 'rest' | 'saas';
@@ -486,6 +487,9 @@ function RegisterTool({ onClose, onComplete }: { onClose: () => void; onComplete
   const [form, setForm] = useState<FormData>(initialFormData);
   const [tagInput, setTagInput] = useState('');
   const [domainInput, setDomainInput] = useState('');
+  const [showInlineCred, setShowInlineCred] = useState<string | null>(null);
+  const [dynamicCredentials, setDynamicCredentials] = useState<string[]>([]);
+  const allCredentialOptions = [...credentialOptions, ...dynamicCredentials];
 
   const totalSteps = 6;
 
@@ -929,11 +933,17 @@ function RegisterTool({ onClose, onComplete }: { onClose: () => void; onComplete
           </div>
           <div style={fieldGroup}>
             <label style={label}>Credential</label>
-            <select style={select} value={form.apiKeyCredential} onChange={(e) => set('apiKeyCredential', e.target.value)}>
+            <select style={select} value={form.apiKeyCredential} onChange={(e) => { if (e.target.value === '__new') { setShowInlineCred('apiKeyCredential'); } else { set('apiKeyCredential', e.target.value); } }}>
               <option value="">Select existing credential…</option>
-              {credentialOptions.map((c) => <option key={c} value={c}>{c}</option>)}
+              {allCredentialOptions.map((c) => <option key={c} value={c}>{c}</option>)}
               <option value="__new">+ Create new credential</option>
             </select>
+            {showInlineCred === 'apiKeyCredential' && (
+              <InlineCredentialForm
+                onSave={(name) => { setDynamicCredentials(prev => [...prev, name]); set('apiKeyCredential', name); setShowInlineCred(null); }}
+                onCancel={() => { set('apiKeyCredential', ''); setShowInlineCred(null); }}
+              />
+            )}
           </div>
         </>
       )}
@@ -946,11 +956,17 @@ function RegisterTool({ onClose, onComplete }: { onClose: () => void; onComplete
           </div>
           <div style={fieldGroup}>
             <label style={label}>Client ID (from credential store)</label>
-            <select style={select} value={form.oauthClientId} onChange={(e) => set('oauthClientId', e.target.value)}>
+            <select style={select} value={form.oauthClientId} onChange={(e) => { if (e.target.value === '__new') { setShowInlineCred('oauthClientId'); } else { set('oauthClientId', e.target.value); } }}>
               <option value="">Select credential…</option>
-              {credentialOptions.map((c) => <option key={c} value={c}>{c}</option>)}
+              {allCredentialOptions.map((c) => <option key={c} value={c}>{c}</option>)}
               <option value="__new">+ Create new credential</option>
             </select>
+            {showInlineCred === 'oauthClientId' && (
+              <InlineCredentialForm
+                onSave={(name) => { setDynamicCredentials(prev => [...prev, name]); set('oauthClientId', name); setShowInlineCred(null); }}
+                onCancel={() => { set('oauthClientId', ''); setShowInlineCred(null); }}
+              />
+            )}
           </div>
           <div style={fieldGroup}>
             <label style={label}>Scopes</label>
@@ -1007,11 +1023,17 @@ function RegisterTool({ onClose, onComplete }: { onClose: () => void; onComplete
           </div>
           <div style={fieldGroup}>
             <label style={label}>Credential Reference</label>
-            <select style={select} value={form.customHeaderCredential} onChange={(e) => set('customHeaderCredential', e.target.value)}>
+            <select style={select} value={form.customHeaderCredential} onChange={(e) => { if (e.target.value === '__new') { setShowInlineCred('customHeaderCredential'); } else { set('customHeaderCredential', e.target.value); } }}>
               <option value="">Select credential…</option>
-              {credentialOptions.map((c) => <option key={c} value={c}>{c}</option>)}
+              {allCredentialOptions.map((c) => <option key={c} value={c}>{c}</option>)}
               <option value="__new">+ Create new credential</option>
             </select>
+            {showInlineCred === 'customHeaderCredential' && (
+              <InlineCredentialForm
+                onSave={(name) => { setDynamicCredentials(prev => [...prev, name]); set('customHeaderCredential', name); setShowInlineCred(null); }}
+                onCancel={() => { set('customHeaderCredential', ''); setShowInlineCred(null); }}
+              />
+            )}
           </div>
         </>
       )}

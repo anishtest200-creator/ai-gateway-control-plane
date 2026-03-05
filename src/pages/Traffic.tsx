@@ -29,6 +29,7 @@ const card: CSSProperties = {
   border: `1px solid ${colors.border}`,
   borderRadius: 8,
   padding: 16,
+  boxShadow: '0 2px 8px rgba(0,0,0,0.35), 0 1px 3px rgba(0,0,0,0.25)',
 };
 
 const sectionTitle: CSSProperties = {

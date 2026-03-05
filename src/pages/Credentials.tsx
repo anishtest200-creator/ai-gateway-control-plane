@@ -270,6 +270,7 @@ const card: CSSProperties = {
   borderRadius: 8,
   border: '1px solid rgba(129, 140, 248, 0.10)',
   padding: 20,
+  boxShadow: '0 2px 8px rgba(0,0,0,0.35), 0 1px 3px rgba(0,0,0,0.25)',
 };
 
 const statusColors: Record<string, string> = {

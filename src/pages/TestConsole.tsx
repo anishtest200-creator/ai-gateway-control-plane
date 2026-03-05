@@ -505,6 +505,7 @@ const styles: Record<string, React.CSSProperties> = {
     borderRadius: '6px',
     padding: '10px',
     textAlign: 'center' as const,
+    boxShadow: '0 2px 8px rgba(0,0,0,0.35), 0 1px 3px rgba(0,0,0,0.25)',
   },
   metricValue: {
     fontSize: '18px',

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { CSSProperties } from 'react';
 import InlineCredentialForm from '../components/InlineCredentialForm';
+import ConnectFoundryPanel from '../components/ConnectFoundryPanel';
 
 // --- Types ---
 type AgentSource = 'foundry' | 'bedrock' | 'vertex' | 'a2a' | 'rapi' | 'custom';
@@ -489,6 +490,7 @@ function RegisterAgent({ onClose, onComplete }: { onClose: () => void; onComplet
   const [showInlineCred, setShowInlineCred] = useState<string | null>(null);
   const [dynamicCredentials, setDynamicCredentials] = useState<string[]>([]);
   const allCredentialOptions = [...credentialOptions, ...dynamicCredentials];
+  const [connectedFoundryProjects, setConnectedFoundryProjects] = useState<string[]>(['contoso-ai-prod', 'retail-ai']);
 
   const totalSteps = 7;
   const canNext = (): boolean => {
@@ -600,14 +602,12 @@ function RegisterAgent({ onClose, onComplete }: { onClose: () => void; onComplet
         {/* Foundry */}
         {form.source === 'foundry' && (
           <>
-            <div style={fieldGroup}>
-              <label style={label}>Foundry Project</label>
-              <select style={select} value={form.foundryProject} onChange={(e) => set('foundryProject', e.target.value)}>
-                <option value="">Select Foundry project…</option>
-                <option value="contoso-ai-prod">contoso-ai-prod</option>
-                <option value="retail-ai">retail-ai</option>
-              </select>
-            </div>
+            <ConnectFoundryPanel
+              connectedProjects={connectedFoundryProjects}
+              selectedProject={form.foundryProject}
+              onSelectProject={(p) => set('foundryProject', p)}
+              onConnectProject={(p) => setConnectedFoundryProjects((prev) => [...prev, p])}
+            />
             {form.foundryProject && (
               <div style={fieldGroup}>
                 <label style={label}>Auto-discovered Agents</label>

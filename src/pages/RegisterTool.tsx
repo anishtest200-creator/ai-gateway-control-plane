@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { CSSProperties } from 'react';
 import InlineCredentialForm from '../components/InlineCredentialForm';
+import ConnectFoundryPanel from '../components/ConnectFoundryPanel';
 
 // --- Types ---
 type ToolType = 'mcp' | 'rest' | 'saas';
@@ -485,6 +486,7 @@ function RegisterTool({ onClose, onComplete }: { onClose: () => void; onComplete
   const [showInlineCred, setShowInlineCred] = useState<string | null>(null);
   const [dynamicCredentials, setDynamicCredentials] = useState<string[]>([]);
   const allCredentialOptions = [...credentialOptions, ...dynamicCredentials];
+  const [connectedFoundryProjects, setConnectedFoundryProjects] = useState<string[]>(['contoso-ai-prod', 'retail-ai']);
 
   const totalSteps = 6;
 
@@ -697,14 +699,12 @@ function RegisterTool({ onClose, onComplete }: { onClose: () => void; onComplete
         {/* MCP — Foundry */}
         {key === 'mcp-foundry' && (
           <>
-            <div style={fieldGroup}>
-              <label style={label}>Foundry Project</label>
-              <select style={select} value={form.foundryProject} onChange={(e) => set('foundryProject', e.target.value)}>
-                <option value="">Select Foundry project…</option>
-                <option value="contoso-ai-prod">contoso-ai-prod</option>
-                <option value="retail-ai">retail-ai</option>
-              </select>
-            </div>
+            <ConnectFoundryPanel
+              connectedProjects={connectedFoundryProjects}
+              selectedProject={form.foundryProject}
+              onSelectProject={(p) => set('foundryProject', p)}
+              onConnectProject={(p) => setConnectedFoundryProjects((prev) => [...prev, p])}
+            />
             {form.foundryProject && (
               <div style={fieldGroup}>
                 <label style={label}>Available MCP Servers</label>
@@ -858,14 +858,12 @@ function RegisterTool({ onClose, onComplete }: { onClose: () => void; onComplete
         {/* Generic fallback for unhandled combos (foundry for rest/saas) */}
         {form.toolType === 'rest' && form.toolSource === 'foundry' && (
           <>
-            <div style={fieldGroup}>
-              <label style={label}>Foundry Project</label>
-              <select style={select} value={form.foundryProject} onChange={(e) => set('foundryProject', e.target.value)}>
-                <option value="">Select Foundry project…</option>
-                <option value="contoso-ai-prod">contoso-ai-prod</option>
-                <option value="retail-ai">retail-ai</option>
-              </select>
-            </div>
+            <ConnectFoundryPanel
+              connectedProjects={connectedFoundryProjects}
+              selectedProject={form.foundryProject}
+              onSelectProject={(p) => set('foundryProject', p)}
+              onConnectProject={(p) => setConnectedFoundryProjects((prev) => [...prev, p])}
+            />
             <div style={infoBox}>Import from Foundry will discover REST API tools registered in your project and add them to the governed catalog.</div>
           </>
         )}

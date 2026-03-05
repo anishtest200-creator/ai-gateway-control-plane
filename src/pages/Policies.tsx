@@ -182,14 +182,14 @@ const policies: Policy[] = _basePolicies.map(p => ({
 
 const accessRules: AssetAccessRule[] = [
   { id: 'ar1', name: 'Model Invoke RBAC', description: 'Only users with AI-Developer or ML-Engineer role can invoke GPT-4 class models.', type: 'who', assetType: 'Model', namespace: 'global', enabled: true, config: { identities: ['AI-Developer', 'ML-Engineer', 'Admin'] } },
-  { id: 'ar2', name: 'Tool Execute Permissions', description: 'Restrict tool execution to service principals and managed identities only.', type: 'who', assetType: 'Tool', namespace: 'production', enabled: true, config: { identities: ['ServicePrincipal', 'ManagedIdentity'] } },
-  { id: 'ar3', name: 'Agent Operator Role', description: 'Only Agent-Operator and Admin roles can invoke or configure production agents.', type: 'who', assetType: 'Agent', namespace: 'production', enabled: true, config: { identities: ['Agent-Operator', 'Admin'] } },
+  { id: 'ar2', name: 'Tool Execute Permissions', description: 'Restrict tool execution to service principals and managed identities only.', type: 'who', assetType: 'Tool', namespace: 'global', enabled: true, config: { identities: ['ServicePrincipal', 'ManagedIdentity'] } },
+  { id: 'ar3', name: 'Agent Operator Role', description: 'Only Agent-Operator and Admin roles can invoke or configure production agents.', type: 'who', assetType: 'Agent', namespace: 'global', enabled: true, config: { identities: ['Agent-Operator', 'Admin'] } },
   { id: 'ar4', name: 'Read-Only Analyst Access', description: 'Analyst role can query models but cannot modify configurations or deploy.', type: 'who', assetType: 'Model', namespace: 'global', enabled: true, config: { identities: ['Analyst'] } },
-  { id: 'ar5', name: 'Internal Domain Only', description: 'Restrict all model invocations to identities from @contoso.com domain.', type: 'who', assetType: 'Model', namespace: 'global', enabled: true, config: { identities: ['contoso.com', 'contoso.onmicrosoft.com'] } },
-  { id: 'ar6', name: 'Cross-Namespace Model Import', description: 'Allow staging namespace to import and use models from production namespace.', type: 'where', assetType: 'All', namespace: 'staging', enabled: true, config: { sourceNamespace: 'production', allowedNamespaces: ['staging'] } },
-  { id: 'ar7', name: 'Agent Sharing Policy', description: 'Restrict agent imports to approved partner and production namespaces only.', type: 'where', assetType: 'All', namespace: 'global', enabled: true, config: { sourceNamespace: 'global', allowedNamespaces: ['partners', 'production'] } },
-  { id: 'ar8', name: 'Sandbox Isolation', description: 'Sandbox namespace cannot access production or staging models, tools, or agents.', type: 'where', assetType: 'All', namespace: 'sandbox', enabled: true, config: { sourceNamespace: 'sandbox', allowedNamespaces: ['sandbox', 'dev'] } },
-  { id: 'ar9', name: 'Tool Catalog Sharing', description: 'Allow all namespaces to discover shared tools but restrict execution to approved ones.', type: 'where', assetType: 'All', namespace: 'global', enabled: true, config: { sourceNamespace: 'global', allowedNamespaces: ['production', 'staging', 'dev'] } },
+  { id: 'ar5', name: 'Internal Domain Only', description: 'Restrict all model invocations to identities from @contoso.com domain.', type: 'who', assetType: 'All', namespace: 'global', enabled: true, config: { identities: ['contoso.com', 'contoso.onmicrosoft.com'] } },
+  { id: 'ar6', name: 'Cross-Namespace Model Import', description: 'Allow staging namespace to import and use models from production.', type: 'where', assetType: 'Namespace', namespace: 'global', enabled: true, config: { assignedAssets: ['staging', 'production'] } },
+  { id: 'ar7', name: 'Agent Sharing Policy', description: 'Restrict agent access to approved partner and production namespaces only.', type: 'where', assetType: 'Agent', namespace: 'global', enabled: true, config: { assignedAssets: ['Support Summarizer', 'Financial Analyst Agent'] } },
+  { id: 'ar8', name: 'Sandbox Isolation', description: 'Sandbox namespace cannot access production or staging assets.', type: 'where', assetType: 'Namespace', namespace: 'global', enabled: true, config: { assignedAssets: ['sandbox', 'dev-sandbox'] } },
+  { id: 'ar9', name: 'Tool Catalog Sharing', description: 'Control which tools are discoverable and executable across namespaces.', type: 'where', assetType: 'Tool', namespace: 'global', enabled: true, config: { assignedAssets: ['Content Moderator', 'CRM Lookup Tool', 'Jira Issue Tracker'] } },
 ]
 
 const guardrails: RAIGuardrail[] = [
@@ -294,7 +294,7 @@ const categoryConfig: Record<PolicyCategory, { label: string; color: string; bg:
 
 const accessRuleConfig: Record<AccessRuleType, { label: string; color: string; bg: string; icon: string; desc: string }> = {
   'who': { label: 'Who Can Access', color: '#c084fc', bg: '#2d1a4d', icon: '🔑', desc: 'Control access by roles, groups, service principals, or domains' },
-  'where': { label: 'Where It\'s Accessible', color: '#4ade80', bg: '#1a3a2a', icon: '🛡', desc: 'Control which namespaces can share, import, and use assets' },
+  'where': { label: 'Where It\'s Accessible', color: '#4ade80', bg: '#1a3a2a', icon: '🛡', desc: 'Define which assets are accessible — assign specific models, tools, agents, or namespaces' },
 }
 
 const severityConfig: Record<'block' | 'warn' | 'log', { color: string; bg: string; label: string }> = {
@@ -312,8 +312,7 @@ interface AccessRuleTemplate {
   icon: string; name: string; description: string; tags: string[]
   prefill: {
     type: AccessRuleType; description: string
-    assetType?: string; namespace?: string; identities?: string
-    sourceNamespace?: string; allowedNamespaces?: string
+    assetType?: string; identities?: string
   }
 }
 
@@ -329,11 +328,11 @@ interface GuardrailTemplate {
 
 const accessRuleTemplates: AccessRuleTemplate[] = [
   { icon: '🏢', name: 'Restrict to Internal Identities', description: 'Only internal roles and domains can access assets', tags: ['rbac', 'identity'], prefill: { type: 'who', description: 'Only internal roles and domains can access assets', identities: 'Internal-User, contoso.com' } },
-  { icon: '🔐', name: 'Production Model RBAC', description: 'Require ML-Engineer or Admin role for production models', tags: ['rbac', 'production'], prefill: { type: 'who', description: 'Require ML-Engineer or Admin role for production models', assetType: 'Model', namespace: 'production', identities: 'ML-Engineer, Admin' } },
+  { icon: '🔐', name: 'Production Model RBAC', description: 'Require ML-Engineer or Admin role for production models', tags: ['rbac', 'production'], prefill: { type: 'who', description: 'Require ML-Engineer or Admin role for production models', assetType: 'Model', identities: 'ML-Engineer, Admin' } },
   { icon: '⚙️', name: 'Service Principal Only', description: 'Restrict to service principals and managed identities', tags: ['service-principal', 'identity'], prefill: { type: 'who', description: 'Restrict to service principals and managed identities', identities: 'ServicePrincipal, ManagedIdentity' } },
-  { icon: '🔒', name: 'Sandbox Isolation', description: 'Prevent sandbox from accessing production namespaces', tags: ['namespace', 'isolation'], prefill: { type: 'where', description: 'Prevent sandbox from accessing production namespaces', sourceNamespace: 'sandbox', allowedNamespaces: 'sandbox, dev' } },
-  { icon: '🔄', name: 'Cross-Environment Promotion', description: 'Allow staging to import from production', tags: ['cross-environment', 'promotion'], prefill: { type: 'where', description: 'Allow staging to import from production', sourceNamespace: 'production', allowedNamespaces: 'staging' } },
-  { icon: '🤝', name: 'Partner Namespace Access', description: 'Grant partner namespaces read access to shared assets', tags: ['partner', 'namespace'], prefill: { type: 'where', description: 'Grant partner namespaces read access to shared assets', sourceNamespace: 'global', allowedNamespaces: 'partners' } },
+  { icon: '🔒', name: 'Sandbox Isolation', description: 'Prevent sandbox from accessing production assets', tags: ['namespace', 'isolation'], prefill: { type: 'where', description: 'Prevent sandbox from accessing production assets', assetType: 'Namespace' } },
+  { icon: '🔄', name: 'Cross-Environment Promotion', description: 'Control which assets can move between environments', tags: ['cross-environment', 'promotion'], prefill: { type: 'where', description: 'Control which assets can move between environments', assetType: 'All' } },
+  { icon: '🤝', name: 'Partner Asset Access', description: 'Define which assets partner namespaces can access', tags: ['partner', 'access'], prefill: { type: 'where', description: 'Define which assets partner namespaces can access', assetType: 'All' } },
 ]
 
 const runtimeRuleTemplates: RuntimeRuleTemplate[] = [
@@ -416,9 +415,9 @@ const Policies: React.FC = () => {
   const [accessRuleStep, setAccessRuleStep] = useState(1)
   const [accessRuleList, setAccessRuleList] = useState<AssetAccessRule[]>(accessRules)
   const [accessRuleForm, setAccessRuleForm] = useState<{
-    name: string; type: AccessRuleType; description: string; namespace: string;
-    assetType: string; identities: string; sourceNamespace: string; allowedNamespaces: string;
-  }>({ name: '', type: 'who', description: '', namespace: 'global', assetType: 'Model', identities: '', sourceNamespace: 'global', allowedNamespaces: '' })
+    name: string; type: AccessRuleType; description: string;
+    assetType: string; identities: string;
+  }>({ name: '', type: 'who', description: '', assetType: 'Model', identities: '' })
   const [accessRuleAssignments, setAccessRuleAssignments] = useState<Record<string, boolean>>({})
 
   const allAssets = [
@@ -434,31 +433,38 @@ const Policies: React.FC = () => {
     { name: 'CRM Lookup Tool', type: 'Tool', namespace: 'retail-support' },
     { name: 'Jira Issue Tracker', type: 'Tool', namespace: 'dev-sandbox' },
     { name: 'HR Database Connector', type: 'Tool', namespace: 'hr-automation' },
+    { name: 'retail-support', type: 'Namespace', namespace: 'retail-support' },
+    { name: 'finance-analytics', type: 'Namespace', namespace: 'finance-analytics' },
+    { name: 'customer-ops', type: 'Namespace', namespace: 'customer-ops' },
+    { name: 'hr-automation', type: 'Namespace', namespace: 'hr-automation' },
+    { name: 'dev-sandbox', type: 'Namespace', namespace: 'dev-sandbox' },
+    { name: 'production', type: 'Namespace', namespace: 'production' },
+    { name: 'staging', type: 'Namespace', namespace: 'staging' },
+    { name: 'sandbox', type: 'Namespace', namespace: 'sandbox' },
+    { name: 'partners', type: 'Namespace', namespace: 'partners' },
   ]
-  const allNs = ['global', 'retail-support', 'finance-analytics', 'customer-ops', 'hr-automation', 'dev-sandbox', 'production', 'staging', 'sandbox', 'partners']
+
 
   const handleCreateAccessRule = () => {
     const f = accessRuleForm
     const configMap: Record<AccessRuleType, Record<string, unknown>> = {
       'who': { identities: f.identities.split(',').map(s => s.trim()).filter(Boolean) },
-      'where': { sourceNamespace: f.sourceNamespace, allowedNamespaces: f.allowedNamespaces.split(',').map(s => s.trim()).filter(Boolean) },
+      'where': {},
     }
+    const assigned = Object.entries(accessRuleAssignments).filter(([, v]) => v).map(([k]) => k)
     const newRule: AssetAccessRule = {
       id: 'ar' + Date.now(), name: f.name, description: f.description, type: f.type,
-      assetType: f.type === 'who' ? f.assetType : 'All',
-      namespace: f.type === 'who' ? f.namespace : f.sourceNamespace,
-      enabled: true, config: configMap[f.type],
+      assetType: f.assetType, namespace: 'global',
+      enabled: true, config: { ...configMap[f.type], assignedAssets: assigned },
     }
     setAccessRuleList(prev => [...prev, newRule])
     setRuleStates(s => ({ ...s, [newRule.id]: true }))
-    const assigned = Object.values(accessRuleAssignments).filter(Boolean).length
     setShowCreateFlow(false)
     setCreateFlowCategory(null)
     resetCreateFlowState()
     setAccessRuleStep(1)
-    setAccessRuleForm({ name: '', type: 'who', description: '', namespace: 'global', assetType: 'Model', identities: '', sourceNamespace: 'global', allowedNamespaces: '' })
+    setAccessRuleForm({ name: '', type: 'who', description: '', assetType: 'Model', identities: '' })
     setAccessRuleAssignments({})
-    void assigned // assignment data would be sent to backend
   }
 
   const handleCreatePolicy = () => {
@@ -517,18 +523,14 @@ const Policies: React.FC = () => {
         let type: AccessRuleType = 'who'
         let name = 'AI-Generated Access Rule'
         const description = aiComposeInput
-        let namespace = 'global'
         let assetType = 'Model'
         let identities = ''
-        let sourceNamespace = 'global'
-        let allowedNamespaces = ''
 
-        if (input.includes('namespace') || input.includes('staging') || input.includes('sandbox') || input.includes('import') || input.includes('cross-environment')) {
+        if (input.includes('namespace') || input.includes('staging') || input.includes('sandbox') || input.includes('import') || input.includes('cross-environment') || input.includes('accessible')) {
           type = 'where'
-          name = 'Namespace Access Policy'
-          if (input.includes('sandbox')) { sourceNamespace = 'sandbox'; allowedNamespaces = 'sandbox, dev' }
-          else if (input.includes('staging')) { sourceNamespace = 'production'; allowedNamespaces = 'staging' }
-          else { sourceNamespace = 'global'; allowedNamespaces = 'production, staging' }
+          name = 'Asset Access Scope'
+          if (input.includes('namespace')) assetType = 'Namespace'
+          else assetType = 'All'
         } else {
           type = 'who'
           if (input.includes('engineer') || input.includes('admin') || input.includes('role')) {
@@ -550,10 +552,10 @@ const Policies: React.FC = () => {
           }
           if (input.includes('agent')) assetType = 'Agent'
           else if (input.includes('tool')) assetType = 'Tool'
-          if (input.includes('production')) namespace = 'production'
+          else if (input.includes('namespace')) assetType = 'Namespace'
         }
 
-        setAccessRuleForm(f => ({ ...f, name, type, description, namespace, assetType, identities, sourceNamespace, allowedNamespaces }))
+        setAccessRuleForm(f => ({ ...f, name, type, description, assetType, identities }))
       } else if (createFlowCategory === 'runtime') {
         let category: PolicyCategory = 'authentication'
         let enforcement = 'Enforce'
@@ -782,15 +784,7 @@ const Policies: React.FC = () => {
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 4 }}>
                         <span style={{ color: '#fff', fontWeight: 600, fontSize: 13 }}>{r.name}</span>
-                        {r.type === 'who' && (
-                          <span style={badge(colors.goldMuted, colors.gold)}>{r.assetType}</span>
-                        )}
-                        {r.type === 'where' && Boolean(r.config.sourceNamespace) && (
-                          <span style={badge('rgba(212,168,67,0.12)', colors.gold)}>from: {String(r.config.sourceNamespace)}</span>
-                        )}
-                        {r.type === 'who' && r.namespace !== 'global' && (
-                          <span style={badge('rgba(139,92,246,0.15)', '#a78bfa')}>{r.namespace}</span>
-                        )}
+                        <span style={badge(colors.goldMuted, colors.gold)}>{r.assetType}</span>
                       </div>
                       <div style={{ color: colors.textMuted, fontSize: 12, marginBottom: 8, lineHeight: 1.4 }}>{r.description}</div>
                       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', fontSize: 11 }}>
@@ -815,31 +809,25 @@ const Policies: React.FC = () => {
     switch (rule.type) {
       case 'who':
         return (
-          <>
-            <span style={detailStyle}>
-              Identities:{' '}
-              {(cfg.identities as string[]).map(id => (
-                <span key={id} style={badge('rgba(192,132,252,0.12)', '#c084fc')}>{id}</span>
-              ))}
-            </span>
-          </>
+          <span style={detailStyle}>
+            Identities:{' '}
+            {(cfg.identities as string[]).map(id => (
+              <span key={id} style={badge('rgba(192,132,252,0.12)', '#c084fc')}>{id}</span>
+            ))}
+          </span>
         )
-      case 'where':
+      case 'where': {
+        const assigned = (cfg.assignedAssets as string[] | undefined) ?? []
         return (
-          <>
-            {cfg.sourceNamespace && (
-              <span style={detailStyle}>
-                From: <span style={badge('rgba(212,168,67,0.12)', colors.gold)}>{cfg.sourceNamespace as string}</span> →
-              </span>
-            )}
-            <span style={detailStyle}>
-              Can access:{' '}
-              {(cfg.allowedNamespaces as string[]).map(ns => (
-                <span key={ns} style={badge('rgba(74,222,128,0.12)', '#4ade80')}>{ns}</span>
-              ))}
-            </span>
-          </>
+          <span style={detailStyle}>
+            Applies to:{' '}
+            {assigned.length > 0
+              ? assigned.map(a => <span key={a} style={badge('rgba(74,222,128,0.12)', '#4ade80')}>{a}</span>)
+              : <span style={{ color: '#888' }}>all assets (no specific assignment)</span>
+            }
+          </span>
         )
+      }
       default:
         return null
     }
@@ -1348,10 +1336,7 @@ const Policies: React.FC = () => {
                               ...f, name: at.name, type: at.prefill.type,
                               description: at.prefill.description,
                               assetType: at.prefill.assetType ?? f.assetType,
-                              namespace: at.prefill.namespace ?? f.namespace,
                               identities: at.prefill.identities ?? '',
-                              sourceNamespace: at.prefill.sourceNamespace ?? f.sourceNamespace,
-                              allowedNamespaces: at.prefill.allowedNamespaces ?? '',
                             }))
                           } else {
                             const rt = t as RuntimeRuleTemplate | GuardrailTemplate
@@ -1618,43 +1603,23 @@ const Policies: React.FC = () => {
                         <textarea value={accessRuleForm.description} onChange={e => setAccessRuleForm(f => ({ ...f, description: e.target.value }))} rows={2} placeholder={accessRuleForm.type === 'who' ? 'e.g. Only ML engineers and admins can invoke production GPT-4 models' : 'e.g. Staging can import models from production but not from sandbox'} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit', resize: 'vertical' as const, boxSizing: 'border-box' as const }} />
                       </div>
                       {/* Type-specific fields */}
+                      <div>
+                        <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Asset Type</label>
+                        <select value={accessRuleForm.assetType} onChange={e => setAccessRuleForm(f => ({ ...f, assetType: e.target.value }))} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit' }}>
+                          <option>Model</option><option>Tool</option><option>Agent</option><option>Namespace</option><option>All</option>
+                        </select>
+                      </div>
                       {accessRuleForm.type === 'who' && (
-                        <>
-                          <div style={{ display: 'flex', gap: 10 }}>
-                            <div style={{ flex: 1 }}>
-                              <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Asset Type</label>
-                              <select value={accessRuleForm.assetType} onChange={e => setAccessRuleForm(f => ({ ...f, assetType: e.target.value }))} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit' }}>
-                                <option>Model</option><option>Tool</option><option>Agent</option><option>All</option>
-                              </select>
-                            </div>
-                            <div style={{ flex: 1 }}>
-                              <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Namespace Scope</label>
-                              <select value={accessRuleForm.namespace} onChange={e => setAccessRuleForm(f => ({ ...f, namespace: e.target.value }))} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit' }}>
-                                {allNs.map(ns => <option key={ns} value={ns}>{ns}</option>)}
-                              </select>
-                            </div>
-                          </div>
-                          <div>
-                            <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Allowed Identities <span style={{ color: '#666' }}>(roles, groups, service principals, domains — comma-separated)</span></label>
-                            <input value={accessRuleForm.identities} onChange={e => setAccessRuleForm(f => ({ ...f, identities: e.target.value }))} placeholder="e.g. AI-Developer, ML-Engineer, contoso.com" style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' as const }} />
-                            {accessRuleForm.identities && <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginTop: 6 }}>{accessRuleForm.identities.split(',').map(r => r.trim()).filter(Boolean).map(r => <span key={r} style={badge('rgba(192,132,252,0.12)', '#c084fc')}>{r}</span>)}</div>}
-                          </div>
-                        </>
+                        <div>
+                          <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Allowed Identities <span style={{ color: '#666' }}>(roles, groups, service principals, domains — comma-separated)</span></label>
+                          <input value={accessRuleForm.identities} onChange={e => setAccessRuleForm(f => ({ ...f, identities: e.target.value }))} placeholder="e.g. AI-Developer, ML-Engineer, contoso.com" style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' as const }} />
+                          {accessRuleForm.identities && <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginTop: 6 }}>{accessRuleForm.identities.split(',').map(r => r.trim()).filter(Boolean).map(r => <span key={r} style={badge('rgba(192,132,252,0.12)', '#c084fc')}>{r}</span>)}</div>}
+                        </div>
                       )}
                       {accessRuleForm.type === 'where' && (
-                        <>
-                          <div>
-                            <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Source Namespace <span style={{ color: '#666' }}>(where the assets originate)</span></label>
-                            <select value={accessRuleForm.sourceNamespace} onChange={e => setAccessRuleForm(f => ({ ...f, sourceNamespace: e.target.value }))} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit' }}>
-                              {allNs.map(ns => <option key={ns} value={ns}>{ns}</option>)}
-                            </select>
-                          </div>
-                          <div>
-                            <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Allowed Target Namespaces <span style={{ color: '#666' }}>(who can consume these assets — comma-separated)</span></label>
-                            <input value={accessRuleForm.allowedNamespaces} onChange={e => setAccessRuleForm(f => ({ ...f, allowedNamespaces: e.target.value }))} placeholder="e.g. production, staging" style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' as const }} />
-                            {accessRuleForm.allowedNamespaces && <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginTop: 6 }}>{accessRuleForm.allowedNamespaces.split(',').map(n => n.trim()).filter(Boolean).map(n => <span key={n} style={badge('rgba(74,222,128,0.12)', '#4ade80')}>{n}</span>)}</div>}
-                          </div>
-                        </>
+                        <div style={{ padding: '10px 12px', backgroundColor: 'rgba(74,222,128,0.06)', borderRadius: 6, border: '1px solid rgba(74,222,128,0.12)' }}>
+                          <span style={{ fontSize: 12, color: '#4ade80' }}>💡 You'll assign specific assets this rule applies to in the next step.</span>
+                        </div>
                       )}
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, marginTop: 20 }}>
@@ -1668,11 +1633,10 @@ const Policies: React.FC = () => {
                 )}
 
                 {accessRuleStep === 2 && (() => {
-                  const typeEmojis: Record<string, string> = { Model: '🧠', Agent: '🤖', Tool: '🔧' }
-                  const assetTypes = ['Model', 'Agent', 'Tool']
+                  const typeEmojis: Record<string, string> = { Model: '🧠', Agent: '🤖', Tool: '🔧', Namespace: '🗂' }
+                  const assetTypes = ['Model', 'Agent', 'Tool', 'Namespace']
                   const filteredAssets = allAssets.filter(a =>
-                    (accessRuleForm.assetType === 'All' || a.type === accessRuleForm.assetType) &&
-                    (accessRuleForm.namespace === 'global' || a.namespace === accessRuleForm.namespace)
+                    accessRuleForm.assetType === 'All' || a.type === accessRuleForm.assetType
                   )
                   const assignedCount = Object.values(accessRuleAssignments).filter(Boolean).length
                   return (

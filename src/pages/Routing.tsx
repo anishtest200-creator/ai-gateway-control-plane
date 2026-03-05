@@ -527,7 +527,7 @@ const Routing: React.FC = () => {
                     width: 28, height: 28, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
                     fontSize: 12, fontWeight: 700,
                     backgroundColor: createStep >= s ? colors.gold : '#333',
-                    color: createStep >= s ? '#0A0A0A' : '#888',
+                    color: createStep >= s ? '#FFFFFF' : '#888',
                   }}>{s}</div>
                 </React.Fragment>
               ))}
@@ -763,18 +763,18 @@ const Routing: React.FC = () => {
             <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 20 }}>
               <div>
                 {createStep === 2 && (
-                  <button onClick={() => setCreateStep(1)} style={{ backgroundColor: 'transparent', color: '#ccc', border: `1px solid ${colors.border}`, borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>← Back</button>
+                  <button onClick={() => setCreateStep(1)} style={{ backgroundColor: 'transparent', color: '#E8E8E8', border: `1px solid ${colors.border}`, borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>← Back</button>
                 )}
               </div>
               <div style={{ display: 'flex', gap: 10 }}>
-                <button onClick={() => { setShowCreate(false); resetForm(); }} style={{ backgroundColor: 'transparent', color: '#ccc', border: `1px solid ${colors.border}`, borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>Cancel</button>
+                <button onClick={() => { setShowCreate(false); resetForm(); }} style={{ backgroundColor: 'transparent', color: '#E8E8E8', border: `1px solid ${colors.border}`, borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>Cancel</button>
                 {createStep === 1 ? (
                   <button
                     onClick={() => setCreateStep(2)}
                     disabled={!formName || !formPattern}
                     style={{
                       backgroundColor: formName && formPattern ? colors.gold : '#333',
-                      color: formName && formPattern ? '#0A0A0A' : '#666',
+                      color: formName && formPattern ? '#FFFFFF' : '#666',
                       border: 'none', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 600,
                       cursor: formName && formPattern ? 'pointer' : 'not-allowed', fontFamily: 'inherit',
                     }}

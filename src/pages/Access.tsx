@@ -56,7 +56,7 @@ const requestTypeStyles: Record<string, { bg: string; color: string; label: stri
 
 const inputStyle: CSSProperties = {
   backgroundColor: '#2d2c2b',
-  color: '#ccc',
+  color: '#E8E8E8',
   border: '1px solid rgba(129, 140, 248, 0.10)',
   borderRadius: 6,
   padding: '6px 12px',

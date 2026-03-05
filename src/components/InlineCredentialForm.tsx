@@ -82,14 +82,14 @@ export default function InlineCredentialForm({ onSave, onCancel }: InlineCredent
       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 4 }}>
         <button
           onClick={onCancel}
-          style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(129, 140, 248,0.10)', borderRadius: 6, padding: '6px 14px', fontSize: 12, cursor: 'pointer', fontFamily: 'inherit' }}
+          style={{ backgroundColor: 'transparent', color: '#E8E8E8', border: '1px solid rgba(129, 140, 248, 0.12)', borderRadius: 6, padding: '6px 14px', fontSize: 12, cursor: 'pointer', fontFamily: 'inherit' }}
         >
           Cancel
         </button>
         <button
           onClick={() => canSave && onSave(name.trim())}
           style={{
-            backgroundColor: canSave ? '#818CF8' : '#555', color: canSave ? '#0A0A0A' : '#999',
+            backgroundColor: canSave ? '#818CF8' : '#555', color: canSave ? '#FFFFFF' : '#999',
             border: 'none', borderRadius: 6, padding: '6px 14px', fontSize: 12, fontWeight: 600,
             cursor: canSave ? 'pointer' : 'not-allowed', fontFamily: 'inherit',
           }}

@@ -106,7 +106,7 @@ const th: CSSProperties = {
 const td: CSSProperties = {
   padding: '10px 14px',
   borderBottom: '1px solid rgba(129, 140, 248, 0.06)',
-  color: '#ccc',
+  color: '#E8E8E8',
 };
 
 const badge = (bg: string, fg: string): CSSProperties => ({
@@ -516,13 +516,13 @@ function Assets() {
             <button onClick={() => setDetailItem(null)} style={{ background: 'none', border: 'none', color: '#999', fontSize: 20, cursor: 'pointer', padding: '0 4px', fontFamily: 'inherit', lineHeight: 1 }}>✕</button>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            <div><span style={{ fontSize: 11, color: '#888', textTransform: 'uppercase', letterSpacing: 0.4 }}>Provider</span><div style={{ fontSize: 13, color: '#ccc', marginTop: 2 }}>{detailItem.provider}</div></div>
+            <div><span style={{ fontSize: 11, color: '#888', textTransform: 'uppercase', letterSpacing: 0.4 }}>Provider</span><div style={{ fontSize: 13, color: '#E8E8E8', marginTop: 2 }}>{detailItem.provider}</div></div>
             <div><span style={{ fontSize: 11, color: '#888', textTransform: 'uppercase', letterSpacing: 0.4 }}>Source</span><div style={{ marginTop: 2 }}><SourceBadge source={detailItem.source} /></div></div>
             <div><span style={{ fontSize: 11, color: '#888', textTransform: 'uppercase', letterSpacing: 0.4 }}>Endpoint</span><div style={{ fontSize: 13, color: '#9cdcfe', fontFamily: 'monospace', marginTop: 2 }}>{detailItem.endpoint}</div></div>
-            <div><span style={{ fontSize: 11, color: '#888', textTransform: 'uppercase', letterSpacing: 0.4 }}>Region</span><div style={{ fontSize: 13, color: '#ccc', marginTop: 2 }}>{detailItem.region}</div></div>
+            <div><span style={{ fontSize: 11, color: '#888', textTransform: 'uppercase', letterSpacing: 0.4 }}>Region</span><div style={{ fontSize: 13, color: '#E8E8E8', marginTop: 2 }}>{detailItem.region}</div></div>
             <div><span style={{ fontSize: 11, color: '#888', textTransform: 'uppercase', letterSpacing: 0.4 }}>Governance</span><div style={{ marginTop: 2 }}><GovernanceBadge status={detailItem.governance} /></div></div>
             <div><span style={{ fontSize: 11, color: '#888', textTransform: 'uppercase', letterSpacing: 0.4 }}>Health</span><div style={{ marginTop: 2 }}><HealthBadge status={detailItem.health} /></div></div>
-            <div><span style={{ fontSize: 11, color: '#888', textTransform: 'uppercase', letterSpacing: 0.4 }}>Metrics</span><div style={{ fontSize: 13, color: '#ccc', marginTop: 2 }}>12,340 req/24h &nbsp;·&nbsp; 47ms latency</div></div>
+            <div><span style={{ fontSize: 11, color: '#888', textTransform: 'uppercase', letterSpacing: 0.4 }}>Metrics</span><div style={{ fontSize: 13, color: '#E8E8E8', marginTop: 2 }}>12,340 req/24h &nbsp;·&nbsp; 47ms latency</div></div>
             <div><span style={{ fontSize: 11, color: '#888', textTransform: 'uppercase', letterSpacing: 0.4 }}>Applied Policies</span><div style={{ marginTop: 4, display: 'flex', gap: 4, flexWrap: 'wrap' }}>{detailItem.policies.map(p => <span key={p} style={policyBadge}>{p}</span>)}</div></div>
             <div><span style={{ fontSize: 11, color: '#888', textTransform: 'uppercase', letterSpacing: 0.4 }}>Namespace</span><div style={{ fontSize: 13, color: '#9cdcfe', fontFamily: 'monospace', marginTop: 2 }}>{detailItem.namespace}</div></div>
           </div>

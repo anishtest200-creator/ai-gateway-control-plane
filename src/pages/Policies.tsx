@@ -1155,7 +1155,7 @@ const Policies: React.FC = () => {
                   ))}
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 20 }}>
-                  <button onClick={() => setShowCreateFlow(false)} style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(129, 140, 248, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>Cancel</button>
+                  <button onClick={() => setShowCreateFlow(false)} style={{ backgroundColor: 'transparent', color: '#E8E8E8', border: '1px solid rgba(129, 140, 248, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>Cancel</button>
                 </div>
               </>
             )}
@@ -1191,7 +1191,7 @@ const Policies: React.FC = () => {
                   ))}
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'flex-start', marginTop: 20 }}>
-                  <button onClick={() => setCreateFlowCategory(null)} style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(129, 140, 248, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>← Back</button>
+                  <button onClick={() => setCreateFlowCategory(null)} style={{ backgroundColor: 'transparent', color: '#E8E8E8', border: '1px solid rgba(129, 140, 248, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>← Back</button>
                 </div>
               </>
             )}
@@ -1269,7 +1269,7 @@ const Policies: React.FC = () => {
                     ))}
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'flex-start', marginTop: 16 }}>
-                    <button onClick={() => setCreateFlowMethod(null)} style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(129, 140, 248, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>← Back</button>
+                    <button onClick={() => setCreateFlowMethod(null)} style={{ backgroundColor: 'transparent', color: '#E8E8E8', border: '1px solid rgba(129, 140, 248, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>← Back</button>
                   </div>
                 </>
               )
@@ -1316,7 +1316,7 @@ const Policies: React.FC = () => {
                   <button
                     onClick={() => { setCreateFlowMethod(null); setAiComposeInput('') }}
                     disabled={aiCompiling}
-                    style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(129, 140, 248, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: aiCompiling ? 'not-allowed' : 'pointer', fontFamily: 'inherit', opacity: aiCompiling ? 0.5 : 1 }}
+                    style={{ backgroundColor: 'transparent', color: '#E8E8E8', border: '1px solid rgba(129, 140, 248, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: aiCompiling ? 'not-allowed' : 'pointer', fontFamily: 'inherit', opacity: aiCompiling ? 0.5 : 1 }}
                   >← Back</button>
                   <button
                     onClick={handleAICompile}
@@ -1366,7 +1366,7 @@ const Policies: React.FC = () => {
                             width: 22, height: 22, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
                             fontSize: 11, fontWeight: 600,
                             backgroundColor: active ? '#818CF8' : done ? 'rgba(129, 140, 248,0.25)' : '#1E1E1E',
-                            color: active ? '#0A0A0A' : done ? '#818CF8' : '#666',
+                            color: active ? '#FFFFFF' : done ? '#818CF8' : '#666',
                             border: active ? 'none' : '1px solid rgba(129, 140, 248,0.15)',
                           }}>{done ? '✓' : step}</span>
                           <span style={{ fontSize: 12, color: active ? '#fff' : '#888', fontWeight: active ? 600 : 400 }}>{label}</span>
@@ -1428,7 +1428,7 @@ const Policies: React.FC = () => {
                       </div>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, marginTop: 20 }}>
-                      <button onClick={() => { handleFormBack(); setPolicyFormStep(1) }} style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(129, 140, 248, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>← Back</button>
+                      <button onClick={() => { handleFormBack(); setPolicyFormStep(1) }} style={{ backgroundColor: 'transparent', color: '#E8E8E8', border: '1px solid rgba(129, 140, 248, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>← Back</button>
                       <button disabled={!policyFormData.name} onClick={() => setPolicyFormStep(2)} style={{
                         backgroundColor: !policyFormData.name ? '#555' : '#818CF8', color: !policyFormData.name ? '#999' : '#0A0A0A',
                         border: 'none', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: !policyFormData.name ? 'not-allowed' : 'pointer', fontFamily: 'inherit',
@@ -1491,9 +1491,9 @@ const Policies: React.FC = () => {
                         </div>
                       )}
                       <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, marginTop: 20 }}>
-                        <button onClick={() => setPolicyFormStep(1)} style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(129, 140, 248, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>← Back</button>
+                        <button onClick={() => setPolicyFormStep(1)} style={{ backgroundColor: 'transparent', color: '#E8E8E8', border: '1px solid rgba(129, 140, 248, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>← Back</button>
                         <div style={{ display: 'flex', gap: 10 }}>
-                          <button onClick={() => { setPolicyAssignments({}); handleCreatePolicy() }} style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(129, 140, 248, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>Skip (apply globally)</button>
+                          <button onClick={() => { setPolicyAssignments({}); handleCreatePolicy() }} style={{ backgroundColor: 'transparent', color: '#E8E8E8', border: '1px solid rgba(129, 140, 248, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>Skip (apply globally)</button>
                           <button onClick={handleCreatePolicy} style={{ backgroundColor: '#818CF8', color: '#FFFFFF', border: 'none', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
                             {assignedCount > 0 ? `Create & Assign (${assignedCount})` : 'Create Runtime Rule'}
                           </button>
@@ -1522,7 +1522,7 @@ const Policies: React.FC = () => {
                             width: 22, height: 22, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
                             fontSize: 11, fontWeight: 600,
                             backgroundColor: active ? '#818CF8' : done ? 'rgba(129, 140, 248,0.25)' : '#1E1E1E',
-                            color: active ? '#0A0A0A' : done ? '#818CF8' : '#666',
+                            color: active ? '#FFFFFF' : done ? '#818CF8' : '#666',
                             border: active ? 'none' : '1px solid rgba(129, 140, 248,0.15)',
                           }}>{done ? '✓' : step}</span>
                           <span style={{ fontSize: 12, color: active ? '#fff' : '#888', fontWeight: active ? 600 : 400 }}>{label}</span>
@@ -1577,7 +1577,7 @@ const Policies: React.FC = () => {
                       </div>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, marginTop: 20 }}>
-                      <button onClick={() => { handleFormBack(); setPolicyFormStep(1) }} style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(129, 140, 248, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>← Back</button>
+                      <button onClick={() => { handleFormBack(); setPolicyFormStep(1) }} style={{ backgroundColor: 'transparent', color: '#E8E8E8', border: '1px solid rgba(129, 140, 248, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>← Back</button>
                       <button disabled={!policyFormData.name} onClick={() => setPolicyFormStep(2)} style={{
                         backgroundColor: !policyFormData.name ? '#555' : '#818CF8', color: !policyFormData.name ? '#999' : '#0A0A0A',
                         border: 'none', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: !policyFormData.name ? 'not-allowed' : 'pointer', fontFamily: 'inherit',
@@ -1640,9 +1640,9 @@ const Policies: React.FC = () => {
                         </div>
                       )}
                       <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, marginTop: 20 }}>
-                        <button onClick={() => setPolicyFormStep(1)} style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(129, 140, 248, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>← Back</button>
+                        <button onClick={() => setPolicyFormStep(1)} style={{ backgroundColor: 'transparent', color: '#E8E8E8', border: '1px solid rgba(129, 140, 248, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>← Back</button>
                         <div style={{ display: 'flex', gap: 10 }}>
-                          <button onClick={() => { setPolicyAssignments({}); handleCreatePolicy() }} style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(129, 140, 248, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>Skip (apply globally)</button>
+                          <button onClick={() => { setPolicyAssignments({}); handleCreatePolicy() }} style={{ backgroundColor: 'transparent', color: '#E8E8E8', border: '1px solid rgba(129, 140, 248, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>Skip (apply globally)</button>
                           <button onClick={handleCreatePolicy} style={{ backgroundColor: '#818CF8', color: '#FFFFFF', border: 'none', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
                             {assignedCount > 0 ? `Create & Assign (${assignedCount})` : 'Create Guardrail'}
                           </button>
@@ -1671,7 +1671,7 @@ const Policies: React.FC = () => {
                             width: 22, height: 22, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
                             fontSize: 11, fontWeight: 600,
                             backgroundColor: active ? '#818CF8' : done ? 'rgba(129, 140, 248,0.25)' : '#1E1E1E',
-                            color: active ? '#0A0A0A' : done ? '#818CF8' : '#666',
+                            color: active ? '#FFFFFF' : done ? '#818CF8' : '#666',
                             border: active ? 'none' : '1px solid rgba(129, 140, 248,0.15)',
                           }}>{done ? '✓' : step}</span>
                           <span style={{ fontSize: 12, color: active ? '#fff' : '#888', fontWeight: active ? 600 : 400 }}>{label}</span>
@@ -1731,7 +1731,7 @@ const Policies: React.FC = () => {
                       )}
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, marginTop: 20 }}>
-                      <button onClick={() => { handleFormBack(); setAccessRuleStep(1) }} style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(129, 140, 248, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>← Back</button>
+                      <button onClick={() => { handleFormBack(); setAccessRuleStep(1) }} style={{ backgroundColor: 'transparent', color: '#E8E8E8', border: '1px solid rgba(129, 140, 248, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>← Back</button>
                       <button disabled={!accessRuleForm.name} onClick={() => setAccessRuleStep(2)} style={{
                         backgroundColor: !accessRuleForm.name ? '#555' : '#818CF8', color: !accessRuleForm.name ? '#999' : '#0A0A0A',
                         border: 'none', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: !accessRuleForm.name ? 'not-allowed' : 'pointer', fontFamily: 'inherit',
@@ -1793,9 +1793,9 @@ const Policies: React.FC = () => {
                         </div>
                       )}
                       <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, marginTop: 20 }}>
-                        <button onClick={() => setAccessRuleStep(1)} style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(129, 140, 248, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>← Back</button>
+                        <button onClick={() => setAccessRuleStep(1)} style={{ backgroundColor: 'transparent', color: '#E8E8E8', border: '1px solid rgba(129, 140, 248, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>← Back</button>
                         <div style={{ display: 'flex', gap: 10 }}>
-                          <button onClick={() => { setAccessRuleAssignments({}); handleCreateAccessRule() }} style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(129, 140, 248, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>Skip (apply to all)</button>
+                          <button onClick={() => { setAccessRuleAssignments({}); handleCreateAccessRule() }} style={{ backgroundColor: 'transparent', color: '#E8E8E8', border: '1px solid rgba(129, 140, 248, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>Skip (apply to all)</button>
                           <button onClick={handleCreateAccessRule} style={{ backgroundColor: '#818CF8', color: '#FFFFFF', border: 'none', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
                             {assignedCount > 0 ? `Create & Assign (${assignedCount})` : 'Create Rule'}
                           </button>

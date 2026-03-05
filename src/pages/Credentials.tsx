@@ -448,7 +448,7 @@ const Credentials: React.FC = () => {
           </button>
           <span style={{ fontSize: 18, fontWeight: 700, color: '#fff' }}>{selectedCredential.name}</span>
           <span style={{
-            backgroundColor: '#1E1E1E', padding: '2px 10px', borderRadius: 4, fontSize: 12, color: '#ccc',
+            backgroundColor: '#1E1E1E', padding: '2px 10px', borderRadius: 4, fontSize: 12, color: '#E8E8E8',
           }}>{selectedCredential.type}</span>
           <span style={{
             display: 'inline-flex', alignItems: 'center', gap: 6,
@@ -598,7 +598,7 @@ const Credentials: React.FC = () => {
                         }}>{access.method}</span>
                       </td>
                       <td style={{ padding: '8px 16px', color: '#bbb', fontFamily: 'monospace', fontSize: 11 }}>{access.path}</td>
-                      <td style={{ padding: '8px 16px', color: '#ccc' }}>{access.consumer}</td>
+                      <td style={{ padding: '8px 16px', color: '#E8E8E8' }}>{access.consumer}</td>
                       <td style={{ padding: '8px 16px' }}>
                         <span style={{
                           color: access.status < 300 ? '#4ADE80' : access.status < 400 ? '#F59E0B' : '#EF4444',
@@ -648,7 +648,7 @@ const Credentials: React.FC = () => {
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
               <button style={{
-                backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(129, 140, 248, 0.10)', borderRadius: 6,
+                backgroundColor: 'transparent', color: '#E8E8E8', border: '1px solid rgba(129, 140, 248, 0.10)', borderRadius: 6,
                 padding: '8px 18px', fontWeight: 600, fontSize: 13, cursor: 'pointer', whiteSpace: 'nowrap',
               }} onClick={() => showCredToast(`✓ Alert sent to ${d.namespaces.length} namespace admin${d.namespaces.length !== 1 ? 's' : ''}`)}>
                 Notify Stakeholders
@@ -804,7 +804,7 @@ const Credentials: React.FC = () => {
 
               {/* Actions */}
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
-                <button onClick={() => setShowEditScope(false)} style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(129, 140, 248, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>Cancel</button>
+                <button onClick={() => setShowEditScope(false)} style={{ backgroundColor: 'transparent', color: '#E8E8E8', border: '1px solid rgba(129, 140, 248, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>Cancel</button>
                 <button onClick={handleSaveScope} style={{ backgroundColor: '#818CF8', color: '#FFFFFF', border: 'none', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>Save Scope</button>
               </div>
             </div>
@@ -859,7 +859,7 @@ const Credentials: React.FC = () => {
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          style={{ backgroundColor: '#1E1E1E', color: '#ccc', border: '1px solid rgba(129, 140, 248, 0.10)', borderRadius: 6, padding: '8px 12px', fontSize: 13, fontFamily: 'inherit' }}
+          style={{ backgroundColor: '#1E1E1E', color: '#E8E8E8', border: '1px solid rgba(129, 140, 248, 0.10)', borderRadius: 6, padding: '8px 12px', fontSize: 13, fontFamily: 'inherit' }}
         >
           <option value="all">All Status</option>
           <option value="active">Active</option>
@@ -933,7 +933,7 @@ const Credentials: React.FC = () => {
                         width: 22, height: 22, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
                         fontSize: 11, fontWeight: 600,
                         backgroundColor: active ? '#818CF8' : done ? 'rgba(129, 140, 248,0.25)' : '#1E1E1E',
-                        color: active ? '#0A0A0A' : done ? '#818CF8' : '#666',
+                        color: active ? '#FFFFFF' : done ? '#818CF8' : '#666',
                         border: active ? 'none' : '1px solid rgba(129, 140, 248,0.15)',
                       }}>{done ? '✓' : step}</span>
                       <span style={{ fontSize: 12, color: active ? '#fff' : '#888', fontWeight: active ? 600 : 400 }}>{label}</span>
@@ -981,13 +981,13 @@ const Credentials: React.FC = () => {
                   </div>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 20 }}>
-                  <button onClick={() => { setShowAddCredential(false); setAddCredStep(1); setCredAssignments({}); setAssignMode('namespace'); setAssignNsSelections({}); setAssignAssetSearch(''); }} style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(129, 140, 248, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>Cancel</button>
+                  <button onClick={() => { setShowAddCredential(false); setAddCredStep(1); setCredAssignments({}); setAssignMode('namespace'); setAssignNsSelections({}); setAssignAssetSearch(''); }} style={{ backgroundColor: 'transparent', color: '#E8E8E8', border: '1px solid rgba(129, 140, 248, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>Cancel</button>
                   <button
                     disabled={!credFormData.name || !credFormData.provider}
                     onClick={() => setAddCredStep(2)}
                     style={{
                       backgroundColor: !credFormData.name || !credFormData.provider ? '#555' : '#818CF8',
-                      color: !credFormData.name || !credFormData.provider ? '#999' : '#0A0A0A',
+                      color: !credFormData.name || !credFormData.provider ? '#999' : '#FFFFFF',
                       border: 'none', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: !credFormData.name || !credFormData.provider ? 'not-allowed' : 'pointer', fontFamily: 'inherit',
                     }}>
                     Next: Assign →
@@ -1018,7 +1018,7 @@ const Credentials: React.FC = () => {
                         style={{
                           flex: 1, padding: '8px 12px', fontSize: 13, fontWeight: 600, border: 'none', cursor: 'pointer', fontFamily: 'inherit',
                           backgroundColor: assignMode === mode ? '#818CF8' : '#1E1E1E',
-                          color: assignMode === mode ? '#0A0A0A' : '#999',
+                          color: assignMode === mode ? '#FFFFFF' : '#999',
                           transition: 'all 0.15s',
                         }}
                       >{label}{mode === 'namespace' && assignedNsCount > 0 ? ` (${assignedNsCount})` : ''}{mode === 'asset' && assignedAssetCount > 0 ? ` (${assignedAssetCount})` : ''}</button>
@@ -1125,9 +1125,9 @@ const Credentials: React.FC = () => {
                   )}
 
                   <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, marginTop: 20 }}>
-                    <button onClick={() => setAddCredStep(1)} style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(129, 140, 248, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>← Back</button>
+                    <button onClick={() => setAddCredStep(1)} style={{ backgroundColor: 'transparent', color: '#E8E8E8', border: '1px solid rgba(129, 140, 248, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>← Back</button>
                     <div style={{ display: 'flex', gap: 10 }}>
-                      <button onClick={() => { setCredAssignments({}); setAssignNsSelections({}); handleAddCredential(); }} style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(129, 140, 248, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>Skip</button>
+                      <button onClick={() => { setCredAssignments({}); setAssignNsSelections({}); handleAddCredential(); }} style={{ backgroundColor: 'transparent', color: '#E8E8E8', border: '1px solid rgba(129, 140, 248, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>Skip</button>
                       <button onClick={handleAddCredential} style={{ backgroundColor: '#818CF8', color: '#FFFFFF', border: 'none', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
                         {totalAssigned > 0 ? `Create & Assign (${totalAssigned})` : 'Create'}
                       </button>

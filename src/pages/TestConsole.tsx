@@ -304,7 +304,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   toggleLabel: {
     fontSize: '12px',
-    color: '#ccc',
+    color: '#E8E8E8',
   },
   toggle: {
     width: '36px',
@@ -446,7 +446,7 @@ const styles: Record<string, React.CSSProperties> = {
     flexShrink: 0,
   },
   traceDetailValue: {
-    color: '#ccc',
+    color: '#E8E8E8',
   },
   // Right column
   rightPanel: {
@@ -485,7 +485,7 @@ const styles: Record<string, React.CSSProperties> = {
     color: '#777',
   },
   cardValue: {
-    color: '#ccc',
+    color: '#E8E8E8',
     fontFamily: '"Cascadia Code", "Fira Code", monospace',
     fontSize: '11px',
   },

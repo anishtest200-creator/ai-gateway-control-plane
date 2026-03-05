@@ -888,7 +888,7 @@ const DocsPage: FC<DocsPageProps> = ({ onLogin, onSignup }) => {
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'center' }}>
               {['OpenAI', 'Anthropic', 'Azure OpenAI', 'Google Gemini', 'Self-Hosted'].map((b) => (
-                <div key={b} style={{ padding: '6px 16px', fontSize: 11, fontWeight: 600, color: '#ccc', border: '1px solid rgba(129, 140, 248, 0.10)', borderRadius: 8, fontFamily: C.font, background: 'rgba(129, 140, 248, 0.03)', boxShadow: '0 2px 8px rgba(0,0,0,0.2)', width: '80%' }}>
+                <div key={b} style={{ padding: '6px 16px', fontSize: 11, fontWeight: 600, color: '#E8E8E8', border: '1px solid rgba(129, 140, 248, 0.10)', borderRadius: 8, fontFamily: C.font, background: 'rgba(129, 140, 248, 0.03)', boxShadow: '0 2px 8px rgba(0,0,0,0.2)', width: '80%' }}>
                   {b}
                 </div>
               ))}
@@ -901,7 +901,7 @@ const DocsPage: FC<DocsPageProps> = ({ onLogin, onSignup }) => {
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'center' }}>
               {['MCP Servers', 'REST APIs', 'SaaS Connectors', 'OpenAPI Endpoints'].map((b) => (
-                <div key={b} style={{ padding: '6px 16px', fontSize: 11, fontWeight: 600, color: '#ccc', border: '1px solid rgba(129, 140, 248, 0.10)', borderRadius: 8, fontFamily: C.font, background: 'rgba(129, 140, 248, 0.03)', boxShadow: '0 2px 8px rgba(0,0,0,0.2)', width: '80%' }}>
+                <div key={b} style={{ padding: '6px 16px', fontSize: 11, fontWeight: 600, color: '#E8E8E8', border: '1px solid rgba(129, 140, 248, 0.10)', borderRadius: 8, fontFamily: C.font, background: 'rgba(129, 140, 248, 0.03)', boxShadow: '0 2px 8px rgba(0,0,0,0.2)', width: '80%' }}>
                   {b}
                 </div>
               ))}
@@ -914,7 +914,7 @@ const DocsPage: FC<DocsPageProps> = ({ onLogin, onSignup }) => {
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'center' }}>
               {['LangChain', 'Foundry Agents', 'A2A Protocol', 'Custom Agents'].map((b) => (
-                <div key={b} style={{ padding: '6px 16px', fontSize: 11, fontWeight: 600, color: '#ccc', border: '1px solid rgba(129, 140, 248, 0.10)', borderRadius: 8, fontFamily: C.font, background: 'rgba(129, 140, 248, 0.03)', boxShadow: '0 2px 8px rgba(0,0,0,0.2)', width: '80%' }}>
+                <div key={b} style={{ padding: '6px 16px', fontSize: 11, fontWeight: 600, color: '#E8E8E8', border: '1px solid rgba(129, 140, 248, 0.10)', borderRadius: 8, fontFamily: C.font, background: 'rgba(129, 140, 248, 0.03)', boxShadow: '0 2px 8px rgba(0,0,0,0.2)', width: '80%' }}>
                   {b}
                 </div>
               ))}

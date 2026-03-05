@@ -269,8 +269,8 @@ const btnPrimary: CSSProperties = {
   padding: '8px 24px',
   borderRadius: 6,
   border: 'none',
-  backgroundColor: '#60cdff',
-  color: '#000',
+  backgroundColor: '#818CF8',
+  color: '#FFFFFF',
   fontSize: 13,
   fontWeight: 600,
   cursor: 'pointer',
@@ -279,8 +279,9 @@ const btnPrimary: CSSProperties = {
 
 const btnSecondary: CSSProperties = {
   ...btnPrimary,
-  backgroundColor: '#2a2a2a',
-  color: '#ccc',
+  backgroundColor: 'transparent',
+  color: '#E8E8E8',
+  border: '1px solid rgba(129, 140, 248, 0.12)',
 };
 
 const title: CSSProperties = {
@@ -377,7 +378,7 @@ const checkRow: CSSProperties = {
   alignItems: 'center',
   gap: 8,
   fontSize: 13,
-  color: '#ccc',
+  color: '#E8E8E8',
   marginTop: 8,
 };
 
@@ -613,7 +614,7 @@ function RegisterAgent({ onClose, onComplete }: { onClose: () => void; onComplet
                 <label style={label}>Auto-discovered Agents</label>
                 <div style={{ backgroundColor: '#1a1a1a', border: '1px solid #333', borderRadius: 6, padding: 8 }}>
                   {foundryAgentList.map((a) => (
-                    <label key={a.id} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, padding: '8px 8px', cursor: 'pointer', color: '#ccc', fontSize: 13 }}>
+                    <label key={a.id} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, padding: '8px 8px', cursor: 'pointer', color: '#E8E8E8', fontSize: 13 }}>
                       <input
                         type="checkbox"
                         checked={form.foundryAgents.includes(a.id)}
@@ -716,13 +717,13 @@ function RegisterAgent({ onClose, onComplete }: { onClose: () => void; onComplet
                   <span style={{ color: '#888' }}>Name:</span>
                   <span style={{ color: '#fff', fontWeight: 600 }}>{form.a2aName}</span>
                   <span style={{ color: '#888' }}>Description:</span>
-                  <span style={{ color: '#ccc' }}>{form.a2aDescription}</span>
+                  <span style={{ color: '#E8E8E8' }}>{form.a2aDescription}</span>
                   <span style={{ color: '#888' }}>Capabilities:</span>
                   <span>{form.a2aCapabilities.map((c) => <span key={c} style={badge('rgba(96,205,255,0.1)', '#60cdff')}>{c}</span>)}</span>
                   <span style={{ color: '#888' }}>Input modes:</span>
-                  <span style={{ color: '#ccc', fontFamily: 'monospace', fontSize: 12 }}>{form.a2aInputModes.join(', ')}</span>
+                  <span style={{ color: '#E8E8E8', fontFamily: 'monospace', fontSize: 12 }}>{form.a2aInputModes.join(', ')}</span>
                   <span style={{ color: '#888' }}>Output modes:</span>
-                  <span style={{ color: '#ccc', fontFamily: 'monospace', fontSize: 12 }}>{form.a2aOutputModes.join(', ')}</span>
+                  <span style={{ color: '#E8E8E8', fontFamily: 'monospace', fontSize: 12 }}>{form.a2aOutputModes.join(', ')}</span>
                 </div>
               </div>
             )}
@@ -922,7 +923,7 @@ function RegisterAgent({ onClose, onComplete }: { onClose: () => void; onComplet
         <div style={sectionSub}>Which models can this agent access through the gateway?</div>
         <div style={{ backgroundColor: '#1a1a1a', border: '1px solid #333', borderRadius: 6, padding: 8, marginBottom: 8 }}>
           {gatewayModels.map((m) => (
-            <label key={m.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 8px', cursor: 'pointer', color: '#ccc', fontSize: 13 }}>
+            <label key={m.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 8px', cursor: 'pointer', color: '#E8E8E8', fontSize: 13 }}>
               <input
                 type="checkbox"
                 checked={form.allowAllModels || form.selectedModels.includes(m.id)}
@@ -939,7 +940,7 @@ function RegisterAgent({ onClose, onComplete }: { onClose: () => void; onComplet
           ))}
         </div>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 0' }}>
-          <span style={{ fontSize: 13, color: '#ccc' }}>Allow all models in namespace</span>
+          <span style={{ fontSize: 13, color: '#E8E8E8' }}>Allow all models in namespace</span>
           <ToggleButton on={form.allowAllModels} onToggle={() => set('allowAllModels', !form.allowAllModels)} />
         </div>
       </div>
@@ -950,7 +951,7 @@ function RegisterAgent({ onClose, onComplete }: { onClose: () => void; onComplet
         <div style={sectionSub}>Which tools can this agent invoke through the gateway?</div>
         <div style={{ backgroundColor: '#1a1a1a', border: '1px solid #333', borderRadius: 6, padding: 8, marginBottom: 8 }}>
           {gatewayTools.map((t) => (
-            <label key={t.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 8px', cursor: 'pointer', color: '#ccc', fontSize: 13 }}>
+            <label key={t.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 8px', cursor: 'pointer', color: '#E8E8E8', fontSize: 13 }}>
               <input
                 type="checkbox"
                 checked={form.allowAllTools || form.selectedTools.includes(t.id)}
@@ -963,7 +964,7 @@ function RegisterAgent({ onClose, onComplete }: { onClose: () => void; onComplet
           ))}
         </div>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 0' }}>
-          <span style={{ fontSize: 13, color: '#ccc' }}>Allow all tools in namespace</span>
+          <span style={{ fontSize: 13, color: '#E8E8E8' }}>Allow all tools in namespace</span>
           <ToggleButton on={form.allowAllTools} onToggle={() => set('allowAllTools', !form.allowAllTools)} />
         </div>
       </div>
@@ -980,7 +981,7 @@ function RegisterAgent({ onClose, onComplete }: { onClose: () => void; onComplet
         {form.enableA2A && (
           <div style={{ backgroundColor: '#1a1a1a', border: '1px solid #333', borderRadius: 6, padding: 8 }}>
             {registeredAgents.map((a) => (
-              <label key={a} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 8px', cursor: 'pointer', color: '#ccc', fontSize: 13 }}>
+              <label key={a} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 8px', cursor: 'pointer', color: '#E8E8E8', fontSize: 13 }}>
                 <input
                   type="checkbox"
                   checked={form.allowedTargetAgents.includes(a)}
@@ -1169,7 +1170,7 @@ function RegisterAgent({ onClose, onComplete }: { onClose: () => void; onComplet
         <label style={label}>Visibility</label>
         <div style={{ display: 'flex', gap: 16 }}>
           {([['private', 'Private to namespace'], ['shared', 'Shared across organization']] as const).map(([v, lbl]) => (
-            <label key={v} style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', color: '#ccc', fontSize: 13 }}>
+            <label key={v} style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', color: '#E8E8E8', fontSize: 13 }}>
               <input type="radio" name="visibility" checked={form.visibility === v} onChange={() => set('visibility', v)} />
               {lbl}
             </label>

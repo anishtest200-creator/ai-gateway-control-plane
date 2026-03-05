@@ -51,7 +51,7 @@ const tdStyle: CSSProperties = {
 
 const inputStyle: CSSProperties = {
   backgroundColor: '#1A1A1A',
-  color: '#ccc',
+  color: '#E8E8E8',
   border: '1px solid rgba(129, 140, 248, 0.10)',
   borderRadius: 6,
   padding: '6px 10px',
@@ -282,7 +282,7 @@ const Logs: React.FC = () => {
             borderRadius: 6,
             border: '1px solid rgba(129, 140, 248, 0.10)',
             backgroundColor: '#1A1A1A',
-            color: '#ccc',
+            color: '#E8E8E8',
             fontSize: 13,
             fontWeight: 600,
             fontFamily: 'inherit',

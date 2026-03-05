@@ -147,7 +147,7 @@ export default function ConnectFoundryPanel({
             <button
               onClick={() => { setShowConnect(false); setConnectForm({ projectName: '', subscriptionId: '', resourceGroup: '' }); }}
               style={{
-                backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(129, 140, 248,0.10)',
+                backgroundColor: 'transparent', color: '#E8E8E8', border: '1px solid rgba(129, 140, 248, 0.12)',
                 borderRadius: 6, padding: '6px 14px', fontSize: 12, cursor: 'pointer', fontFamily: 'inherit',
               }}
             >
@@ -157,7 +157,7 @@ export default function ConnectFoundryPanel({
               onClick={() => canConnect && !connecting && handleConnect()}
               style={{
                 backgroundColor: connected ? '#4ADE80' : canConnect && !connecting ? '#818CF8' : '#555',
-                color: connected ? '#0A0A0A' : canConnect ? '#0A0A0A' : '#999',
+                color: connected ? '#0A0A0A' : canConnect ? '#FFFFFF' : '#999',
                 border: 'none', borderRadius: 6, padding: '6px 14px', fontSize: 12, fontWeight: 600,
                 cursor: canConnect && !connecting ? 'pointer' : 'not-allowed', fontFamily: 'inherit',
                 minWidth: 120,

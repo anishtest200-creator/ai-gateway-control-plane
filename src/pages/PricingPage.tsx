@@ -571,7 +571,7 @@ const PricingPage: FC<PricingPageProps> = ({ onLogin, onSignup }) => {
                       gap: 10,
                       marginBottom: 10,
                       fontSize: 13.5,
-                      color: '#ccc',
+                      color: '#E8E8E8',
                       fontFamily: C.font,
                       lineHeight: 1.5,
                     }}
@@ -932,7 +932,7 @@ const PricingPage: FC<PricingPageProps> = ({ onLogin, onSignup }) => {
         {/* requests slider */}
         <div style={{ marginBottom: 32 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
-            <span style={{ fontSize: 14, color: '#ccc', fontFamily: C.font }}>AI Requests / month</span>
+            <span style={{ fontSize: 14, color: '#E8E8E8', fontFamily: C.font }}>AI Requests / month</span>
             <span style={{ fontSize: 16, fontWeight: 700, color: C.gold, fontFamily: C.font }}>
               {formatNum(REQUEST_MARKS[calcRequests])}
             </span>
@@ -954,7 +954,7 @@ const PricingPage: FC<PricingPageProps> = ({ onLogin, onSignup }) => {
         {/* namespaces slider */}
         <div style={{ marginBottom: 36 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
-            <span style={{ fontSize: 14, color: '#ccc', fontFamily: C.font }}>Namespaces</span>
+            <span style={{ fontSize: 14, color: '#E8E8E8', fontFamily: C.font }}>Namespaces</span>
             <span style={{ fontSize: 16, fontWeight: 700, color: C.gold, fontFamily: C.font }}>
               {NS_MARKS[calcNs]}{calcNs === NS_MARKS.length - 1 ? '+' : ''}
             </span>

@@ -256,8 +256,8 @@ const btnPrimary: CSSProperties = {
   padding: '8px 24px',
   borderRadius: 6,
   border: 'none',
-  backgroundColor: '#60cdff',
-  color: '#000',
+  backgroundColor: '#818CF8',
+  color: '#FFFFFF',
   fontSize: 13,
   fontWeight: 600,
   cursor: 'pointer',
@@ -266,8 +266,9 @@ const btnPrimary: CSSProperties = {
 
 const btnSecondary: CSSProperties = {
   ...btnPrimary,
-  backgroundColor: '#2a2a2a',
-  color: '#ccc',
+  backgroundColor: 'transparent',
+  color: '#E8E8E8',
+  border: '1px solid rgba(129, 140, 248, 0.12)',
 };
 
 const title: CSSProperties = {
@@ -358,7 +359,7 @@ const checkRow: CSSProperties = {
   alignItems: 'center',
   gap: 8,
   fontSize: 13,
-  color: '#ccc',
+  color: '#E8E8E8',
   marginTop: 8,
 };
 
@@ -535,7 +536,7 @@ function RegisterModel({ onClose, onComplete }: { onClose: () => void; onComplet
                 <label style={label}>Discovered Models</label>
                 <div style={{ backgroundColor: '#1a1a1a', border: '1px solid #333', borderRadius: 6, padding: 8 }}>
                   {['gpt-4o (East US)', 'gpt-4o-mini (East US)', 'gpt-4o (West US)'].map((m) => (
-                    <label key={m} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 8px', cursor: 'pointer', color: '#ccc', fontSize: 13 }}>
+                    <label key={m} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 8px', cursor: 'pointer', color: '#E8E8E8', fontSize: 13 }}>
                       <input
                         type="checkbox"
                         checked={form.foundryModels.includes(m)}
@@ -937,7 +938,7 @@ function RegisterModel({ onClose, onComplete }: { onClose: () => void; onComplet
             <label style={label}>Allowed Consumers</label>
             <div style={{ backgroundColor: '#1a1a1a', border: '1px solid #333', borderRadius: 6, padding: 8, maxHeight: 150, overflowY: 'auto' }}>
               {consumers.map((c) => (
-                <label key={c} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 8px', cursor: 'pointer', color: '#ccc', fontSize: 13 }}>
+                <label key={c} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 8px', cursor: 'pointer', color: '#E8E8E8', fontSize: 13 }}>
                   <input type="checkbox" checked={form.allowedConsumers.includes(c)} onChange={() => toggleArrayItem('allowedConsumers', c)} />
                   {c}
                 </label>
@@ -1018,7 +1019,7 @@ function RegisterModel({ onClose, onComplete }: { onClose: () => void; onComplet
         <label style={label}>Visibility</label>
         <div style={{ display: 'flex', gap: 16 }}>
           {([['private', 'Private to namespace'], ['shared', 'Shared across organization']] as const).map(([v, lbl]) => (
-            <label key={v} style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', color: '#ccc', fontSize: 13 }}>
+            <label key={v} style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', color: '#E8E8E8', fontSize: 13 }}>
               <input type="radio" name="visibility" checked={form.visibility === v} onChange={() => set('visibility', v)} />
               {lbl}
             </label>

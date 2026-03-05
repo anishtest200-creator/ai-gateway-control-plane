@@ -305,6 +305,9 @@ const Credentials: React.FC = () => {
   const [credFormData, setCredFormData] = useState({ name: '', type: 'API Key', provider: '', namespace: 'ai-platform', expires: '' });
   const [addCredStep, setAddCredStep] = useState(1);
   const [credAssignments, setCredAssignments] = useState<Record<string, boolean>>({});
+  const [assignMode, setAssignMode] = useState<'namespace' | 'asset'>('namespace');
+  const [assignNsSelections, setAssignNsSelections] = useState<Record<string, boolean>>({});
+  const [assignAssetSearch, setAssignAssetSearch] = useState('');
   const [credToast, setCredToast] = useState<string | null>(null);
   const showCredToast = (msg: string) => { setCredToast(msg); setTimeout(() => setCredToast(null), 3000); };
 
@@ -328,9 +331,16 @@ const Credentials: React.FC = () => {
     setShowAddCredential(false);
     setAddCredStep(1);
     setCredAssignments({});
+    setAssignMode('namespace');
+    setAssignNsSelections({});
+    setAssignAssetSearch('');
     setCredFormData({ name: '', type: 'API Key', provider: '', namespace: 'ai-platform', expires: '' });
-    const assigned = Object.entries(credAssignments).filter(([, v]) => v).length;
-    showCredToast(`✓ Credential "${newCred.name}" created${assigned > 0 ? ` and assigned to ${assigned} asset${assigned !== 1 ? 's' : ''}` : ''}`);
+    const assignedAssets = Object.entries(credAssignments).filter(([, v]) => v).length;
+    const assignedNs = Object.entries(assignNsSelections).filter(([, v]) => v).length;
+    const parts: string[] = [];
+    if (assignedNs > 0) parts.push(`${assignedNs} namespace${assignedNs !== 1 ? 's' : ''}`);
+    if (assignedAssets > 0) parts.push(`${assignedAssets} asset${assignedAssets !== 1 ? 's' : ''}`);
+    showCredToast(`✓ Credential "${newCred.name}" created${parts.length > 0 ? ` and assigned to ${parts.join(' and ')}` : ''}`);
   };
 
   const allNamespaces = ['retail-support', 'finance-analytics', 'customer-ops', 'hr-automation', 'dev-sandbox', 'Global', 'ai-platform', 'ml-inference', 'research-sandbox'];
@@ -957,7 +967,7 @@ const Credentials: React.FC = () => {
                   </div>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 20 }}>
-                  <button onClick={() => { setShowAddCredential(false); setAddCredStep(1); setCredAssignments({}); }} style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(212, 168, 67, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>Cancel</button>
+                  <button onClick={() => { setShowAddCredential(false); setAddCredStep(1); setCredAssignments({}); setAssignMode('namespace'); setAssignNsSelections({}); setAssignAssetSearch(''); }} style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(212, 168, 67, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>Cancel</button>
                   <button
                     disabled={!credFormData.name || !credFormData.provider}
                     onClick={() => setAddCredStep(2)}
@@ -975,80 +985,137 @@ const Credentials: React.FC = () => {
             {addCredStep === 2 && (() => {
               const assetTypeEmojis: Record<string, string> = { model: '🧠', agent: '🤖', tool: '🔧' };
               const assetTypes = ['model', 'agent', 'tool'] as const;
-              const assignedCount = Object.values(credAssignments).filter(Boolean).length;
+              const assignedAssetCount = Object.values(credAssignments).filter(Boolean).length;
+              const assignedNsCount = Object.values(assignNsSelections).filter(Boolean).length;
+              const totalAssigned = assignedAssetCount + assignedNsCount;
               return (
                 <>
-                  <h3 style={{ color: '#fff', fontSize: 16, fontWeight: 600, margin: '0 0 4px' }}>Assign to Assets</h3>
+                  <h3 style={{ color: '#fff', fontSize: 16, fontWeight: 600, margin: '0 0 4px' }}>Assign Credential</h3>
                   <p style={{ color: '#888', fontSize: 12, margin: '0 0 16px' }}>
-                    Select which models, tools, and agents should use this credential. You can also do this later.
+                    Assign to entire namespaces or pick individual assets. You can also do this later.
                   </p>
 
-                  {/* Namespace filter for assets */}
-                  <div style={{ marginBottom: 12 }}>
-                    <select
-                      id="assign-ns-filter"
-                      value={credFormData.namespace}
-                      onChange={e => setCredFormData(f => ({ ...f, namespace: e.target.value }))}
-                      style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit' }}
-                    >
-                      <option value="">All namespaces</option>
-                      {allNamespaces.map(ns => <option key={ns} value={ns}>{ns}</option>)}
-                    </select>
+                  {/* Mode toggle */}
+                  <div style={{ display: 'flex', gap: 0, marginBottom: 16, borderRadius: 6, overflow: 'hidden', border: '1px solid rgba(212,168,67,0.15)' }}>
+                    {([['namespace', 'Namespaces'], ['asset', 'Individual Assets']] as const).map(([mode, label]) => (
+                      <button
+                        key={mode}
+                        onClick={() => setAssignMode(mode)}
+                        style={{
+                          flex: 1, padding: '8px 12px', fontSize: 13, fontWeight: 600, border: 'none', cursor: 'pointer', fontFamily: 'inherit',
+                          backgroundColor: assignMode === mode ? '#D4A843' : '#1E1E1E',
+                          color: assignMode === mode ? '#0A0A0A' : '#999',
+                          transition: 'all 0.15s',
+                        }}
+                      >{label}{mode === 'namespace' && assignedNsCount > 0 ? ` (${assignedNsCount})` : ''}{mode === 'asset' && assignedAssetCount > 0 ? ` (${assignedAssetCount})` : ''}</button>
+                    ))}
                   </div>
 
-                  <div style={{ maxHeight: 300, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 14, paddingRight: 4 }}>
-                    {assetTypes.map(aType => {
-                      const assetsOfType = allAvailableAssets.filter(a =>
-                        a.type === aType && (!credFormData.namespace || a.namespace === credFormData.namespace)
-                      );
-                      if (assetsOfType.length === 0) return null;
-                      return (
-                        <div key={aType}>
-                          <div style={{ fontSize: 12, color: '#888', fontWeight: 600, marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.5 }}>
-                            {assetTypeEmojis[aType]} {aType}s ({assetsOfType.filter(a => credAssignments[a.name]).length}/{assetsOfType.length})
-                          </div>
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                            {assetsOfType.map(a => {
-                              const checked = !!credAssignments[a.name];
-                              return (
-                                <label
-                                  key={a.name}
-                                  style={{
-                                    display: 'flex', alignItems: 'center', gap: 10, padding: '6px 10px', borderRadius: 6,
-                                    backgroundColor: checked ? 'rgba(212,168,67,0.08)' : 'transparent',
-                                    border: '1px solid ' + (checked ? 'rgba(212,168,67,0.25)' : 'rgba(212,168,67,0.06)'),
-                                    cursor: 'pointer', transition: 'all 0.15s',
-                                  }}
-                                >
-                                  <input
-                                    type="checkbox"
-                                    checked={checked}
-                                    onChange={() => setCredAssignments(prev => ({ ...prev, [a.name]: !prev[a.name] }))}
-                                    style={{ accentColor: '#D4A843' }}
-                                  />
-                                  <span style={{ fontSize: 13, color: '#E8E8E8', flex: 1 }}>{a.name}</span>
-                                  <span style={{ fontSize: 11, color: '#666' }}>{a.namespace}</span>
-                                </label>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
+                  {/* Namespace assignment mode */}
+                  {assignMode === 'namespace' && (
+                    <div style={{ maxHeight: 300, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 4 }}>
+                      {allNamespaces.map(ns => {
+                        const checked = !!assignNsSelections[ns];
+                        const assetCount = allAvailableAssets.filter(a => a.namespace === ns).length;
+                        return (
+                          <label
+                            key={ns}
+                            style={{
+                              display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', borderRadius: 6,
+                              backgroundColor: checked ? 'rgba(212,168,67,0.08)' : 'transparent',
+                              border: '1px solid ' + (checked ? 'rgba(212,168,67,0.25)' : 'rgba(212,168,67,0.06)'),
+                              cursor: 'pointer', transition: 'all 0.15s',
+                            }}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={checked}
+                              onChange={() => setAssignNsSelections(prev => ({ ...prev, [ns]: !prev[ns] }))}
+                              style={{ accentColor: '#D4A843' }}
+                            />
+                            <span style={{ fontSize: 13, color: '#E8E8E8', flex: 1 }}>{ns}</span>
+                            <span style={{ fontSize: 11, color: '#666' }}>{assetCount} asset{assetCount !== 1 ? 's' : ''}</span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  )}
 
-                  {assignedCount > 0 && (
-                    <div style={{ marginTop: 12, padding: '8px 12px', backgroundColor: 'rgba(212,168,67,0.06)', borderRadius: 6, fontSize: 12, color: '#D4A843' }}>
-                      {assignedCount} asset{assignedCount !== 1 ? 's' : ''} selected
+                  {/* Individual asset assignment mode */}
+                  {assignMode === 'asset' && (
+                    <>
+                      <input
+                        value={assignAssetSearch}
+                        onChange={e => setAssignAssetSearch(e.target.value)}
+                        placeholder="Search models, tools, agents..."
+                        style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' as const, marginBottom: 12 }}
+                      />
+                      <div style={{ maxHeight: 260, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 14, paddingRight: 4 }}>
+                        {assetTypes.map(aType => {
+                          const assetsOfType = allAvailableAssets.filter(a =>
+                            a.type === aType && (
+                              !assignAssetSearch ||
+                              a.name.toLowerCase().includes(assignAssetSearch.toLowerCase()) ||
+                              a.namespace.toLowerCase().includes(assignAssetSearch.toLowerCase())
+                            )
+                          );
+                          if (assetsOfType.length === 0) return null;
+                          const checkedCount = assetsOfType.filter(a => credAssignments[a.name]).length;
+                          return (
+                            <div key={aType}>
+                              <div style={{ fontSize: 12, color: '#888', fontWeight: 600, marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                                {assetTypeEmojis[aType]} {aType}s ({checkedCount}/{assetsOfType.length})
+                              </div>
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                                {assetsOfType.map(a => {
+                                  const checked = !!credAssignments[a.name];
+                                  return (
+                                    <label
+                                      key={a.name}
+                                      style={{
+                                        display: 'flex', alignItems: 'center', gap: 10, padding: '6px 10px', borderRadius: 6,
+                                        backgroundColor: checked ? 'rgba(212,168,67,0.08)' : 'transparent',
+                                        border: '1px solid ' + (checked ? 'rgba(212,168,67,0.25)' : 'rgba(212,168,67,0.06)'),
+                                        cursor: 'pointer', transition: 'all 0.15s',
+                                      }}
+                                    >
+                                      <input
+                                        type="checkbox"
+                                        checked={checked}
+                                        onChange={() => setCredAssignments(prev => ({ ...prev, [a.name]: !prev[a.name] }))}
+                                        style={{ accentColor: '#D4A843' }}
+                                      />
+                                      <span style={{ fontSize: 13, color: '#E8E8E8', flex: 1 }}>{a.name}</span>
+                                      <span style={{ fontSize: 11, color: '#666' }}>{a.namespace}</span>
+                                    </label>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          );
+                        })}
+                        {allAvailableAssets.filter(a => !assignAssetSearch || a.name.toLowerCase().includes(assignAssetSearch.toLowerCase()) || a.namespace.toLowerCase().includes(assignAssetSearch.toLowerCase())).length === 0 && (
+                          <div style={{ textAlign: 'center', color: '#666', fontSize: 13, padding: 20 }}>No assets match "{assignAssetSearch}"</div>
+                        )}
+                      </div>
+                    </>
+                  )}
+
+                  {/* Selection summary */}
+                  {totalAssigned > 0 && (
+                    <div style={{ marginTop: 12, padding: '8px 12px', backgroundColor: 'rgba(212,168,67,0.06)', borderRadius: 6, fontSize: 12, color: '#D4A843', display: 'flex', gap: 12 }}>
+                      {assignedNsCount > 0 && <span>{assignedNsCount} namespace{assignedNsCount !== 1 ? 's' : ''}</span>}
+                      {assignedNsCount > 0 && assignedAssetCount > 0 && <span style={{ color: '#555' }}>·</span>}
+                      {assignedAssetCount > 0 && <span>{assignedAssetCount} individual asset{assignedAssetCount !== 1 ? 's' : ''}</span>}
                     </div>
                   )}
 
                   <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, marginTop: 20 }}>
                     <button onClick={() => setAddCredStep(1)} style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(212, 168, 67, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>← Back</button>
                     <div style={{ display: 'flex', gap: 10 }}>
-                      <button onClick={() => { setCredAssignments({}); handleAddCredential(); }} style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(212, 168, 67, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>Skip</button>
+                      <button onClick={() => { setCredAssignments({}); setAssignNsSelections({}); handleAddCredential(); }} style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(212, 168, 67, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>Skip</button>
                       <button onClick={handleAddCredential} style={{ backgroundColor: '#D4A843', color: '#0A0A0A', border: 'none', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
-                        {assignedCount > 0 ? `Create & Assign (${assignedCount})` : 'Create'}
+                        {totalAssigned > 0 ? `Create & Assign (${totalAssigned})` : 'Create'}
                       </button>
                     </div>
                   </div>

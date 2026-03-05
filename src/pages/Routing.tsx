@@ -1,20 +1,35 @@
 import React, { useState } from 'react';
 
 /* ── Types ── */
+type Strategy = 'failover' | 'load-balance' | 'single' | 'cost-aware' | 'latency-aware' | 'capability-aware';
+
 interface Endpoint {
   provider: string;
   region: string;
   health: 'healthy' | 'degraded' | 'unhealthy';
   weight?: number;
+  costPer1k?: number;
+  latencyP95?: number;
+  capabilities?: string[];
+}
+
+interface SmartConfig {
+  budgetLimit?: number;
+  budgetPeriod?: string;
+  preferCheapest?: boolean;
+  latencyTarget?: number;
+  capabilityRules?: { capability: string; preferredProvider: string }[];
+  fallbackProvider?: string;
 }
 
 interface RouteGroup {
   id: string;
   name: string;
   pattern: string;
-  strategy: 'failover' | 'load-balance' | 'single';
+  strategy: Strategy;
   enabled: boolean;
   endpoints: Endpoint[];
+  smartConfig?: SmartConfig;
 }
 
 /* ── Mock Data ── */
@@ -56,13 +71,55 @@ const initialGroups: RouteGroup[] = [
     id: 'auto',
     name: 'Auto-Route (Cost Optimized)',
     pattern: '/v1/chat/completions (auto)',
-    strategy: 'load-balance',
+    strategy: 'cost-aware',
     enabled: true,
     endpoints: [
-      { provider: 'Azure OpenAI', region: 'East US', health: 'healthy', weight: 60 },
-      { provider: 'Anthropic', region: 'api.anthropic.com', health: 'healthy', weight: 25 },
-      { provider: 'Google Vertex', region: 'us-central1', health: 'degraded', weight: 15 },
+      { provider: 'Azure OpenAI', region: 'East US', health: 'healthy', costPer1k: 0.03, latencyP95: 180, capabilities: ['chat', 'vision', 'tools'] },
+      { provider: 'Anthropic', region: 'api.anthropic.com', health: 'healthy', costPer1k: 0.015, latencyP95: 220, capabilities: ['chat', 'vision', 'tools', 'large-context'] },
+      { provider: 'Google Vertex', region: 'us-central1', health: 'degraded', costPer1k: 0.01, latencyP95: 350, capabilities: ['chat', 'vision'] },
     ],
+    smartConfig: {
+      budgetLimit: 5000,
+      budgetPeriod: 'monthly',
+      preferCheapest: true,
+      fallbackProvider: 'Azure OpenAI',
+    },
+  },
+  {
+    id: 'latency',
+    name: 'Low-Latency Route',
+    pattern: '/v1/chat/completions (fast-*)',
+    strategy: 'latency-aware',
+    enabled: true,
+    endpoints: [
+      { provider: 'Azure OpenAI', region: 'East US', health: 'healthy', costPer1k: 0.03, latencyP95: 120 },
+      { provider: 'Azure OpenAI', region: 'West US', health: 'healthy', costPer1k: 0.03, latencyP95: 145 },
+      { provider: 'Anthropic', region: 'api.anthropic.com', health: 'healthy', costPer1k: 0.015, latencyP95: 280 },
+    ],
+    smartConfig: {
+      latencyTarget: 200,
+      fallbackProvider: 'Azure OpenAI',
+    },
+  },
+  {
+    id: 'capability',
+    name: 'Smart Capability Router',
+    pattern: '/v1/chat/completions (smart-*)',
+    strategy: 'capability-aware',
+    enabled: true,
+    endpoints: [
+      { provider: 'Azure OpenAI', region: 'East US', health: 'healthy', costPer1k: 0.03, capabilities: ['chat', 'vision', 'tools'] },
+      { provider: 'Anthropic', region: 'api.anthropic.com', health: 'healthy', costPer1k: 0.015, capabilities: ['chat', 'vision', 'tools', 'large-context'] },
+      { provider: 'Google Vertex', region: 'us-central1', health: 'degraded', costPer1k: 0.01, capabilities: ['chat', 'vision'] },
+    ],
+    smartConfig: {
+      capabilityRules: [
+        { capability: 'large-context', preferredProvider: 'Anthropic' },
+        { capability: 'vision', preferredProvider: 'Azure OpenAI' },
+        { capability: 'tools', preferredProvider: 'Azure OpenAI' },
+      ],
+      fallbackProvider: 'Google Vertex',
+    },
   },
 ];
 
@@ -103,8 +160,15 @@ const selectStyle: React.CSSProperties = { ...inputStyle };
 
 const healthColor = (h: string) => h === 'healthy' ? colors.green : h === 'degraded' ? colors.amber : colors.red;
 const healthLabel = (h: string) => h === 'healthy' ? 'Healthy' : h === 'degraded' ? 'Degraded' : 'Unhealthy';
-const strategyLabel = (s: string) => s === 'failover' ? 'Failover Chain' : s === 'load-balance' ? 'Load Balanced' : 'Single Endpoint';
-const strategyColor = (s: string) => s === 'failover' ? colors.purple : s === 'load-balance' ? colors.blue : colors.textMuted;
+
+const strategyMeta: Record<Strategy, { label: string; color: string; desc: string; icon: string }> = {
+  'failover': { label: 'Failover Chain', color: colors.purple, desc: 'Try endpoints in priority order', icon: '🔄' },
+  'load-balance': { label: 'Load Balanced', color: colors.blue, desc: 'Distribute traffic by weight', icon: '⚖️' },
+  'single': { label: 'Single Endpoint', color: colors.textMuted, desc: 'One endpoint only', icon: '🎯' },
+  'cost-aware': { label: 'Cost-Aware', color: '#10B981', desc: 'Prefer cheapest healthy endpoint; respect budget limits', icon: '💰' },
+  'latency-aware': { label: 'Latency-Aware', color: '#F59E0B', desc: 'Route to lowest-latency healthy endpoint (rolling p95)', icon: '⚡' },
+  'capability-aware': { label: 'Capability-Aware', color: '#EC4899', desc: 'Route by required capabilities (vision, tools, context size)', icon: '🧠' },
+};
 
 const providerColors: Record<string, string> = {
   'Azure OpenAI': '#4F6BED',
@@ -126,12 +190,14 @@ const Routing: React.FC = () => {
   // Form state
   const [formName, setFormName] = useState('');
   const [formPattern, setFormPattern] = useState('');
-  const [formStrategy, setFormStrategy] = useState<'failover' | 'load-balance' | 'single'>('failover');
+  const [formStrategy, setFormStrategy] = useState<Strategy>('failover');
   const [formEndpoints, setFormEndpoints] = useState<Endpoint[]>([{ provider: 'Azure OpenAI', region: '', health: 'healthy' }]);
+  const [formSmartConfig, setFormSmartConfig] = useState<SmartConfig>({});
 
   const resetForm = () => {
     setFormName(''); setFormPattern(''); setFormStrategy('failover');
     setFormEndpoints([{ provider: 'Azure OpenAI', region: '', health: 'healthy' }]);
+    setFormSmartConfig({});
     setCreateStep(1); setEditingId(null);
   };
 
@@ -141,10 +207,12 @@ const Routing: React.FC = () => {
     setEditingId(g.id);
     setFormName(g.name); setFormPattern(g.pattern); setFormStrategy(g.strategy);
     setFormEndpoints(g.endpoints.map(e => ({ ...e })));
+    setFormSmartConfig(g.smartConfig ? { ...g.smartConfig } : {});
     setCreateStep(1); setShowCreate(true);
   };
 
   const handleSave = () => {
+    const isSmartStrategy = ['cost-aware', 'latency-aware', 'capability-aware'].includes(formStrategy);
     const newGroup: RouteGroup = {
       id: editingId || `route-${Date.now()}`,
       name: formName,
@@ -152,6 +220,7 @@ const Routing: React.FC = () => {
       strategy: formStrategy,
       enabled: true,
       endpoints: formEndpoints,
+      ...(isSmartStrategy ? { smartConfig: formSmartConfig } : {}),
     };
     if (editingId) {
       setGroups(prev => prev.map(g => g.id === editingId ? newGroup : g));
@@ -256,10 +325,10 @@ const Routing: React.FC = () => {
                 {/* Strategy pill */}
                 <span style={{
                   padding: '3px 10px', borderRadius: 12, fontSize: 11, fontWeight: 600,
-                  color: strategyColor(g.strategy), backgroundColor: `${strategyColor(g.strategy)}15`,
-                  border: `1px solid ${strategyColor(g.strategy)}30`,
+                  color: strategyMeta[g.strategy].color, backgroundColor: `${strategyMeta[g.strategy].color}15`,
+                  border: `1px solid ${strategyMeta[g.strategy].color}30`,
                 }}>
-                  {strategyLabel(g.strategy)}
+                  {strategyMeta[g.strategy].icon} {strategyMeta[g.strategy].label}
                 </span>
 
                 {/* Endpoint chain preview */}
@@ -301,9 +370,14 @@ const Routing: React.FC = () => {
                   {/* Endpoint chain visualization */}
                   <div>
                     <div style={{ fontSize: 12, color: colors.textMuted, marginBottom: 10, textTransform: 'uppercase', letterSpacing: 0.5 }}>
-                      {g.strategy === 'failover' ? 'Failover Order (priority left → right)' : g.strategy === 'load-balance' ? 'Traffic Distribution' : 'Endpoint'}
+                      {g.strategy === 'failover' ? 'Failover Order (priority left → right)' :
+                       g.strategy === 'load-balance' ? 'Traffic Distribution' :
+                       g.strategy === 'cost-aware' ? 'Available Endpoints (routed by cost)' :
+                       g.strategy === 'latency-aware' ? 'Available Endpoints (routed by latency)' :
+                       g.strategy === 'capability-aware' ? 'Available Endpoints (routed by capability)' :
+                       'Endpoint'}
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 0, flexWrap: 'wrap' }}>
+                    <div style={{ display: 'flex', alignItems: 'stretch', gap: 0, flexWrap: 'wrap' }}>
                       {g.endpoints.map((ep, ei) => (
                         <React.Fragment key={ei}>
                           <div style={{
@@ -315,6 +389,19 @@ const Routing: React.FC = () => {
                             <div>
                               <div style={{ fontSize: 13, color: '#fff', fontWeight: 500 }}>{ep.provider}</div>
                               <div style={{ fontSize: 11, color: colors.textMuted, fontFamily: 'monospace' }}>{ep.region}</div>
+                              {g.strategy === 'cost-aware' && ep.costPer1k != null && (
+                                <div style={{ fontSize: 10, color: '#10B981', marginTop: 2 }}>${ep.costPer1k}/1k tokens</div>
+                              )}
+                              {g.strategy === 'latency-aware' && ep.latencyP95 != null && (
+                                <div style={{ fontSize: 10, color: colors.amber, marginTop: 2 }}>p95: {ep.latencyP95}ms</div>
+                              )}
+                              {g.strategy === 'capability-aware' && ep.capabilities && (
+                                <div style={{ display: 'flex', gap: 3, marginTop: 3, flexWrap: 'wrap' }}>
+                                  {ep.capabilities.map(c => (
+                                    <span key={c} style={{ fontSize: 9, padding: '1px 5px', borderRadius: 3, backgroundColor: 'rgba(236,72,153,0.15)', color: '#EC4899' }}>{c}</span>
+                                  ))}
+                                </div>
+                              )}
                             </div>
                             {g.strategy === 'load-balance' && ep.weight != null && (
                               <span style={{ fontSize: 13, fontWeight: 700, color: providerColors[ep.provider] || colors.gold, marginLeft: 4 }}>{ep.weight}%</span>
@@ -324,7 +411,7 @@ const Routing: React.FC = () => {
                             )}
                           </div>
                           {ei < g.endpoints.length - 1 && (
-                            <span style={{ color: '#555', fontSize: 16, margin: '0 8px', userSelect: 'none' }}>
+                            <span style={{ color: '#555', fontSize: 16, margin: '0 8px', userSelect: 'none', alignSelf: 'center' }}>
                               {g.strategy === 'failover' ? '→' : '·'}
                             </span>
                           )}
@@ -347,6 +434,58 @@ const Routing: React.FC = () => {
                           </div>
                         </div>
                       ))}
+                    </div>
+                  )}
+
+                  {/* Smart routing config display */}
+                  {g.smartConfig && g.strategy === 'cost-aware' && (
+                    <div style={{ backgroundColor: '#0F0F0F', borderRadius: 8, padding: 12, border: `1px solid rgba(16,185,129,0.2)` }}>
+                      <div style={{ fontSize: 12, fontWeight: 600, color: '#10B981', marginBottom: 8 }}>💰 Cost Rules</div>
+                      <div style={{ display: 'flex', gap: 20, fontSize: 12, color: colors.textMuted, flexWrap: 'wrap' }}>
+                        {g.smartConfig.budgetLimit && (
+                          <span>Budget limit: <span style={{ color: colors.text }}>${g.smartConfig.budgetLimit.toLocaleString()}/{g.smartConfig.budgetPeriod || 'month'}</span></span>
+                        )}
+                        <span>Prefer cheapest: <span style={{ color: g.smartConfig.preferCheapest ? colors.green : colors.text }}>{g.smartConfig.preferCheapest ? 'Yes' : 'No'}</span></span>
+                        {g.smartConfig.fallbackProvider && (
+                          <span>Fallback: <span style={{ color: colors.text }}>{g.smartConfig.fallbackProvider}</span></span>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {g.smartConfig && g.strategy === 'latency-aware' && (
+                    <div style={{ backgroundColor: '#0F0F0F', borderRadius: 8, padding: 12, border: `1px solid rgba(245,158,11,0.2)` }}>
+                      <div style={{ fontSize: 12, fontWeight: 600, color: colors.amber, marginBottom: 8 }}>⚡ Latency Rules</div>
+                      <div style={{ display: 'flex', gap: 20, fontSize: 12, color: colors.textMuted, flexWrap: 'wrap' }}>
+                        {g.smartConfig.latencyTarget && (
+                          <span>Target p95: <span style={{ color: colors.text }}>&lt; {g.smartConfig.latencyTarget}ms</span></span>
+                        )}
+                        <span>Selection: <span style={{ color: colors.text }}>Lowest rolling p95 among healthy</span></span>
+                        {g.smartConfig.fallbackProvider && (
+                          <span>Fallback: <span style={{ color: colors.text }}>{g.smartConfig.fallbackProvider}</span></span>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {g.smartConfig && g.strategy === 'capability-aware' && (
+                    <div style={{ backgroundColor: '#0F0F0F', borderRadius: 8, padding: 12, border: `1px solid rgba(236,72,153,0.2)` }}>
+                      <div style={{ fontSize: 12, fontWeight: 600, color: '#EC4899', marginBottom: 8 }}>🧠 Capability Rules</div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                        {(g.smartConfig.capabilityRules || []).map((rule, ri) => (
+                          <div key={ri} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12 }}>
+                            <span style={{ color: colors.textMuted }}>If request needs</span>
+                            <span style={{ padding: '1px 6px', borderRadius: 3, backgroundColor: 'rgba(236,72,153,0.15)', color: '#EC4899', fontSize: 11 }}>{rule.capability}</span>
+                            <span style={{ color: colors.textMuted }}>→ prefer</span>
+                            <span style={{ color: colors.text, fontWeight: 500 }}>{rule.preferredProvider}</span>
+                          </div>
+                        ))}
+                        {g.smartConfig.fallbackProvider && (
+                          <div style={{ fontSize: 12, color: colors.textMuted, marginTop: 2 }}>
+                            Default fallback: <span style={{ color: colors.text }}>{g.smartConfig.fallbackProvider}</span>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   )}
 
@@ -382,7 +521,7 @@ const Routing: React.FC = () => {
                 </React.Fragment>
               ))}
               <span style={{ color: colors.textMuted, fontSize: 12, marginLeft: 8 }}>
-                {createStep === 1 ? 'Route Details' : 'Add Endpoints'}
+                {createStep === 1 ? 'Route Details' : ['cost-aware', 'latency-aware', 'capability-aware'].includes(formStrategy) ? 'Rules & Endpoints' : 'Add Endpoints'}
               </span>
             </div>
 
@@ -403,24 +542,20 @@ const Routing: React.FC = () => {
                 </div>
                 <div>
                   <label style={{ color: colors.textMuted, fontSize: 12, marginBottom: 8, display: 'block' }}>Routing Strategy</label>
-                  <div style={{ display: 'flex', gap: 8 }}>
-                    {([
-                      { key: 'failover' as const, label: 'Failover', desc: 'Try endpoints in priority order' },
-                      { key: 'load-balance' as const, label: 'Load Balance', desc: 'Distribute traffic by weight' },
-                      { key: 'single' as const, label: 'Single', desc: 'One endpoint only' },
-                    ]).map(opt => (
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
+                    {(Object.entries(strategyMeta) as [Strategy, typeof strategyMeta[Strategy]][]).map(([key, meta]) => (
                       <div
-                        key={opt.key}
-                        onClick={() => setFormStrategy(opt.key)}
+                        key={key}
+                        onClick={() => setFormStrategy(key)}
                         style={{
-                          flex: 1, padding: '10px 12px', borderRadius: 8, cursor: 'pointer',
-                          backgroundColor: formStrategy === opt.key ? `${strategyColor(opt.key)}15` : '#0F0F0F',
-                          border: `1px solid ${formStrategy === opt.key ? strategyColor(opt.key) : 'rgba(212,168,67,0.10)'}`,
+                          padding: '10px 12px', borderRadius: 8, cursor: 'pointer',
+                          backgroundColor: formStrategy === key ? `${meta.color}15` : '#0F0F0F',
+                          border: `1px solid ${formStrategy === key ? meta.color : 'rgba(212,168,67,0.10)'}`,
                           transition: 'all 0.15s',
                         }}
                       >
-                        <div style={{ fontSize: 13, fontWeight: 600, color: formStrategy === opt.key ? strategyColor(opt.key) : colors.text }}>{opt.label}</div>
-                        <div style={{ fontSize: 11, color: colors.textMuted, marginTop: 2 }}>{opt.desc}</div>
+                        <div style={{ fontSize: 13, fontWeight: 600, color: formStrategy === key ? meta.color : colors.text }}>{meta.icon} {meta.label}</div>
+                        <div style={{ fontSize: 10, color: colors.textMuted, marginTop: 2, lineHeight: 1.3 }}>{meta.desc}</div>
                       </div>
                     ))}
                   </div>
@@ -430,10 +565,103 @@ const Routing: React.FC = () => {
 
             {createStep === 2 && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                {/* Smart config section for smart strategies */}
+                {formStrategy === 'cost-aware' && (
+                  <div style={{ backgroundColor: '#0F0F0F', borderRadius: 8, padding: 14, border: '1px solid rgba(16,185,129,0.2)', display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: '#10B981' }}>💰 Cost Rules</div>
+                    <div style={{ display: 'flex', gap: 10 }}>
+                      <div style={{ flex: 1 }}>
+                        <label style={{ color: colors.textMuted, fontSize: 11, display: 'block', marginBottom: 3 }}>Monthly Budget Limit ($)</label>
+                        <input type="number" value={formSmartConfig.budgetLimit ?? ''} onChange={e => setFormSmartConfig(c => ({ ...c, budgetLimit: Number(e.target.value) }))} placeholder="5000" style={inputStyle} />
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <label style={{ color: colors.textMuted, fontSize: 11, display: 'block', marginBottom: 3 }}>Fallback Provider</label>
+                        <select value={formSmartConfig.fallbackProvider ?? ''} onChange={e => setFormSmartConfig(c => ({ ...c, fallbackProvider: e.target.value }))} style={selectStyle}>
+                          <option value="">Select...</option>
+                          <option>Azure OpenAI</option><option>Anthropic</option><option>Google Vertex</option><option>OpenAI Direct</option><option>AWS Bedrock</option>
+                        </select>
+                      </div>
+                    </div>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: colors.text, cursor: 'pointer' }}>
+                      <input type="checkbox" checked={formSmartConfig.preferCheapest ?? true} onChange={e => setFormSmartConfig(c => ({ ...c, preferCheapest: e.target.checked }))} />
+                      Always prefer cheapest healthy endpoint
+                    </label>
+                  </div>
+                )}
+
+                {formStrategy === 'latency-aware' && (
+                  <div style={{ backgroundColor: '#0F0F0F', borderRadius: 8, padding: 14, border: '1px solid rgba(245,158,11,0.2)', display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: colors.amber }}>⚡ Latency Rules</div>
+                    <div style={{ display: 'flex', gap: 10 }}>
+                      <div style={{ flex: 1 }}>
+                        <label style={{ color: colors.textMuted, fontSize: 11, display: 'block', marginBottom: 3 }}>Target p95 Latency (ms)</label>
+                        <input type="number" value={formSmartConfig.latencyTarget ?? ''} onChange={e => setFormSmartConfig(c => ({ ...c, latencyTarget: Number(e.target.value) }))} placeholder="200" style={inputStyle} />
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <label style={{ color: colors.textMuted, fontSize: 11, display: 'block', marginBottom: 3 }}>Fallback Provider</label>
+                        <select value={formSmartConfig.fallbackProvider ?? ''} onChange={e => setFormSmartConfig(c => ({ ...c, fallbackProvider: e.target.value }))} style={selectStyle}>
+                          <option value="">Select...</option>
+                          <option>Azure OpenAI</option><option>Anthropic</option><option>Google Vertex</option><option>OpenAI Direct</option><option>AWS Bedrock</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div style={{ fontSize: 11, color: '#666' }}>Routes to the endpoint with lowest rolling p95 latency among healthy targets</div>
+                  </div>
+                )}
+
+                {formStrategy === 'capability-aware' && (
+                  <div style={{ backgroundColor: '#0F0F0F', borderRadius: 8, padding: 14, border: '1px solid rgba(236,72,153,0.2)', display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: '#EC4899' }}>🧠 Capability Rules</div>
+                    {(formSmartConfig.capabilityRules || []).map((rule, ri) => (
+                      <div key={ri} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <span style={{ fontSize: 12, color: colors.textMuted, whiteSpace: 'nowrap' }}>If needs</span>
+                        <select value={rule.capability} onChange={e => {
+                          const rules = [...(formSmartConfig.capabilityRules || [])];
+                          rules[ri] = { ...rules[ri], capability: e.target.value };
+                          setFormSmartConfig(c => ({ ...c, capabilityRules: rules }));
+                        }} style={{ ...selectStyle, flex: 1 }}>
+                          <option value="vision">Vision</option>
+                          <option value="tools">Tool Calling</option>
+                          <option value="large-context">Large Context (&gt;32k)</option>
+                          <option value="code">Code Generation</option>
+                          <option value="embedding">Embeddings</option>
+                        </select>
+                        <span style={{ fontSize: 12, color: colors.textMuted }}>→</span>
+                        <select value={rule.preferredProvider} onChange={e => {
+                          const rules = [...(formSmartConfig.capabilityRules || [])];
+                          rules[ri] = { ...rules[ri], preferredProvider: e.target.value };
+                          setFormSmartConfig(c => ({ ...c, capabilityRules: rules }));
+                        }} style={{ ...selectStyle, flex: 1 }}>
+                          <option>Azure OpenAI</option><option>Anthropic</option><option>Google Vertex</option><option>OpenAI Direct</option><option>AWS Bedrock</option>
+                        </select>
+                        <button onClick={() => {
+                          const rules = (formSmartConfig.capabilityRules || []).filter((_, i) => i !== ri);
+                          setFormSmartConfig(c => ({ ...c, capabilityRules: rules }));
+                        }} style={{ background: 'none', border: 'none', color: colors.red, cursor: 'pointer', fontSize: 16 }}>×</button>
+                      </div>
+                    ))}
+                    <button onClick={() => {
+                      const rules = [...(formSmartConfig.capabilityRules || []), { capability: 'vision', preferredProvider: 'Azure OpenAI' }];
+                      setFormSmartConfig(c => ({ ...c, capabilityRules: rules }));
+                    }} style={{ background: 'none', border: `1px dashed ${colors.border}`, borderRadius: 6, padding: '6px', color: '#EC4899', fontSize: 12, cursor: 'pointer', fontFamily: 'inherit' }}>
+                      + Add Capability Rule
+                    </button>
+                    <div>
+                      <label style={{ color: colors.textMuted, fontSize: 11, display: 'block', marginBottom: 3 }}>Default Fallback Provider</label>
+                      <select value={formSmartConfig.fallbackProvider ?? ''} onChange={e => setFormSmartConfig(c => ({ ...c, fallbackProvider: e.target.value }))} style={selectStyle}>
+                        <option value="">Select...</option>
+                        <option>Azure OpenAI</option><option>Anthropic</option><option>Google Vertex</option><option>OpenAI Direct</option><option>AWS Bedrock</option>
+                      </select>
+                    </div>
+                  </div>
+                )}
+
+                {/* Endpoints section */}
                 <div style={{ fontSize: 12, color: colors.textMuted, marginBottom: 4 }}>
                   {formStrategy === 'failover' ? 'Add endpoints in failover priority order (first = primary)' :
                    formStrategy === 'load-balance' ? 'Add endpoints and set traffic weight for each' :
-                   'Configure the single endpoint for this route'}
+                   formStrategy === 'single' ? 'Configure the single endpoint for this route' :
+                   'Add available endpoints for smart routing to choose from'}
                 </div>
 
                 {formEndpoints.map((ep, idx) => (
@@ -462,14 +690,36 @@ const Routing: React.FC = () => {
                       {formStrategy === 'load-balance' && (
                         <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                           <input
-                            type="number"
-                            min={0}
-                            max={100}
+                            type="number" min={0} max={100}
                             value={ep.weight ?? 0}
                             onChange={e => updateEndpoint(idx, 'weight', Number(e.target.value))}
                             style={{ ...inputStyle, width: 60, textAlign: 'center' }}
                           />
                           <span style={{ color: colors.textMuted, fontSize: 12 }}>%</span>
+                        </div>
+                      )}
+                      {formStrategy === 'cost-aware' && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                          <input
+                            type="number" min={0} step={0.001}
+                            value={ep.costPer1k ?? ''}
+                            onChange={e => updateEndpoint(idx, 'costPer1k', Number(e.target.value))}
+                            placeholder="$/1k"
+                            style={{ ...inputStyle, width: 70, textAlign: 'center' }}
+                          />
+                          <span style={{ color: colors.textMuted, fontSize: 10 }}>$/1k</span>
+                        </div>
+                      )}
+                      {formStrategy === 'latency-aware' && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                          <input
+                            type="number" min={0}
+                            value={ep.latencyP95 ?? ''}
+                            onChange={e => updateEndpoint(idx, 'latencyP95', Number(e.target.value))}
+                            placeholder="p95ms"
+                            style={{ ...inputStyle, width: 70, textAlign: 'center' }}
+                          />
+                          <span style={{ color: colors.textMuted, fontSize: 10 }}>ms</span>
                         </div>
                       )}
                       {formEndpoints.length > 1 && (

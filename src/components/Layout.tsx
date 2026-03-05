@@ -338,13 +338,6 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   {
-    path: '/',
-    label: 'Overview',
-    icon: <Shield24Regular />,
-    activeIcon: <Shield24Filled />,
-    section: 'Overview',
-  },
-  {
     path: '/traffic',
     label: 'Traffic',
     icon: <DataUsage24Regular />,
@@ -630,6 +623,20 @@ const Layout: React.FC<LayoutProps> = ({ onSignOut }) => {
             <div className={styles.logoIcon}>⚡</div>
           </div>
           <nav className={styles.nav}>
+            <div
+              className={styles.navSection}
+              onClick={() => navigate('/')}
+              style={{
+                cursor: 'pointer',
+                color: location.pathname === '/' ? '#D4A843' : '#B8923A',
+                backgroundColor: location.pathname === '/' ? 'rgba(212, 168, 67, 0.08)' : 'transparent',
+                borderRadius: 6,
+                margin: '0 8px',
+                padding: '6px 10px 6px',
+              }}
+            >
+              ⚡ Overview
+            </div>
             {navItems.map((item) => {
               const showSection = item.section && item.section !== lastSection;
               if (item.section) lastSection = item.section;

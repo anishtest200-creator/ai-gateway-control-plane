@@ -356,6 +356,53 @@ const Policies: React.FC = () => {
   const [approvalList, setApprovalList] = useState<PendingApproval[]>(pendingApprovals)
   const [policyFormData, setPolicyFormData] = useState({ name: '', category: 'authentication' as PolicyCategory, description: '', enforcement: 'Enforce', threshold: '' })
 
+  // Access Rule creation state
+  const [showCreateAccessRule, setShowCreateAccessRule] = useState(false)
+  const [accessRuleStep, setAccessRuleStep] = useState(1)
+  const [accessRuleList, setAccessRuleList] = useState<AssetAccessRule[]>(accessRules)
+  const [accessRuleForm, setAccessRuleForm] = useState<{
+    name: string; type: AccessRuleType; description: string; namespace: string;
+    assetType: string; roles: string; namespaces: string; domains: string;
+  }>({ name: '', type: 'role-based', description: '', namespace: 'global', assetType: 'Model', roles: '', namespaces: '', domains: '' })
+  const [accessRuleAssignments, setAccessRuleAssignments] = useState<Record<string, boolean>>({})
+
+  const allAssets = [
+    { name: 'GPT-4o', type: 'Model', namespace: 'retail-support' },
+    { name: 'GPT-4o-mini', type: 'Model', namespace: 'retail-support' },
+    { name: 'Claude 3.5 Sonnet', type: 'Model', namespace: 'finance-analytics' },
+    { name: 'Gemini 1.5 Pro', type: 'Model', namespace: 'finance-analytics' },
+    { name: 'Claude 3 (Bedrock)', type: 'Model', namespace: 'customer-ops' },
+    { name: 'Support Summarizer', type: 'Agent', namespace: 'retail-support' },
+    { name: 'Financial Analyst Agent', type: 'Agent', namespace: 'finance-analytics' },
+    { name: 'Sprint Planning Agent', type: 'Agent', namespace: 'dev-sandbox' },
+    { name: 'Content Moderator', type: 'Tool', namespace: 'retail-support' },
+    { name: 'CRM Lookup Tool', type: 'Tool', namespace: 'retail-support' },
+    { name: 'Jira Issue Tracker', type: 'Tool', namespace: 'dev-sandbox' },
+    { name: 'HR Database Connector', type: 'Tool', namespace: 'hr-automation' },
+  ]
+  const allNs = ['global', 'retail-support', 'finance-analytics', 'customer-ops', 'hr-automation', 'dev-sandbox', 'production', 'staging', 'sandbox', 'partners']
+
+  const handleCreateAccessRule = () => {
+    const f = accessRuleForm
+    const configMap: Record<AccessRuleType, Record<string, unknown>> = {
+      'role-based': { allowedRoles: f.roles.split(',').map(s => s.trim()).filter(Boolean) },
+      'namespace-access': { allowedNamespaces: f.namespaces.split(',').map(s => s.trim()).filter(Boolean) },
+      'domain-access': { allowedDomains: f.domains.split(',').map(s => s.trim()).filter(Boolean) },
+    }
+    const newRule: AssetAccessRule = {
+      id: 'ar' + Date.now(), name: f.name, description: f.description, type: f.type,
+      assetType: f.assetType, namespace: f.namespace, enabled: true, config: configMap[f.type],
+    }
+    setAccessRuleList(prev => [...prev, newRule])
+    setRuleStates(s => ({ ...s, [newRule.id]: true }))
+    const assigned = Object.values(accessRuleAssignments).filter(Boolean).length
+    setShowCreateAccessRule(false)
+    setAccessRuleStep(1)
+    setAccessRuleForm({ name: '', type: 'role-based', description: '', namespace: 'global', assetType: 'Model', roles: '', namespaces: '', domains: '' })
+    setAccessRuleAssignments({})
+    void assigned // assignment data would be sent to backend
+  }
+
   const handleCreatePolicy = () => {
     const newId = 'p' + Date.now()
     const newPolicy: Policy = {
@@ -489,9 +536,12 @@ const Policies: React.FC = () => {
     const types = Object.keys(accessRuleConfig) as AccessRuleType[]
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+        <div>
+          <button onClick={() => setShowCreateAccessRule(true)} style={{ backgroundColor: '#D4A843', color: '#0A0A0A', border: 'none', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>+ Create Access Rule</button>
+        </div>
         {types.map(ruleType => {
           const cfg = accessRuleConfig[ruleType]
-          const items = accessRules.filter(r => r.type === ruleType)
+          const items = accessRuleList.filter(r => r.type === ruleType)
           if (items.length === 0) return null
           return (
             <div key={ruleType}>
@@ -856,7 +906,7 @@ const Policies: React.FC = () => {
 
       {/* Compact stats summary */}
       <div style={{ fontSize: 13, color: colors.textMuted, lineHeight: 1.6 }}>
-        <span style={{ fontWeight: 600, color: '#fff' }}>{enabledPolicies}</span> runtime rules · <span style={{ fontWeight: 600, color: '#fff' }}>{accessRules.filter(r => ruleStates[r.id]).length}</span> access rules · <span style={{ fontWeight: 600, color: '#fff' }}>{enabledGuardrails}</span> guardrails · <span style={{ fontWeight: 600, color: '#fff' }}>{approvalList.length}</span> pending approvals
+        <span style={{ fontWeight: 600, color: '#fff' }}>{enabledPolicies}</span> runtime rules · <span style={{ fontWeight: 600, color: '#fff' }}>{accessRuleList.filter(r => ruleStates[r.id]).length}</span> access rules · <span style={{ fontWeight: 600, color: '#fff' }}>{enabledGuardrails}</span> guardrails · <span style={{ fontWeight: 600, color: '#fff' }}>{approvalList.length}</span> pending approvals
       </div>
 
       {/* Impact Simulator panel */}
@@ -1021,6 +1071,206 @@ const Policies: React.FC = () => {
               <button onClick={() => setShowCreatePolicy(false)} style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(212, 168, 67, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>Cancel</button>
               <button onClick={handleCreatePolicy} style={{ backgroundColor: '#D4A843', color: '#0A0A0A', border: 'none', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>Create Policy</button>
             </div>
+          </div>
+        </div>
+      )}
+      {/* Create Access Rule Modal */}
+      {showCreateAccessRule && (
+        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+          <div style={{ backgroundColor: '#1A1A1A', borderTop: '3px solid #D4A843', borderRadius: 8, padding: 24, width: '100%', maxWidth: 560, border: '1px solid rgba(212, 168, 67, 0.10)' }}>
+            {/* Step indicator */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20 }}>
+              {['Define Rule', 'Assign'].map((label, idx) => {
+                const step = idx + 1
+                const active = accessRuleStep === step
+                const done = accessRuleStep > step
+                return (
+                  <React.Fragment key={label}>
+                    {idx > 0 && <div style={{ flex: 1, height: 1, backgroundColor: done ? '#D4A843' : 'rgba(212,168,67,0.15)' }} />}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <span style={{
+                        width: 22, height: 22, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: 11, fontWeight: 600,
+                        backgroundColor: active ? '#D4A843' : done ? 'rgba(212,168,67,0.25)' : '#1E1E1E',
+                        color: active ? '#0A0A0A' : done ? '#D4A843' : '#666',
+                        border: active ? 'none' : '1px solid rgba(212,168,67,0.15)',
+                      }}>{done ? '✓' : step}</span>
+                      <span style={{ fontSize: 12, color: active ? '#fff' : '#888', fontWeight: active ? 600 : 400 }}>{label}</span>
+                    </div>
+                  </React.Fragment>
+                )
+              })}
+            </div>
+
+            {accessRuleStep === 1 && (
+              <>
+                <h3 style={{ color: '#fff', fontSize: 16, fontWeight: 600, margin: '0 0 16px' }}>Define Access Rule</h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  <div>
+                    <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Rule Name</label>
+                    <input value={accessRuleForm.name} onChange={e => setAccessRuleForm(f => ({ ...f, name: e.target.value }))} placeholder="e.g. Production Model RBAC" style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' as const }} />
+                  </div>
+                  <div>
+                    <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Rule Type</label>
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      {(Object.entries(accessRuleConfig) as [AccessRuleType, typeof accessRuleConfig[AccessRuleType]][]).map(([key, cfg]) => (
+                        <button
+                          key={key}
+                          onClick={() => setAccessRuleForm(f => ({ ...f, type: key }))}
+                          style={{
+                            flex: 1, padding: '10px 8px', borderRadius: 6, border: `1px solid ${accessRuleForm.type === key ? cfg.color : 'rgba(212,168,67,0.10)'}`,
+                            backgroundColor: accessRuleForm.type === key ? cfg.bg : 'transparent', cursor: 'pointer',
+                            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, fontFamily: 'inherit',
+                          }}
+                        >
+                          <span style={{ fontSize: 18 }}>{cfg.icon}</span>
+                          <span style={{ fontSize: 11, fontWeight: 600, color: accessRuleForm.type === key ? cfg.color : '#999' }}>{cfg.label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Description</label>
+                    <textarea value={accessRuleForm.description} onChange={e => setAccessRuleForm(f => ({ ...f, description: e.target.value }))} rows={2} placeholder="Describe what this rule controls..." style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit', resize: 'vertical' as const, boxSizing: 'border-box' as const }} />
+                  </div>
+                  <div style={{ display: 'flex', gap: 10 }}>
+                    <div style={{ flex: 1 }}>
+                      <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Asset Type</label>
+                      <select value={accessRuleForm.assetType} onChange={e => setAccessRuleForm(f => ({ ...f, assetType: e.target.value }))} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit' }}>
+                        <option>Model</option>
+                        <option>Tool</option>
+                        <option>Agent</option>
+                        <option>All</option>
+                      </select>
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Namespace Scope</label>
+                      <select value={accessRuleForm.namespace} onChange={e => setAccessRuleForm(f => ({ ...f, namespace: e.target.value }))} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit' }}>
+                        {allNs.map(ns => <option key={ns} value={ns}>{ns}</option>)}
+                      </select>
+                    </div>
+                  </div>
+                  {/* Type-specific configuration */}
+                  {accessRuleForm.type === 'role-based' && (
+                    <div>
+                      <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Allowed Roles <span style={{ color: '#666' }}>(comma-separated)</span></label>
+                      <input value={accessRuleForm.roles} onChange={e => setAccessRuleForm(f => ({ ...f, roles: e.target.value }))} placeholder="e.g. AI-Developer, ML-Engineer, Admin" style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' as const }} />
+                      {accessRuleForm.roles && (
+                        <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginTop: 6 }}>
+                          {accessRuleForm.roles.split(',').map(r => r.trim()).filter(Boolean).map(r => (
+                            <span key={r} style={badge('rgba(192,132,252,0.12)', '#c084fc')}>{r}</span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  {accessRuleForm.type === 'namespace-access' && (
+                    <div>
+                      <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Allowed Namespaces <span style={{ color: '#666' }}>(comma-separated)</span></label>
+                      <input value={accessRuleForm.namespaces} onChange={e => setAccessRuleForm(f => ({ ...f, namespaces: e.target.value }))} placeholder="e.g. production, staging" style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' as const }} />
+                      {accessRuleForm.namespaces && (
+                        <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginTop: 6 }}>
+                          {accessRuleForm.namespaces.split(',').map(n => n.trim()).filter(Boolean).map(n => (
+                            <span key={n} style={badge('rgba(74,222,128,0.12)', '#4ade80')}>{n}</span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  {accessRuleForm.type === 'domain-access' && (
+                    <div>
+                      <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Allowed Domains <span style={{ color: '#666' }}>(comma-separated)</span></label>
+                      <input value={accessRuleForm.domains} onChange={e => setAccessRuleForm(f => ({ ...f, domains: e.target.value }))} placeholder="e.g. contoso.com, partner-a.com" style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' as const }} />
+                      {accessRuleForm.domains && (
+                        <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginTop: 6 }}>
+                          {accessRuleForm.domains.split(',').map(d => d.trim()).filter(Boolean).map(d => (
+                            <span key={d} style={badge('rgba(56,189,248,0.12)', '#38bdf8')}>{d}</span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 20 }}>
+                  <button onClick={() => { setShowCreateAccessRule(false); setAccessRuleStep(1) }} style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(212, 168, 67, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>Cancel</button>
+                  <button
+                    disabled={!accessRuleForm.name}
+                    onClick={() => setAccessRuleStep(2)}
+                    style={{
+                      backgroundColor: !accessRuleForm.name ? '#555' : '#D4A843',
+                      color: !accessRuleForm.name ? '#999' : '#0A0A0A',
+                      border: 'none', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 600,
+                      cursor: !accessRuleForm.name ? 'not-allowed' : 'pointer', fontFamily: 'inherit',
+                    }}>Next: Assign →</button>
+                </div>
+              </>
+            )}
+
+            {accessRuleStep === 2 && (() => {
+              const typeEmojis: Record<string, string> = { Model: '🧠', Agent: '🤖', Tool: '🔧' }
+              const assetTypes = ['Model', 'Agent', 'Tool']
+              const filteredAssets = allAssets.filter(a =>
+                (accessRuleForm.assetType === 'All' || a.type === accessRuleForm.assetType) &&
+                (accessRuleForm.namespace === 'global' || a.namespace === accessRuleForm.namespace)
+              )
+              const assignedCount = Object.values(accessRuleAssignments).filter(Boolean).length
+              return (
+                <>
+                  <h3 style={{ color: '#fff', fontSize: 16, fontWeight: 600, margin: '0 0 4px' }}>Assign to Assets</h3>
+                  <p style={{ color: '#888', fontSize: 12, margin: '0 0 16px' }}>
+                    Select which {accessRuleForm.assetType === 'All' ? 'assets' : accessRuleForm.assetType.toLowerCase() + 's'} this rule applies to, or skip to apply to all matching assets.
+                  </p>
+                  <div style={{ maxHeight: 300, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 14, paddingRight: 4 }}>
+                    {assetTypes.map(aType => {
+                      const items = filteredAssets.filter(a => a.type === aType)
+                      if (items.length === 0) return null
+                      const checkedCount = items.filter(a => accessRuleAssignments[a.name]).length
+                      return (
+                        <div key={aType}>
+                          <div style={{ fontSize: 12, color: '#888', fontWeight: 600, marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                            {typeEmojis[aType]} {aType}s ({checkedCount}/{items.length})
+                          </div>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                            {items.map(a => {
+                              const checked = !!accessRuleAssignments[a.name]
+                              return (
+                                <label key={a.name} style={{
+                                  display: 'flex', alignItems: 'center', gap: 10, padding: '6px 10px', borderRadius: 6,
+                                  backgroundColor: checked ? 'rgba(212,168,67,0.08)' : 'transparent',
+                                  border: '1px solid ' + (checked ? 'rgba(212,168,67,0.25)' : 'rgba(212,168,67,0.06)'),
+                                  cursor: 'pointer', transition: 'all 0.15s',
+                                }}>
+                                  <input type="checkbox" checked={checked} onChange={() => setAccessRuleAssignments(prev => ({ ...prev, [a.name]: !prev[a.name] }))} style={{ accentColor: '#D4A843' }} />
+                                  <span style={{ fontSize: 13, color: '#E8E8E8', flex: 1 }}>{a.name}</span>
+                                  <span style={{ fontSize: 11, color: '#666' }}>{a.namespace}</span>
+                                </label>
+                              )
+                            })}
+                          </div>
+                        </div>
+                      )
+                    })}
+                    {filteredAssets.length === 0 && (
+                      <div style={{ textAlign: 'center', color: '#666', fontSize: 13, padding: 20 }}>No {accessRuleForm.assetType === 'All' ? 'assets' : accessRuleForm.assetType.toLowerCase() + 's'} in this namespace</div>
+                    )}
+                  </div>
+                  {assignedCount > 0 && (
+                    <div style={{ marginTop: 12, padding: '8px 12px', backgroundColor: 'rgba(212,168,67,0.06)', borderRadius: 6, fontSize: 12, color: '#D4A843' }}>
+                      {assignedCount} asset{assignedCount !== 1 ? 's' : ''} selected
+                    </div>
+                  )}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, marginTop: 20 }}>
+                    <button onClick={() => setAccessRuleStep(1)} style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(212, 168, 67, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>← Back</button>
+                    <div style={{ display: 'flex', gap: 10 }}>
+                      <button onClick={() => { setAccessRuleAssignments({}); handleCreateAccessRule() }} style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(212, 168, 67, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>Skip (apply to all)</button>
+                      <button onClick={handleCreateAccessRule} style={{ backgroundColor: '#D4A843', color: '#0A0A0A', border: 'none', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
+                        {assignedCount > 0 ? `Create & Assign (${assignedCount})` : 'Create Rule'}
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )
+            })()}
           </div>
         </div>
       )}

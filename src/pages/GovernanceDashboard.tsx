@@ -112,22 +112,27 @@ export default function GovernanceDashboard() {
       {/* 1. QUICK START                                              */}
       {/* ═══════════════════════════════════════════════════════════ */}
       <div style={{ marginBottom: 24 }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 10 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
           {quickLinks.map(ql => (
             <div
               key={ql.label}
               onClick={() => navigate(ql.route)}
               style={{
-                ...card, cursor: 'pointer', transition: 'all 0.15s',
-                display: 'flex', flexDirection: 'column', alignItems: 'center',
-                textAlign: 'center', padding: '16px 10px', gap: 6,
+                cursor: 'pointer', transition: 'all 0.15s',
+                display: 'flex', alignItems: 'center', gap: 10,
+                padding: '10px 14px', borderRadius: 8,
+                backgroundColor: `${ql.accent}12`,
+                border: `1px solid ${ql.accent}30`,
               }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = ql.accent; e.currentTarget.style.boxShadow = `0 4px 16px ${ql.accent}15` }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = colors.border; e.currentTarget.style.boxShadow = 'none' }}
+              onMouseEnter={e => { e.currentTarget.style.backgroundColor = `${ql.accent}22`; e.currentTarget.style.borderColor = `${ql.accent}60`; e.currentTarget.style.transform = 'translateY(-1px)' }}
+              onMouseLeave={e => { e.currentTarget.style.backgroundColor = `${ql.accent}12`; e.currentTarget.style.borderColor = `${ql.accent}30`; e.currentTarget.style.transform = 'none' }}
             >
-              <span style={{ fontSize: 24 }}>{ql.icon}</span>
-              <span style={{ fontSize: 13, fontWeight: 600, color: '#fff' }}>{ql.label}</span>
-              <span style={{ fontSize: 11, color: colors.textDim, lineHeight: 1.3 }}>{ql.desc}</span>
+              <span style={{ fontSize: 20, flexShrink: 0 }}>{ql.icon}</span>
+              <div>
+                <div style={{ fontSize: 13, fontWeight: 600, color: '#fff' }}>{ql.label}</div>
+                <div style={{ fontSize: 10, color: colors.textMuted, lineHeight: 1.3 }}>{ql.desc}</div>
+              </div>
+              <span style={{ fontSize: 14, color: ql.accent, marginLeft: 'auto', flexShrink: 0 }}>→</span>
             </div>
           ))}
         </div>

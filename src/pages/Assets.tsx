@@ -63,11 +63,11 @@ const tabInactive: CSSProperties = {
 };
 
 const registerBtn: CSSProperties = {
-  padding: '7px 16px',
+  padding: '8px 18px',
   borderRadius: 6,
-  border: '1px solid rgba(129, 140, 248, 0.3)',
-  backgroundColor: 'rgba(129, 140, 248, 0.1)',
-  color: '#818CF8',
+  border: 'none',
+  backgroundColor: '#818CF8',
+  color: '#FFFFFF',
   fontSize: 13,
   fontWeight: 600,
   fontFamily: 'inherit',

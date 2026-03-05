@@ -1070,8 +1070,14 @@ const Policies: React.FC = () => {
     <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 20 }}>
       {/* Header — stats + create button */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
-        <div style={{ fontSize: 13, color: colors.textMuted, lineHeight: 1.6 }}>
-          <span style={{ fontWeight: 600, color: '#fff' }}>{enabledPolicies}</span> runtime rules · <span style={{ fontWeight: 600, color: '#fff' }}>{accessRuleList.filter(r => ruleStates[r.id]).length}</span> access rules · <span style={{ fontWeight: 600, color: '#fff' }}>{enabledGuardrails}</span> guardrails · <span style={{ fontWeight: 600, color: '#fff' }}>{approvalList.length}</span> pending approvals
+        <div style={{ display: 'flex', gap: 20, fontSize: 14, color: colors.textMuted }}>
+          <span><span style={{ fontWeight: 700, fontSize: 18, color: '#fff' }}>{enabledPolicies}</span> <span style={{ color: '#888' }}>runtime rules</span></span>
+          <span style={{ color: 'rgba(212,168,67,0.2)' }}>·</span>
+          <span><span style={{ fontWeight: 700, fontSize: 18, color: '#fff' }}>{accessRuleList.filter(r => ruleStates[r.id]).length}</span> <span style={{ color: '#888' }}>access rules</span></span>
+          <span style={{ color: 'rgba(212,168,67,0.2)' }}>·</span>
+          <span><span style={{ fontWeight: 700, fontSize: 18, color: '#fff' }}>{enabledGuardrails}</span> <span style={{ color: '#888' }}>guardrails</span></span>
+          <span style={{ color: 'rgba(212,168,67,0.2)' }}>·</span>
+          <span><span style={{ fontWeight: 700, fontSize: 18, color: colors.gold }}>{approvalList.length}</span> <span style={{ color: '#888' }}>pending</span></span>
         </div>
         <button onClick={() => { setShowCreateFlow(true); setCreateFlowCategory(null); setCreateFlowMethod(null); setAiComposeInput(''); setAiCompiling(false); setAiCompiled(false); setTemplateSelected(false) }} style={{ backgroundColor: '#D4A843', color: '#0A0A0A', border: 'none', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' }}>✚ Create Policy</button>
       </div>

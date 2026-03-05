@@ -112,35 +112,39 @@ export default function GovernanceDashboard() {
       {/* 1. QUICK START                                              */}
       {/* ═══════════════════════════════════════════════════════════ */}
       <div style={{ marginBottom: 24 }}>
-        <div style={{ display: 'flex', gap: 10 }}>
+        <div style={{ display: 'flex', gap: 8 }}>
           {quickLinks.map(ql => (
-            <div
+            <button
               key={ql.label}
               onClick={() => navigate(ql.route)}
               style={{
                 flex: 1, cursor: 'pointer', transition: 'all 0.2s',
-                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                textAlign: 'center', padding: '14px 8px', borderRadius: 10, gap: 6,
-                background: `linear-gradient(135deg, ${ql.accent}18, ${ql.accent}08)`,
-                border: `1.5px solid ${ql.accent}35`,
-                boxShadow: `0 2px 8px ${ql.accent}10`,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                gap: 8, padding: '10px 12px', borderRadius: 8,
+                background: 'transparent',
+                border: `1.5px solid ${colors.gold}50`,
+                color: colors.gold,
+                fontSize: 13, fontWeight: 600, fontFamily: 'inherit',
+                letterSpacing: 0.2,
               }}
               onMouseEnter={e => {
-                e.currentTarget.style.background = `linear-gradient(135deg, ${ql.accent}30, ${ql.accent}15)`
-                e.currentTarget.style.borderColor = `${ql.accent}70`
-                e.currentTarget.style.transform = 'translateY(-2px)'
-                e.currentTarget.style.boxShadow = `0 6px 20px ${ql.accent}25`
+                e.currentTarget.style.background = colors.gold
+                e.currentTarget.style.color = '#0A0A0A'
+                e.currentTarget.style.borderColor = colors.gold
+                e.currentTarget.style.transform = 'translateY(-1px)'
+                e.currentTarget.style.boxShadow = `0 4px 16px ${colors.gold}40`
               }}
               onMouseLeave={e => {
-                e.currentTarget.style.background = `linear-gradient(135deg, ${ql.accent}18, ${ql.accent}08)`
-                e.currentTarget.style.borderColor = `${ql.accent}35`
+                e.currentTarget.style.background = 'transparent'
+                e.currentTarget.style.color = colors.gold
+                e.currentTarget.style.borderColor = `${colors.gold}50`
                 e.currentTarget.style.transform = 'none'
-                e.currentTarget.style.boxShadow = `0 2px 8px ${ql.accent}10`
+                e.currentTarget.style.boxShadow = 'none'
               }}
             >
-              <span style={{ fontSize: 22 }}>{ql.icon}</span>
-              <span style={{ fontSize: 12, fontWeight: 700, color: '#fff', letterSpacing: 0.2 }}>{ql.label}</span>
-            </div>
+              <span style={{ fontSize: 16 }}>{ql.icon}</span>
+              {ql.label}
+            </button>
           ))}
         </div>
       </div>

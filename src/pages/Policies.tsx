@@ -338,7 +338,7 @@ type TabKey = 'runtime' | 'access' | 'guardrails' | 'audit' | 'approvals'
 
 const Policies: React.FC = () => {
   const navigate = useNavigate()
-  const [activeTab, setActiveTab] = useState<TabKey>('runtime')
+  const [activeTab, setActiveTab] = useState<TabKey>('access')
   const [policyStates, setPolicyStates] = useState<Record<string, boolean>>(
     () => Object.fromEntries(policies.map(p => [p.id, p.enabled]))
   )
@@ -846,8 +846,8 @@ const Policies: React.FC = () => {
 
   /* ---- Render ---- */
   const tabs: { key: TabKey; label: string; badge?: number }[] = [
-    { key: 'runtime', label: 'Runtime Rules' },
     { key: 'access', label: 'Asset Access Rules' },
+    { key: 'runtime', label: 'Runtime Rules' },
     { key: 'guardrails', label: 'Safety Guardrails' },
     { key: 'audit', label: 'Audit Trail' },
     { key: 'approvals', label: 'Approvals', badge: approvalList.length },
@@ -858,7 +858,7 @@ const Policies: React.FC = () => {
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16 }}>
         <div>
-          <h2 style={{ color: '#fff', fontSize: 20, fontWeight: 700, margin: 0 }}>Policy Management</h2>
+          <h2 style={{ color: '#fff', fontSize: 20, fontWeight: 700, margin: 0 }}>Policies</h2>
           <p style={{ color: colors.textMuted, fontSize: 13, margin: '4px 0 0' }}>
             Configure runtime rules, asset access controls, and safety guardrails across your AI gateway.
           </p>

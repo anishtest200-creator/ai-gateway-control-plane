@@ -72,6 +72,18 @@ interface FormData {
   tags: string[];
   owner: string;
   requireApproval: boolean;
+  // Authentication
+  authMethod: 'apikey' | 'oauth2' | 'managed-identity' | 'entra-token' | 'none';
+  authApiKeyHeader: string;
+  authApiKeyCredential: string;
+  authOAuthTokenUrl: string;
+  authOAuthClientId: string;
+  authOAuthScopes: string;
+  authOAuthGrantType: string;
+  authManagedIdentityType: string;
+  authManagedIdentityResource: string;
+  authEntraTenantId: string;
+  authEntraResource: string;
 }
 
 const initialFormData: FormData = {
@@ -130,6 +142,17 @@ const initialFormData: FormData = {
   tags: [],
   owner: 'anishta@contoso.com',
   requireApproval: false,
+  authMethod: 'apikey',
+  authApiKeyHeader: 'Authorization',
+  authApiKeyCredential: '',
+  authOAuthTokenUrl: '',
+  authOAuthClientId: '',
+  authOAuthScopes: '',
+  authOAuthGrantType: 'client_credentials',
+  authManagedIdentityType: 'system-assigned',
+  authManagedIdentityResource: '',
+  authEntraTenantId: '',
+  authEntraResource: '',
 };
 
 // --- Shared style helpers (matching Assets.tsx / RegisterModel.tsx dark theme) ---
@@ -463,7 +486,7 @@ function RegisterAgent({ onClose, onComplete }: { onClose: () => void; onComplet
   const [form, setForm] = useState<FormData>(initialFormData);
   const [tagInput, setTagInput] = useState('');
 
-  const totalSteps = 6;
+  const totalSteps = 7;
   const canNext = (): boolean => {
     if (step === 1) return form.source !== null;
     if (step === 2) {
@@ -474,7 +497,8 @@ function RegisterAgent({ onClose, onComplete }: { onClose: () => void; onComplet
       if (form.source === 'rapi') return form.rapiEndpoint !== '' && form.rapiDisplayName !== '';
       if (form.source === 'custom') return form.customDisplayName !== '' && form.customEndpoint !== '';
     }
-    if (step === 5) return form.namespace !== '';
+    if (step === 3) return true;
+    if (step === 6) return form.namespace !== '';
     return true;
   };
 
@@ -509,7 +533,7 @@ function RegisterAgent({ onClose, onComplete }: { onClose: () => void; onComplet
     }));
   };
 
-  const stepLabels = ['Source', 'Endpoint', 'Bindings', 'Governance', 'Namespace', 'Review'];
+  const stepLabels = ['Source', 'Endpoint', 'Auth', 'Bindings', 'Governance', 'Namespace', 'Review'];
 
   // --- Render helpers ---
   const renderStepBar = () => (
@@ -765,7 +789,125 @@ function RegisterAgent({ onClose, onComplete }: { onClose: () => void; onComplet
     );
   };
 
-  // Step 3 — Model & Tool Bindings
+  // Step 3 — Authentication
+  const renderAuthStep = () => {
+    const authMethods: { value: FormData['authMethod']; label: string }[] = [
+      { value: 'apikey', label: 'API Key' },
+      { value: 'oauth2', label: 'OAuth 2.0' },
+      { value: 'managed-identity', label: 'Managed Identity' },
+      { value: 'entra-token', label: 'Entra ID Token' },
+      { value: 'none', label: 'None' },
+    ];
+
+    return (
+      <>
+        <div style={title}>Configure authentication</div>
+        <div style={subtitle}>Define how the gateway authenticates with the upstream agent endpoint</div>
+
+        <div style={fieldGroup}>
+          <label style={label}>Auth Method</label>
+          <select style={select} value={form.authMethod} onChange={(e) => set('authMethod', e.target.value as FormData['authMethod'])}>
+            {authMethods.map((m) => (
+              <option key={m.value} value={m.value}>{m.label}</option>
+            ))}
+          </select>
+        </div>
+
+        {/* API Key */}
+        {form.authMethod === 'apikey' && (
+          <>
+            <div style={fieldGroup}>
+              <label style={label}>Header Name</label>
+              <input style={input} placeholder="Authorization" value={form.authApiKeyHeader} onChange={(e) => set('authApiKeyHeader', e.target.value)} />
+            </div>
+            <div style={fieldGroup}>
+              <label style={label}>Credential</label>
+              <select style={select} value={form.authApiKeyCredential} onChange={(e) => set('authApiKeyCredential', e.target.value)}>
+                <option value="">Select credential…</option>
+                {credentialOptions.map((c) => <option key={c} value={c}>{c}</option>)}
+                <option value="__new">+ Create new credential</option>
+              </select>
+            </div>
+          </>
+        )}
+
+        {/* OAuth 2.0 */}
+        {form.authMethod === 'oauth2' && (
+          <>
+            <div style={fieldGroup}>
+              <label style={label}>Token URL</label>
+              <input style={input} placeholder="https://login.microsoftonline.com/{tenant}/oauth2/v2.0/token" value={form.authOAuthTokenUrl} onChange={(e) => set('authOAuthTokenUrl', e.target.value)} />
+            </div>
+            <div style={fieldGroup}>
+              <label style={label}>Client ID Credential</label>
+              <select style={select} value={form.authOAuthClientId} onChange={(e) => set('authOAuthClientId', e.target.value)}>
+                <option value="">Select credential…</option>
+                {credentialOptions.map((c) => <option key={c} value={c}>{c}</option>)}
+                <option value="__new">+ Create new credential</option>
+              </select>
+            </div>
+            <div style={fieldGroup}>
+              <label style={label}>Scopes</label>
+              <input style={input} placeholder="api://my-app/.default" value={form.authOAuthScopes} onChange={(e) => set('authOAuthScopes', e.target.value)} />
+            </div>
+            <div style={fieldGroup}>
+              <label style={label}>Grant Type</label>
+              <select style={select} value={form.authOAuthGrantType} onChange={(e) => set('authOAuthGrantType', e.target.value)}>
+                <option value="client_credentials">client_credentials</option>
+                <option value="authorization_code">authorization_code</option>
+              </select>
+            </div>
+          </>
+        )}
+
+        {/* Managed Identity */}
+        {form.authMethod === 'managed-identity' && (
+          <>
+            <div style={fieldGroup}>
+              <label style={label}>Identity Type</label>
+              <select style={select} value={form.authManagedIdentityType} onChange={(e) => set('authManagedIdentityType', e.target.value)}>
+                <option value="system-assigned">System-assigned</option>
+                <option value="user-assigned">User-assigned</option>
+              </select>
+            </div>
+            <div style={fieldGroup}>
+              <label style={label}>Resource / Audience</label>
+              <input style={input} placeholder="https://management.azure.com/" value={form.authManagedIdentityResource} onChange={(e) => set('authManagedIdentityResource', e.target.value)} />
+            </div>
+          </>
+        )}
+
+        {/* Entra ID Token */}
+        {form.authMethod === 'entra-token' && (
+          <>
+            <div style={fieldGroup}>
+              <label style={label}>Tenant ID</label>
+              <input style={input} placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" value={form.authEntraTenantId} onChange={(e) => set('authEntraTenantId', e.target.value)} />
+            </div>
+            <div style={fieldGroup}>
+              <label style={label}>Resource / Audience</label>
+              <input style={input} placeholder="api://my-application" value={form.authEntraResource} onChange={(e) => set('authEntraResource', e.target.value)} />
+            </div>
+          </>
+        )}
+
+        {/* None */}
+        {form.authMethod === 'none' && (
+          <div style={{ backgroundColor: 'rgba(255,255,255,0.02)', border: '1px solid #333', borderRadius: 8, padding: '14px 18px', fontSize: 13, color: '#aaa' }}>
+            No authentication will be configured. The agent endpoint must accept unauthenticated requests.
+          </div>
+        )}
+
+        {form.authMethod !== 'none' && (
+          <div style={{ backgroundColor: 'rgba(96,205,255,0.06)', border: '1px solid rgba(96,205,255,0.15)', borderRadius: 6, padding: '10px 14px', fontSize: 12, color: '#9cdcfe', marginTop: 16, lineHeight: 1.5 }}>
+            🔒 Credential mediation — The gateway will inject credentials on every request. Consumers never see the upstream credentials.
+          </div>
+        )}
+      </>
+    );
+  };
+
+  // Step 4 — Model & Tool Bindings
   const renderBindingsStep = () => (
     <>
       <div style={title}>Declare model and tool access</div>
@@ -854,7 +996,7 @@ function RegisterAgent({ onClose, onComplete }: { onClose: () => void; onComplet
     </>
   );
 
-  // Step 4 — Governance Policies
+  // Step 5 — Governance Policies
   const renderPoliciesStep = () => (
     <>
       <div style={title}>Apply governance policies</div>
@@ -1005,7 +1147,7 @@ function RegisterAgent({ onClose, onComplete }: { onClose: () => void; onComplet
     </>
   );
 
-  // Step 5 — Namespace
+  // Step 6 — Namespace
   const renderNamespaceStep = () => (
     <>
       <div style={title}>Assign to namespace</div>
@@ -1069,7 +1211,7 @@ function RegisterAgent({ onClose, onComplete }: { onClose: () => void; onComplet
     </>
   );
 
-  // Step 6 — Review
+  // Step 7 — Review
   const sourceName = sources.find((s) => s.id === form.source)?.name ?? '—';
 
   const getAgentDisplay = (): string => {
@@ -1122,6 +1264,27 @@ function RegisterAgent({ onClose, onComplete }: { onClose: () => void; onComplet
         <div style={reviewLabel}>Endpoint</div>
         <div style={{ ...reviewValue, fontFamily: 'monospace', fontSize: 12, color: '#9cdcfe' }}>
           {getEndpointDisplay()}
+        </div>
+      </div>
+
+      <div style={reviewSection}>
+        <div style={reviewLabel}>Authentication</div>
+        <div style={reviewValue}>
+          <span style={badge('rgba(96,205,255,0.1)', '#60cdff')}>
+            {form.authMethod === 'apikey' ? 'API Key' : form.authMethod === 'oauth2' ? 'OAuth 2.0' : form.authMethod === 'managed-identity' ? 'Managed Identity' : form.authMethod === 'entra-token' ? 'Entra ID Token' : 'None'}
+          </span>
+          {form.authMethod === 'apikey' && form.authApiKeyCredential && (
+            <span style={{ marginLeft: 8, color: '#aaa', fontSize: 12 }}>Header: {form.authApiKeyHeader}, Credential: {form.authApiKeyCredential}</span>
+          )}
+          {form.authMethod === 'oauth2' && form.authOAuthTokenUrl && (
+            <span style={{ marginLeft: 8, color: '#aaa', fontSize: 12 }}>Grant: {form.authOAuthGrantType}</span>
+          )}
+          {form.authMethod === 'managed-identity' && (
+            <span style={{ marginLeft: 8, color: '#aaa', fontSize: 12 }}>{form.authManagedIdentityType}</span>
+          )}
+          {form.authMethod === 'entra-token' && form.authEntraTenantId && (
+            <span style={{ marginLeft: 8, color: '#aaa', fontSize: 12 }}>Tenant: {form.authEntraTenantId}</span>
+          )}
         </div>
       </div>
 
@@ -1185,10 +1348,11 @@ function RegisterAgent({ onClose, onComplete }: { onClose: () => void; onComplet
         <div style={body}>
           {step === 1 && renderSourceStep()}
           {step === 2 && renderEndpointStep()}
-          {step === 3 && renderBindingsStep()}
-          {step === 4 && renderPoliciesStep()}
-          {step === 5 && renderNamespaceStep()}
-          {step === 6 && renderReviewStep()}
+          {step === 3 && renderAuthStep()}
+          {step === 4 && renderBindingsStep()}
+          {step === 5 && renderPoliciesStep()}
+          {step === 6 && renderNamespaceStep()}
+          {step === 7 && renderReviewStep()}
         </div>
 
         {/* Footer */}

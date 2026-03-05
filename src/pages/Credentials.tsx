@@ -303,6 +303,8 @@ const Credentials: React.FC = () => {
     environment: string;
   }>({ primaryNamespace: '', sharedNamespaces: [], assetBindings: [], environment: 'Production' });
   const [credFormData, setCredFormData] = useState({ name: '', type: 'API Key', provider: '', namespace: 'ai-platform', expires: '' });
+  const [addCredStep, setAddCredStep] = useState(1);
+  const [credAssignments, setCredAssignments] = useState<Record<string, boolean>>({});
   const [credToast, setCredToast] = useState<string | null>(null);
   const showCredToast = (msg: string) => { setCredToast(msg); setTimeout(() => setCredToast(null), 3000); };
 
@@ -324,7 +326,11 @@ const Credentials: React.FC = () => {
     };
     setCredList(prev => [...prev, newCred]);
     setShowAddCredential(false);
+    setAddCredStep(1);
+    setCredAssignments({});
     setCredFormData({ name: '', type: 'API Key', provider: '', namespace: 'ai-platform', expires: '' });
+    const assigned = Object.entries(credAssignments).filter(([, v]) => v).length;
+    showCredToast(`✓ Credential "${newCred.name}" created${assigned > 0 ? ` and assigned to ${assigned} asset${assigned !== 1 ? 's' : ''}` : ''}`);
   };
 
   const allNamespaces = ['retail-support', 'finance-analytics', 'customer-ops', 'hr-automation', 'dev-sandbox', 'Global', 'ai-platform', 'ml-inference', 'research-sandbox'];
@@ -888,46 +894,167 @@ const Credentials: React.FC = () => {
       {/* Add Credential Modal */}
       {showAddCredential && (
         <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
-          <div style={{ backgroundColor: '#1A1A1A', borderTop: '3px solid #D4A843', borderRadius: 8, padding: 24, width: '100%', maxWidth: 500, border: '1px solid rgba(212, 168, 67, 0.10)' }}>
-            <h3 style={{ color: '#fff', fontSize: 16, fontWeight: 600, margin: '0 0 16px' }}>Add Credential</h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              <div>
-                <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Name</label>
-                <input value={credFormData.name} onChange={e => setCredFormData(f => ({ ...f, name: e.target.value }))} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' as const }} />
-              </div>
-              <div>
-                <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Type</label>
-                <select value={credFormData.type} onChange={e => setCredFormData(f => ({ ...f, type: e.target.value }))} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit' }}>
-                  <option>API Key</option>
-                  <option>OAuth 2.0</option>
-                  <option>Managed Identity</option>
-                  <option>Service Account</option>
-                  <option>IAM Role</option>
-                  <option>Connection String</option>
-                </select>
-              </div>
-              <div>
-                <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Provider</label>
-                <input value={credFormData.provider} onChange={e => setCredFormData(f => ({ ...f, provider: e.target.value }))} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' as const }} />
-              </div>
-              <div>
-                <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Namespace</label>
-                <select value={credFormData.namespace} onChange={e => setCredFormData(f => ({ ...f, namespace: e.target.value }))} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit' }}>
-                  <option value="ai-platform">ai-platform</option>
-                  <option value="ml-inference">ml-inference</option>
-                  <option value="customer-support-ai">customer-support-ai</option>
-                  <option value="research-sandbox">research-sandbox</option>
-                </select>
-              </div>
-              <div>
-                <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Expires</label>
-                <input type="date" value={credFormData.expires} onChange={e => setCredFormData(f => ({ ...f, expires: e.target.value }))} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' as const }} />
-              </div>
+          <div style={{ backgroundColor: '#1A1A1A', borderTop: '3px solid #D4A843', borderRadius: 8, padding: 24, width: '100%', maxWidth: 560, border: '1px solid rgba(212, 168, 67, 0.10)' }}>
+            {/* Step indicator */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20 }}>
+              {['Details', 'Assign'].map((label, idx) => {
+                const step = idx + 1;
+                const active = addCredStep === step;
+                const done = addCredStep > step;
+                return (
+                  <React.Fragment key={label}>
+                    {idx > 0 && <div style={{ flex: 1, height: 1, backgroundColor: done ? '#D4A843' : 'rgba(212,168,67,0.15)' }} />}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <span style={{
+                        width: 22, height: 22, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: 11, fontWeight: 600,
+                        backgroundColor: active ? '#D4A843' : done ? 'rgba(212,168,67,0.25)' : '#1E1E1E',
+                        color: active ? '#0A0A0A' : done ? '#D4A843' : '#666',
+                        border: active ? 'none' : '1px solid rgba(212,168,67,0.15)',
+                      }}>{done ? '✓' : step}</span>
+                      <span style={{ fontSize: 12, color: active ? '#fff' : '#888', fontWeight: active ? 600 : 400 }}>{label}</span>
+                    </div>
+                  </React.Fragment>
+                );
+              })}
             </div>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 20 }}>
-              <button onClick={() => setShowAddCredential(false)} style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(212, 168, 67, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>Cancel</button>
-              <button onClick={handleAddCredential} style={{ backgroundColor: '#D4A843', color: '#0A0A0A', border: 'none', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>Create</button>
-            </div>
+
+            {addCredStep === 1 && (
+              <>
+                <h3 style={{ color: '#fff', fontSize: 16, fontWeight: 600, margin: '0 0 16px' }}>Credential Details</h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  <div>
+                    <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Name</label>
+                    <input value={credFormData.name} onChange={e => setCredFormData(f => ({ ...f, name: e.target.value }))} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' as const }} />
+                  </div>
+                  <div>
+                    <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Type</label>
+                    <select value={credFormData.type} onChange={e => setCredFormData(f => ({ ...f, type: e.target.value }))} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit' }}>
+                      <option>API Key</option>
+                      <option>OAuth 2.0</option>
+                      <option>Managed Identity</option>
+                      <option>Service Account</option>
+                      <option>IAM Role</option>
+                      <option>Connection String</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Provider</label>
+                    <input value={credFormData.provider} onChange={e => setCredFormData(f => ({ ...f, provider: e.target.value }))} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' as const }} />
+                  </div>
+                  <div>
+                    <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Namespace</label>
+                    <select value={credFormData.namespace} onChange={e => setCredFormData(f => ({ ...f, namespace: e.target.value }))} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit' }}>
+                      <option value="ai-platform">ai-platform</option>
+                      <option value="ml-inference">ml-inference</option>
+                      <option value="customer-support-ai">customer-support-ai</option>
+                      <option value="research-sandbox">research-sandbox</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Expires</label>
+                    <input type="date" value={credFormData.expires} onChange={e => setCredFormData(f => ({ ...f, expires: e.target.value }))} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' as const }} />
+                  </div>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 20 }}>
+                  <button onClick={() => { setShowAddCredential(false); setAddCredStep(1); setCredAssignments({}); }} style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(212, 168, 67, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>Cancel</button>
+                  <button
+                    disabled={!credFormData.name || !credFormData.provider}
+                    onClick={() => setAddCredStep(2)}
+                    style={{
+                      backgroundColor: !credFormData.name || !credFormData.provider ? '#555' : '#D4A843',
+                      color: !credFormData.name || !credFormData.provider ? '#999' : '#0A0A0A',
+                      border: 'none', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: !credFormData.name || !credFormData.provider ? 'not-allowed' : 'pointer', fontFamily: 'inherit',
+                    }}>
+                    Next: Assign →
+                  </button>
+                </div>
+              </>
+            )}
+
+            {addCredStep === 2 && (() => {
+              const assetTypeEmojis: Record<string, string> = { model: '🧠', agent: '🤖', tool: '🔧' };
+              const assetTypes = ['model', 'agent', 'tool'] as const;
+              const assignedCount = Object.values(credAssignments).filter(Boolean).length;
+              return (
+                <>
+                  <h3 style={{ color: '#fff', fontSize: 16, fontWeight: 600, margin: '0 0 4px' }}>Assign to Assets</h3>
+                  <p style={{ color: '#888', fontSize: 12, margin: '0 0 16px' }}>
+                    Select which models, tools, and agents should use this credential. You can also do this later.
+                  </p>
+
+                  {/* Namespace filter for assets */}
+                  <div style={{ marginBottom: 12 }}>
+                    <select
+                      id="assign-ns-filter"
+                      value={credFormData.namespace}
+                      onChange={e => setCredFormData(f => ({ ...f, namespace: e.target.value }))}
+                      style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit' }}
+                    >
+                      <option value="">All namespaces</option>
+                      {allNamespaces.map(ns => <option key={ns} value={ns}>{ns}</option>)}
+                    </select>
+                  </div>
+
+                  <div style={{ maxHeight: 300, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 14, paddingRight: 4 }}>
+                    {assetTypes.map(aType => {
+                      const assetsOfType = allAvailableAssets.filter(a =>
+                        a.type === aType && (!credFormData.namespace || a.namespace === credFormData.namespace)
+                      );
+                      if (assetsOfType.length === 0) return null;
+                      return (
+                        <div key={aType}>
+                          <div style={{ fontSize: 12, color: '#888', fontWeight: 600, marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                            {assetTypeEmojis[aType]} {aType}s ({assetsOfType.filter(a => credAssignments[a.name]).length}/{assetsOfType.length})
+                          </div>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                            {assetsOfType.map(a => {
+                              const checked = !!credAssignments[a.name];
+                              return (
+                                <label
+                                  key={a.name}
+                                  style={{
+                                    display: 'flex', alignItems: 'center', gap: 10, padding: '6px 10px', borderRadius: 6,
+                                    backgroundColor: checked ? 'rgba(212,168,67,0.08)' : 'transparent',
+                                    border: '1px solid ' + (checked ? 'rgba(212,168,67,0.25)' : 'rgba(212,168,67,0.06)'),
+                                    cursor: 'pointer', transition: 'all 0.15s',
+                                  }}
+                                >
+                                  <input
+                                    type="checkbox"
+                                    checked={checked}
+                                    onChange={() => setCredAssignments(prev => ({ ...prev, [a.name]: !prev[a.name] }))}
+                                    style={{ accentColor: '#D4A843' }}
+                                  />
+                                  <span style={{ fontSize: 13, color: '#E8E8E8', flex: 1 }}>{a.name}</span>
+                                  <span style={{ fontSize: 11, color: '#666' }}>{a.namespace}</span>
+                                </label>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {assignedCount > 0 && (
+                    <div style={{ marginTop: 12, padding: '8px 12px', backgroundColor: 'rgba(212,168,67,0.06)', borderRadius: 6, fontSize: 12, color: '#D4A843' }}>
+                      {assignedCount} asset{assignedCount !== 1 ? 's' : ''} selected
+                    </div>
+                  )}
+
+                  <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, marginTop: 20 }}>
+                    <button onClick={() => setAddCredStep(1)} style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(212, 168, 67, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>← Back</button>
+                    <div style={{ display: 'flex', gap: 10 }}>
+                      <button onClick={() => { setCredAssignments({}); handleAddCredential(); }} style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(212, 168, 67, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>Skip</button>
+                      <button onClick={handleAddCredential} style={{ backgroundColor: '#D4A843', color: '#0A0A0A', border: 'none', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
+                        {assignedCount > 0 ? `Create & Assign (${assignedCount})` : 'Create'}
+                      </button>
+                    </div>
+                  </div>
+                </>
+              );
+            })()}
           </div>
         </div>
       )}

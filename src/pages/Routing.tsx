@@ -1,399 +1,524 @@
 import React, { useState } from 'react';
 
-/* ── Mock Data ── */
-const initialRoutes = [
-  { name: 'GPT-4o Primary', source: '/v1/chat/completions (gpt-4o)', provider: 'Azure OpenAI', endpoint: 'East US', strategy: 'Primary', priority: 1, health: 'healthy', status: 'Active' },
-  { name: 'GPT-4o Fallback', source: '/v1/chat/completions (gpt-4o)', provider: 'Azure OpenAI', endpoint: 'West US', strategy: 'Failover', priority: 2, health: 'healthy', status: 'Active' },
-  { name: 'GPT-4o Emergency', source: '/v1/chat/completions (gpt-4o)', provider: 'OpenAI Direct', endpoint: 'api.openai.com', strategy: 'Failover', priority: 3, health: 'healthy', status: 'Standby' },
-  { name: 'Claude Sonnet', source: '/v1/chat/completions (claude-*)', provider: 'Anthropic', endpoint: 'api.anthropic.com', strategy: 'Primary', priority: 1, health: 'healthy', status: 'Active' },
-  { name: 'Gemini Pro', source: '/v1/chat/completions (gemini-*)', provider: 'Google Vertex', endpoint: 'us-central1', strategy: 'Primary', priority: 1, health: 'degraded', status: 'Active' },
-  { name: 'Cost-Optimized', source: '/v1/chat/completions (auto)', provider: 'Multi-Provider', endpoint: '—', strategy: 'Cost-Aware', priority: null, health: 'healthy', status: 'Active' },
-];
+/* ── Types ── */
+interface Endpoint {
+  provider: string;
+  region: string;
+  health: 'healthy' | 'degraded' | 'unhealthy';
+  weight?: number;
+}
 
-const failoverChains = [
-  { label: 'GPT-4o Chain', nodes: [
-    { name: 'Azure OpenAI (East US)', health: 'healthy' },
-    { name: 'Azure OpenAI (West US)', health: 'healthy' },
-    { name: 'OpenAI Direct', health: 'healthy' },
-  ]},
-  { label: 'Claude Chain', nodes: [
-    { name: 'Anthropic (Primary)', health: 'healthy' },
-    { name: 'AWS Bedrock (Claude)', health: 'healthy' },
-    { name: 'Azure OpenAI (GPT-4o)', health: 'healthy' },
-  ]},
-  { label: 'Auto-Route Chain (Cost-Aware)', nodes: [
-    { name: 'Cheapest Available', health: 'healthy' },
-    { name: 'Lowest Latency', health: 'healthy' },
-    { name: 'Any Healthy', health: 'healthy' },
-  ]},
+interface RouteGroup {
+  id: string;
+  name: string;
+  pattern: string;
+  strategy: 'failover' | 'load-balance' | 'single';
+  enabled: boolean;
+  endpoints: Endpoint[];
+}
+
+/* ── Mock Data ── */
+const initialGroups: RouteGroup[] = [
+  {
+    id: 'gpt4o',
+    name: 'GPT-4o',
+    pattern: '/v1/chat/completions (gpt-4o*)',
+    strategy: 'failover',
+    enabled: true,
+    endpoints: [
+      { provider: 'Azure OpenAI', region: 'East US', health: 'healthy' },
+      { provider: 'Azure OpenAI', region: 'West US', health: 'healthy' },
+      { provider: 'OpenAI Direct', region: 'api.openai.com', health: 'healthy' },
+    ],
+  },
+  {
+    id: 'claude',
+    name: 'Claude Sonnet',
+    pattern: '/v1/chat/completions (claude-*)',
+    strategy: 'failover',
+    enabled: true,
+    endpoints: [
+      { provider: 'Anthropic', region: 'api.anthropic.com', health: 'healthy' },
+      { provider: 'AWS Bedrock', region: 'us-east-1', health: 'healthy' },
+    ],
+  },
+  {
+    id: 'gemini',
+    name: 'Gemini Pro',
+    pattern: '/v1/chat/completions (gemini-*)',
+    strategy: 'single',
+    enabled: true,
+    endpoints: [
+      { provider: 'Google Vertex', region: 'us-central1', health: 'degraded' },
+    ],
+  },
+  {
+    id: 'auto',
+    name: 'Auto-Route (Cost Optimized)',
+    pattern: '/v1/chat/completions (auto)',
+    strategy: 'load-balance',
+    enabled: true,
+    endpoints: [
+      { provider: 'Azure OpenAI', region: 'East US', health: 'healthy', weight: 60 },
+      { provider: 'Anthropic', region: 'api.anthropic.com', health: 'healthy', weight: 25 },
+      { provider: 'Google Vertex', region: 'us-central1', health: 'degraded', weight: 15 },
+    ],
+  },
 ];
 
 /* ── Styles ── */
+const colors = {
+  gold: '#D4A843',
+  card: '#161616',
+  border: 'rgba(212, 168, 67, 0.10)',
+  text: '#E8E8E8',
+  textMuted: '#999',
+  green: '#4ADE80',
+  amber: '#F59E0B',
+  red: '#EF4444',
+  purple: '#A78BFA',
+  blue: '#60A5FA',
+};
+
 const card: React.CSSProperties = {
-  backgroundColor: '#161616',
-  border: '1px solid rgba(212, 168, 67, 0.10)',
+  backgroundColor: colors.card,
+  border: `1px solid ${colors.border}`,
   borderRadius: 8,
-  padding: 20,
+  padding: 16,
 };
 
-const heading: React.CSSProperties = {
-  color: '#fff',
-  fontSize: 14,
-  fontWeight: 600,
-  margin: 0,
-  marginBottom: 16,
+const inputStyle: React.CSSProperties = {
+  width: '100%',
+  backgroundColor: '#0F0F0F',
+  border: '1px solid rgba(212,168,67,0.15)',
+  color: colors.text,
+  padding: '8px 12px',
+  borderRadius: 6,
+  fontSize: 13,
+  fontFamily: 'inherit',
+  boxSizing: 'border-box' as const,
 };
 
-const healthDot = (h: string): React.CSSProperties => ({
-  display: 'inline-block',
-  width: 8,
-  height: 8,
-  borderRadius: '50%',
-  backgroundColor: h === 'healthy' ? '#4ADE80' : h === 'degraded' ? '#F59E0B' : '#EF4444',
-  marginRight: 6,
-  verticalAlign: 'middle',
-});
+const selectStyle: React.CSSProperties = { ...inputStyle };
 
-const statusPill = (s: string): React.CSSProperties => ({
-  display: 'inline-block',
-  padding: '2px 10px',
-  borderRadius: 12,
-  fontSize: 12,
-  fontWeight: 600,
-  backgroundColor: s === 'Active' ? 'rgba(74,222,128,0.15)' : 'rgba(212, 168, 67, 0.10)',
-  color: s === 'Active' ? '#4ADE80' : '#999',
-  border: `1px solid ${s === 'Active' ? 'rgba(74,222,128,0.3)' : 'rgba(212, 168, 67, 0.10)'}`,
-});
+const healthColor = (h: string) => h === 'healthy' ? colors.green : h === 'degraded' ? colors.amber : colors.red;
+const healthLabel = (h: string) => h === 'healthy' ? 'Healthy' : h === 'degraded' ? 'Degraded' : 'Unhealthy';
+const strategyLabel = (s: string) => s === 'failover' ? 'Failover Chain' : s === 'load-balance' ? 'Load Balanced' : 'Single Endpoint';
+const strategyColor = (s: string) => s === 'failover' ? colors.purple : s === 'load-balance' ? colors.blue : colors.textMuted;
 
-const healthLabel = (h: string) =>
-  h === 'healthy' ? '✓ Healthy' : h === 'degraded' ? '⚠ Degraded' : '✗ Unhealthy';
+const providerColors: Record<string, string> = {
+  'Azure OpenAI': '#4F6BED',
+  'Anthropic': '#D4875E',
+  'Google Vertex': colors.amber,
+  'OpenAI Direct': '#10B981',
+  'AWS Bedrock': '#FF9900',
+};
 
 /* ── Component ── */
 const Routing: React.FC = () => {
-  const [filter, setFilter] = useState('all');
-  const [hoveredRow, setHoveredRow] = useState<number | null>(null);
-  const [routes, setRoutes] = useState(initialRoutes);
-  const [showAddRoute, setShowAddRoute] = useState(false);
-  const [showImportModal, setShowImportModal] = useState(false);
-  const [editingRouteIndex, setEditingRouteIndex] = useState<number | null>(null);
-  const [formData, setFormData] = useState({ name: '', source: '', provider: 'Azure OpenAI', endpoint: '', strategy: 'Primary', priority: 1 });
+  const [groups, setGroups] = useState<RouteGroup[]>(initialGroups);
+  const [search, setSearch] = useState('');
+  const [showCreate, setShowCreate] = useState(false);
+  const [createStep, setCreateStep] = useState<1 | 2>(1);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [expandedGroup, setExpandedGroup] = useState<string | null>(null);
 
-  const openAddModal = () => {
-    setEditingRouteIndex(null);
-    setFormData({ name: '', source: '', provider: 'Azure OpenAI', endpoint: '', strategy: 'Primary', priority: 1 });
-    setShowAddRoute(true);
+  // Form state
+  const [formName, setFormName] = useState('');
+  const [formPattern, setFormPattern] = useState('');
+  const [formStrategy, setFormStrategy] = useState<'failover' | 'load-balance' | 'single'>('failover');
+  const [formEndpoints, setFormEndpoints] = useState<Endpoint[]>([{ provider: 'Azure OpenAI', region: '', health: 'healthy' }]);
+
+  const resetForm = () => {
+    setFormName(''); setFormPattern(''); setFormStrategy('failover');
+    setFormEndpoints([{ provider: 'Azure OpenAI', region: '', health: 'healthy' }]);
+    setCreateStep(1); setEditingId(null);
   };
 
-  const openEditModal = (idx: number) => {
-    const r = routes[idx];
-    setEditingRouteIndex(idx);
-    setFormData({ name: r.name, source: r.source, provider: r.provider, endpoint: r.endpoint, strategy: r.strategy, priority: r.priority ?? 1 });
-    setShowAddRoute(true);
+  const openCreate = () => { resetForm(); setShowCreate(true); };
+
+  const openEdit = (g: RouteGroup) => {
+    setEditingId(g.id);
+    setFormName(g.name); setFormPattern(g.pattern); setFormStrategy(g.strategy);
+    setFormEndpoints(g.endpoints.map(e => ({ ...e })));
+    setCreateStep(1); setShowCreate(true);
   };
 
-  const handleSaveRoute = () => {
-    const newRoute = { name: formData.name, source: formData.source, provider: formData.provider, endpoint: formData.endpoint, strategy: formData.strategy, priority: formData.priority as number | null, health: 'healthy', status: 'Active' };
-    if (editingRouteIndex !== null) {
-      setRoutes(prev => prev.map((r, i) => i === editingRouteIndex ? { ...r, ...newRoute } : r));
+  const handleSave = () => {
+    const newGroup: RouteGroup = {
+      id: editingId || `route-${Date.now()}`,
+      name: formName,
+      pattern: formPattern,
+      strategy: formStrategy,
+      enabled: true,
+      endpoints: formEndpoints,
+    };
+    if (editingId) {
+      setGroups(prev => prev.map(g => g.id === editingId ? newGroup : g));
     } else {
-      setRoutes(prev => [...prev, newRoute]);
+      setGroups(prev => [...prev, newGroup]);
     }
-    setShowAddRoute(false);
+    setShowCreate(false); resetForm();
   };
 
-  const handleDeleteRoute = (idx: number) => {
-    if (confirm('Delete this route?')) {
-      setRoutes(prev => prev.filter((_, i) => i !== idx));
+  const handleDelete = (id: string) => {
+    if (confirm('Delete this route group?')) {
+      setGroups(prev => prev.filter(g => g.id !== id));
     }
   };
 
-  const thStyle: React.CSSProperties = {
-    textAlign: 'left',
-    padding: '10px 12px',
-    fontSize: 12,
-    fontWeight: 600,
-    color: '#999',
-    borderBottom: '1px solid rgba(212, 168, 67, 0.10)',
-    textTransform: 'uppercase',
-    letterSpacing: 0.4,
-    whiteSpace: 'nowrap',
+  const toggleEnabled = (id: string) => {
+    setGroups(prev => prev.map(g => g.id === id ? { ...g, enabled: !g.enabled } : g));
   };
 
-  const tdStyle = (idx: number): React.CSSProperties => ({
-    padding: '10px 12px',
-    fontSize: 13,
-    color: '#E8E8E8',
-    borderBottom: '1px solid rgba(212, 168, 67, 0.06)',
-    backgroundColor: hoveredRow === idx ? '#1A1A1A' : 'transparent',
-    transition: 'background-color 0.15s',
-    whiteSpace: 'nowrap',
-  });
+  const addEndpoint = () => {
+    setFormEndpoints(prev => [...prev, { provider: 'Azure OpenAI', region: '', health: 'healthy' }]);
+  };
 
-  const filtered = filter === 'all'
-    ? routes
-    : routes.filter((r) => r.provider.toLowerCase().includes(filter));
+  const removeEndpoint = (idx: number) => {
+    setFormEndpoints(prev => prev.filter((_, i) => i !== idx));
+  };
+
+  const updateEndpoint = (idx: number, field: keyof Endpoint, value: string | number) => {
+    setFormEndpoints(prev => prev.map((ep, i) => i === idx ? { ...ep, [field]: value } : ep));
+  };
+
+  // Stats
+  const totalEndpoints = groups.reduce((s, g) => s + g.endpoints.length, 0);
+  const healthyEndpoints = groups.reduce((s, g) => s + g.endpoints.filter(e => e.health === 'healthy').length, 0);
+  const degradedEndpoints = groups.reduce((s, g) => s + g.endpoints.filter(e => e.health === 'degraded').length, 0);
+
+  const filtered = search
+    ? groups.filter(g => g.name.toLowerCase().includes(search.toLowerCase()) || g.pattern.toLowerCase().includes(search.toLowerCase()))
+    : groups;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-      {/* ── Top Action Bar ── */}
+
+      {/* ── Stat Cards ── */}
+      <div style={{ display: 'flex', gap: 14, alignItems: 'stretch' }}>
+        {[
+          { label: 'Route Groups', value: groups.length, color: colors.gold },
+          { label: 'Endpoints', value: totalEndpoints, color: colors.purple },
+          { label: 'Healthy', value: healthyEndpoints, color: colors.green },
+          { label: 'Degraded', value: degradedEndpoints, color: degradedEndpoints > 0 ? colors.amber : colors.green },
+        ].map((s) => (
+          <div key={s.label} style={{ ...card, flex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: s.color, display: 'inline-block', flexShrink: 0 }} />
+              <span style={{ color: colors.textMuted, fontSize: 12 }}>{s.label}</span>
+            </div>
+            <span style={{ color: '#fff', fontSize: 28, fontWeight: 700, lineHeight: 1.1 }}>{s.value}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* ── Action Bar ── */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-        <button
-          style={{
-            backgroundColor: '#D4A843',
-            color: '#0A0A0A',
-            border: 'none',
-            borderRadius: 6,
-            padding: '7px 18px',
-            fontSize: 13,
-            fontWeight: 600,
-            cursor: 'pointer',
-            fontFamily: 'inherit',
-          }}
-          onClick={openAddModal}
-        >
-          + Add Route
+        <button onClick={openCreate} style={{ backgroundColor: colors.gold, color: '#0A0A0A', border: 'none', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
+          + Create Route
         </button>
-        <button
-          onClick={() => setShowImportModal(true)}
-          style={{
-            backgroundColor: 'transparent',
-            color: '#ccc',
-            border: '1px solid rgba(212, 168, 67, 0.10)',
-            borderRadius: 6,
-            padding: '7px 18px',
-            fontSize: 13,
-            fontWeight: 500,
-            cursor: 'pointer',
-            fontFamily: 'inherit',
-          }}
-        >
-          Import Rules
-        </button>
-        <div style={{ flex: 1 }} />
-        <select
-          value={filter}
-          onChange={(e) => setFilter(e.target.value)}
-          style={{
-            backgroundColor: '#1A1A1A',
-            color: '#ccc',
-            border: '1px solid rgba(212, 168, 67, 0.10)',
-            borderRadius: 6,
-            padding: '7px 12px',
-            fontSize: 13,
-            fontFamily: 'inherit',
-            cursor: 'pointer',
-          }}
-        >
-          <option value="all">All Providers</option>
-          <option value="azure">Azure OpenAI</option>
-          <option value="anthropic">Anthropic</option>
-          <option value="google">Google Vertex</option>
-          <option value="openai">OpenAI Direct</option>
-        </select>
+        <input
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          placeholder="Search routes..."
+          style={{ flex: 1, minWidth: 200, ...inputStyle }}
+        />
+        <span style={{ color: colors.textMuted, fontSize: 13 }}>{filtered.length} route{filtered.length !== 1 ? 's' : ''}</span>
       </div>
 
-      {/* ── 1. Routing Rules Table ── */}
-      <div style={card}>
-        <h3 style={heading}>Routing Rules</h3>
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr>
-                <th style={thStyle}>Rule Name</th>
-                <th style={thStyle}>Source Pattern</th>
-                <th style={thStyle}>Target Provider</th>
-                <th style={thStyle}>Endpoint</th>
-                <th style={thStyle}>Strategy</th>
-                <th style={thStyle}>Priority</th>
-                <th style={thStyle}>Health</th>
-                <th style={thStyle}>Status</th>
-                <th style={thStyle}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((r, i) => (
-                <tr
-                  key={r.name}
-                  onMouseEnter={() => setHoveredRow(i)}
-                  onMouseLeave={() => setHoveredRow(null)}
-                  style={{ cursor: 'pointer', borderLeft: hoveredRow === i ? '2px solid #D4A843' : '2px solid transparent' }}
-                >
-                  <td style={{ ...tdStyle(i), color: '#D4A843', fontWeight: 600 }}>{r.name}</td>
-                  <td style={tdStyle(i)}>
-                    <code style={{ fontSize: 12, color: '#aaa', backgroundColor: '#1A1A1A', padding: '2px 6px', borderRadius: 4 }}>
-                      {r.source}
-                    </code>
-                  </td>
-                  <td style={tdStyle(i)}>{r.provider}</td>
-                  <td style={{ ...tdStyle(i), fontFamily: 'monospace', fontSize: 12 }}>{r.endpoint}</td>
-                  <td style={tdStyle(i)}>{r.strategy}</td>
-                  <td style={{ ...tdStyle(i), textAlign: 'center' }}>{r.priority ?? '—'}</td>
-                  <td style={tdStyle(i)}>
-                    <span style={healthDot(r.health)} />
-                    <span style={{ color: r.health === 'healthy' ? '#4ADE80' : r.health === 'degraded' ? '#F59E0B' : '#EF4444' }}>
-                      {healthLabel(r.health)}
-                    </span>
-                  </td>
-                  <td style={tdStyle(i)}>
-                    <span style={statusPill(r.status)}>{r.status}</span>
-                  </td>
-                  <td style={tdStyle(i)}>
-                    <span
-                      onClick={(e) => { e.stopPropagation(); openEditModal(routes.indexOf(r)); }}
-                      style={{ color: '#D4A843', fontSize: 12, cursor: 'pointer', marginRight: 10 }}
-                    >Edit</span>
-                    <span
-                      onClick={(e) => { e.stopPropagation(); handleDeleteRoute(routes.indexOf(r)); }}
-                      style={{ color: '#D4A843', fontSize: 12, cursor: 'pointer' }}
-                    >Delete</span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* ── 2. Failover Chains ── */}
-      <div style={card}>
-        <h3 style={heading}>Failover Chains</h3>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-          {failoverChains.map((chain) => (
-            <div key={chain.label}>
-              <div style={{ fontSize: 13, fontWeight: 600, color: '#E8E8E8', marginBottom: 10 }}>
-                {chain.label}
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 0, flexWrap: 'wrap' }}>
-                {chain.nodes.map((node, ni) => (
-                  <React.Fragment key={node.name}>
-                    <span
-                      style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: 6,
-                        padding: '6px 14px',
-                        borderRadius: 20,
-                        fontSize: 12,
-                        fontWeight: 500,
-                        color: '#fff',
-                        backgroundColor: '#1A1A1A',
-                        border: `1px solid ${node.health === 'healthy' ? '#4ADE80' : node.health === 'degraded' ? '#F59E0B' : '#EF4444'}`,
-                      }}
-                    >
-                      <span style={healthDot(node.health)} />
-                      {node.name}
-                    </span>
-                    {ni < chain.nodes.length - 1 && (
-                      <span style={{ color: '#666', fontSize: 18, margin: '0 8px', userSelect: 'none' }}>→</span>
-                    )}
-                  </React.Fragment>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* ── 3. Load Balancing Configuration ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
-        {/* Strategy Card */}
-        <div style={card}>
-          <h3 style={heading}>Load Balancing Strategy</h3>
-          <div style={{ fontSize: 13, color: '#999', marginBottom: 14 }}>
-            Current: <span style={{ color: '#D4A843', fontWeight: 600 }}>Weighted Round Robin</span>
+      {/* ── Route Group Cards ── */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        {filtered.length === 0 && (
+          <div style={{ ...card, textAlign: 'center', padding: 40, color: colors.textMuted }}>
+            No route groups found. Create one to get started.
           </div>
-          {[
-            { label: 'Azure OpenAI', pct: 60, color: '#4F6BED' },
-            { label: 'Anthropic', pct: 25, color: '#D4875E' },
-            { label: 'Google Vertex', pct: 15, color: '#f59e0b' },
-          ].map((item) => (
-            <div key={item.label} style={{ marginBottom: 12 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: '#E8E8E8', marginBottom: 4 }}>
-                <span>{item.label}</span>
-                <span style={{ fontWeight: 600 }}>{item.pct}%</span>
-              </div>
-              <div style={{ height: 6, backgroundColor: 'rgba(212, 168, 67, 0.06)', borderRadius: 3, overflow: 'hidden' }}>
-                <div style={{ width: `${item.pct}%`, height: '100%', backgroundColor: item.color, borderRadius: 3 }} />
-              </div>
-            </div>
-          ))}
-        </div>
+        )}
+        {filtered.map(g => {
+          const isExpanded = expandedGroup === g.id;
+          return (
+            <div key={g.id} style={{ ...card, padding: 0, opacity: g.enabled ? 1 : 0.5, transition: 'opacity 0.2s' }}>
+              {/* Card Header */}
+              <div
+                onClick={() => setExpandedGroup(isExpanded ? null : g.id)}
+                style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', cursor: 'pointer' }}
+              >
+                <span style={{ color: colors.textMuted, fontSize: 12, transition: 'transform 0.2s', transform: isExpanded ? 'rotate(90deg)' : 'none' }}>▶</span>
 
-        {/* Health Check Card */}
-        <div style={card}>
-          <h3 style={heading}>Health Check Configuration</h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-            {[
-              { label: 'Interval', value: '30s' },
-              { label: 'Timeout', value: '5s' },
-              { label: 'Unhealthy Threshold', value: '3 consecutive failures' },
-              { label: 'Auto-Recovery', value: 'Enabled' },
-            ].map((row) => (
-              <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
-                <span style={{ color: '#999' }}>{row.label}</span>
-                <span style={{ color: row.label === 'Auto-Recovery' ? '#4ADE80' : '#ccc', fontWeight: 500 }}>
-                  {row.value}
+                {/* Name + pattern */}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{ color: '#fff', fontWeight: 600, fontSize: 14 }}>{g.name}</span>
+                    <code style={{ fontSize: 11, color: '#888', backgroundColor: '#1A1A1A', padding: '2px 8px', borderRadius: 4 }}>{g.pattern}</code>
+                  </div>
+                </div>
+
+                {/* Strategy pill */}
+                <span style={{
+                  padding: '3px 10px', borderRadius: 12, fontSize: 11, fontWeight: 600,
+                  color: strategyColor(g.strategy), backgroundColor: `${strategyColor(g.strategy)}15`,
+                  border: `1px solid ${strategyColor(g.strategy)}30`,
+                }}>
+                  {strategyLabel(g.strategy)}
                 </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-      {/* ── Add/Edit Route Modal ── */}
-      {showAddRoute && (
-        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
-          <div style={{ backgroundColor: '#1A1A1A', borderTop: '3px solid #D4A843', borderRadius: 8, padding: 24, width: '100%', maxWidth: 500, border: '1px solid rgba(212, 168, 67, 0.10)' }}>
-            <h3 style={{ color: '#fff', fontSize: 16, fontWeight: 600, margin: '0 0 16px' }}>{editingRouteIndex !== null ? 'Edit Route' : 'Add Route'}</h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              <div>
-                <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Rule Name</label>
-                <input value={formData.name} onChange={e => setFormData(f => ({ ...f, name: e.target.value }))} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' as const }} />
-              </div>
-              <div>
-                <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Source Pattern</label>
-                <input value={formData.source} onChange={e => setFormData(f => ({ ...f, source: e.target.value }))} placeholder="/api/v1/*" style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' as const }} />
-              </div>
-              <div>
-                <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Target Provider</label>
-                <select value={formData.provider} onChange={e => setFormData(f => ({ ...f, provider: e.target.value }))} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit' }}>
-                  <option>Azure OpenAI</option>
-                  <option>Anthropic</option>
-                  <option>Google Vertex</option>
-                  <option>OpenAI</option>
-                  <option>AWS Bedrock</option>
-                </select>
-              </div>
-              <div>
-                <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Endpoint URL</label>
-                <input value={formData.endpoint} onChange={e => setFormData(f => ({ ...f, endpoint: e.target.value }))} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' as const }} />
-              </div>
-              <div>
-                <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Strategy</label>
-                <select value={formData.strategy} onChange={e => setFormData(f => ({ ...f, strategy: e.target.value }))} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit' }}>
-                  <option>Primary</option>
-                  <option>Failover</option>
-                  <option>Load Balance</option>
-                </select>
-              </div>
-              <div>
-                <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Priority</label>
-                <input type="number" min={1} max={10} value={formData.priority} onChange={e => setFormData(f => ({ ...f, priority: Number(e.target.value) }))} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' as const }} />
-              </div>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 20 }}>
-              <button onClick={() => setShowAddRoute(false)} style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(212, 168, 67, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>Cancel</button>
-              <button onClick={handleSaveRoute} style={{ backgroundColor: '#D4A843', color: '#0A0A0A', border: 'none', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>{editingRouteIndex !== null ? 'Save Changes' : 'Create Route'}</button>
-            </div>
-          </div>
-        </div>
-      )}
 
-      {/* ── Import Rules Modal ── */}
-      {showImportModal && (
+                {/* Endpoint chain preview */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                  {g.endpoints.map((ep, ei) => (
+                    <React.Fragment key={ei}>
+                      {ei > 0 && <span style={{ color: '#444', fontSize: 12 }}>→</span>}
+                      <span style={{
+                        width: 8, height: 8, borderRadius: '50%',
+                        backgroundColor: healthColor(ep.health), display: 'inline-block',
+                      }} title={`${ep.provider} (${ep.region}) — ${healthLabel(ep.health)}`} />
+                    </React.Fragment>
+                  ))}
+                </div>
+
+                {/* Toggle + actions */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }} onClick={e => e.stopPropagation()}>
+                  <button
+                    onClick={() => toggleEnabled(g.id)}
+                    style={{
+                      width: 36, height: 20, borderRadius: 10, border: 'none', cursor: 'pointer',
+                      backgroundColor: g.enabled ? colors.green : '#333', position: 'relative', transition: 'background-color 0.2s',
+                    }}
+                  >
+                    <span style={{
+                      position: 'absolute', top: 2, left: g.enabled ? 18 : 2,
+                      width: 16, height: 16, borderRadius: '50%', backgroundColor: '#fff',
+                      transition: 'left 0.2s',
+                    }} />
+                  </button>
+                  <span onClick={() => openEdit(g)} style={{ color: colors.gold, fontSize: 12, cursor: 'pointer', fontWeight: 500 }}>Edit</span>
+                  <span onClick={() => handleDelete(g.id)} style={{ color: colors.red, fontSize: 12, cursor: 'pointer', fontWeight: 500 }}>Delete</span>
+                </div>
+              </div>
+
+              {/* Expanded Detail */}
+              {isExpanded && (
+                <div style={{ borderTop: `1px solid ${colors.border}`, padding: 16, display: 'flex', flexDirection: 'column', gap: 14 }}>
+                  {/* Endpoint chain visualization */}
+                  <div>
+                    <div style={{ fontSize: 12, color: colors.textMuted, marginBottom: 10, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                      {g.strategy === 'failover' ? 'Failover Order (priority left → right)' : g.strategy === 'load-balance' ? 'Traffic Distribution' : 'Endpoint'}
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 0, flexWrap: 'wrap' }}>
+                      {g.endpoints.map((ep, ei) => (
+                        <React.Fragment key={ei}>
+                          <div style={{
+                            display: 'inline-flex', alignItems: 'center', gap: 8,
+                            padding: '8px 14px', borderRadius: 8, backgroundColor: '#1A1A1A',
+                            border: `1px solid ${healthColor(ep.health)}40`,
+                          }}>
+                            <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: healthColor(ep.health), flexShrink: 0 }} />
+                            <div>
+                              <div style={{ fontSize: 13, color: '#fff', fontWeight: 500 }}>{ep.provider}</div>
+                              <div style={{ fontSize: 11, color: colors.textMuted, fontFamily: 'monospace' }}>{ep.region}</div>
+                            </div>
+                            {g.strategy === 'load-balance' && ep.weight != null && (
+                              <span style={{ fontSize: 13, fontWeight: 700, color: providerColors[ep.provider] || colors.gold, marginLeft: 4 }}>{ep.weight}%</span>
+                            )}
+                            {g.strategy === 'failover' && (
+                              <span style={{ fontSize: 11, color: colors.textMuted }}>P{ei + 1}</span>
+                            )}
+                          </div>
+                          {ei < g.endpoints.length - 1 && (
+                            <span style={{ color: '#555', fontSize: 16, margin: '0 8px', userSelect: 'none' }}>
+                              {g.strategy === 'failover' ? '→' : '·'}
+                            </span>
+                          )}
+                        </React.Fragment>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Load balance bars */}
+                  {g.strategy === 'load-balance' && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                      {g.endpoints.filter(ep => ep.weight != null).map((ep, i) => (
+                        <div key={i}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: colors.text, marginBottom: 3 }}>
+                            <span>{ep.provider} ({ep.region})</span>
+                            <span style={{ fontWeight: 600 }}>{ep.weight}%</span>
+                          </div>
+                          <div style={{ height: 5, backgroundColor: 'rgba(212,168,67,0.06)', borderRadius: 3, overflow: 'hidden' }}>
+                            <div style={{ width: `${ep.weight}%`, height: '100%', backgroundColor: providerColors[ep.provider] || colors.gold, borderRadius: 3 }} />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Health config summary */}
+                  <div style={{ display: 'flex', gap: 20, fontSize: 12, color: colors.textMuted }}>
+                    <span>Health check: <span style={{ color: colors.text }}>30s interval</span></span>
+                    <span>Timeout: <span style={{ color: colors.text }}>5s</span></span>
+                    <span>Auto-recovery: <span style={{ color: colors.green }}>Enabled</span></span>
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* ── Create / Edit Route Modal ── */}
+      {showCreate && (
         <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
-          <div style={{ backgroundColor: '#1A1A1A', borderTop: '3px solid #D4A843', borderRadius: 8, padding: 24, width: '100%', maxWidth: 400, border: '1px solid rgba(212, 168, 67, 0.10)', textAlign: 'center' as const }}>
-            <div style={{ fontSize: 14, color: '#E8E8E8', marginBottom: 16 }}>Import from JSON or YAML file — coming soon</div>
-            <button onClick={() => setShowImportModal(false)} style={{ backgroundColor: '#D4A843', color: '#0A0A0A', border: 'none', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>Close</button>
+          <div style={{ backgroundColor: '#1A1A1A', borderTop: '3px solid ' + colors.gold, borderRadius: 8, padding: 24, width: '100%', maxWidth: 560, border: `1px solid ${colors.border}`, maxHeight: '85vh', overflowY: 'auto' }}>
+
+            {/* Step indicator */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20 }}>
+              {[1, 2].map(s => (
+                <React.Fragment key={s}>
+                  {s > 1 && <div style={{ flex: 1, height: 1, backgroundColor: createStep >= s ? colors.gold : '#333' }} />}
+                  <div style={{
+                    width: 28, height: 28, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: 12, fontWeight: 700,
+                    backgroundColor: createStep >= s ? colors.gold : '#333',
+                    color: createStep >= s ? '#0A0A0A' : '#888',
+                  }}>{s}</div>
+                </React.Fragment>
+              ))}
+              <span style={{ color: colors.textMuted, fontSize: 12, marginLeft: 8 }}>
+                {createStep === 1 ? 'Route Details' : 'Add Endpoints'}
+              </span>
+            </div>
+
+            <h3 style={{ color: '#fff', fontSize: 16, fontWeight: 600, margin: '0 0 16px' }}>
+              {editingId ? 'Edit Route' : 'Create Route'}
+            </h3>
+
+            {createStep === 1 && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                <div>
+                  <label style={{ color: colors.textMuted, fontSize: 12, marginBottom: 4, display: 'block' }}>Route Name</label>
+                  <input value={formName} onChange={e => setFormName(e.target.value)} placeholder="e.g. GPT-4o Production" style={inputStyle} />
+                </div>
+                <div>
+                  <label style={{ color: colors.textMuted, fontSize: 12, marginBottom: 4, display: 'block' }}>Request Pattern</label>
+                  <input value={formPattern} onChange={e => setFormPattern(e.target.value)} placeholder="/v1/chat/completions (gpt-4o*)" style={inputStyle} />
+                  <div style={{ fontSize: 11, color: '#666', marginTop: 4 }}>Matches incoming requests to this route group</div>
+                </div>
+                <div>
+                  <label style={{ color: colors.textMuted, fontSize: 12, marginBottom: 8, display: 'block' }}>Routing Strategy</label>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    {([
+                      { key: 'failover' as const, label: 'Failover', desc: 'Try endpoints in priority order' },
+                      { key: 'load-balance' as const, label: 'Load Balance', desc: 'Distribute traffic by weight' },
+                      { key: 'single' as const, label: 'Single', desc: 'One endpoint only' },
+                    ]).map(opt => (
+                      <div
+                        key={opt.key}
+                        onClick={() => setFormStrategy(opt.key)}
+                        style={{
+                          flex: 1, padding: '10px 12px', borderRadius: 8, cursor: 'pointer',
+                          backgroundColor: formStrategy === opt.key ? `${strategyColor(opt.key)}15` : '#0F0F0F',
+                          border: `1px solid ${formStrategy === opt.key ? strategyColor(opt.key) : 'rgba(212,168,67,0.10)'}`,
+                          transition: 'all 0.15s',
+                        }}
+                      >
+                        <div style={{ fontSize: 13, fontWeight: 600, color: formStrategy === opt.key ? strategyColor(opt.key) : colors.text }}>{opt.label}</div>
+                        <div style={{ fontSize: 11, color: colors.textMuted, marginTop: 2 }}>{opt.desc}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {createStep === 2 && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <div style={{ fontSize: 12, color: colors.textMuted, marginBottom: 4 }}>
+                  {formStrategy === 'failover' ? 'Add endpoints in failover priority order (first = primary)' :
+                   formStrategy === 'load-balance' ? 'Add endpoints and set traffic weight for each' :
+                   'Configure the single endpoint for this route'}
+                </div>
+
+                {formEndpoints.map((ep, idx) => (
+                  <div key={idx} style={{ backgroundColor: '#0F0F0F', borderRadius: 8, padding: 12, border: `1px solid ${colors.border}`, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      {formStrategy === 'failover' && (
+                        <span style={{ fontSize: 11, color: colors.textMuted, fontWeight: 700, minWidth: 20 }}>P{idx + 1}</span>
+                      )}
+                      <select
+                        value={ep.provider}
+                        onChange={e => updateEndpoint(idx, 'provider', e.target.value)}
+                        style={{ ...selectStyle, flex: 1 }}
+                      >
+                        <option>Azure OpenAI</option>
+                        <option>Anthropic</option>
+                        <option>Google Vertex</option>
+                        <option>OpenAI Direct</option>
+                        <option>AWS Bedrock</option>
+                      </select>
+                      <input
+                        value={ep.region}
+                        onChange={e => updateEndpoint(idx, 'region', e.target.value)}
+                        placeholder="Region / URL"
+                        style={{ ...inputStyle, flex: 1 }}
+                      />
+                      {formStrategy === 'load-balance' && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                          <input
+                            type="number"
+                            min={0}
+                            max={100}
+                            value={ep.weight ?? 0}
+                            onChange={e => updateEndpoint(idx, 'weight', Number(e.target.value))}
+                            style={{ ...inputStyle, width: 60, textAlign: 'center' }}
+                          />
+                          <span style={{ color: colors.textMuted, fontSize: 12 }}>%</span>
+                        </div>
+                      )}
+                      {formEndpoints.length > 1 && (
+                        <button onClick={() => removeEndpoint(idx)} style={{ background: 'none', border: 'none', color: colors.red, cursor: 'pointer', fontSize: 16, padding: '0 4px' }}>×</button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+
+                {(formStrategy !== 'single' || formEndpoints.length === 0) && (
+                  <button onClick={addEndpoint} style={{ background: 'none', border: `1px dashed ${colors.border}`, borderRadius: 8, padding: '10px', color: colors.gold, fontSize: 13, cursor: 'pointer', fontFamily: 'inherit' }}>
+                    + Add {formStrategy === 'failover' ? 'Fallback' : 'Endpoint'}
+                  </button>
+                )}
+              </div>
+            )}
+
+            {/* Footer */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 20 }}>
+              <div>
+                {createStep === 2 && (
+                  <button onClick={() => setCreateStep(1)} style={{ backgroundColor: 'transparent', color: '#ccc', border: `1px solid ${colors.border}`, borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>← Back</button>
+                )}
+              </div>
+              <div style={{ display: 'flex', gap: 10 }}>
+                <button onClick={() => { setShowCreate(false); resetForm(); }} style={{ backgroundColor: 'transparent', color: '#ccc', border: `1px solid ${colors.border}`, borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>Cancel</button>
+                {createStep === 1 ? (
+                  <button
+                    onClick={() => setCreateStep(2)}
+                    disabled={!formName || !formPattern}
+                    style={{
+                      backgroundColor: formName && formPattern ? colors.gold : '#333',
+                      color: formName && formPattern ? '#0A0A0A' : '#666',
+                      border: 'none', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 600,
+                      cursor: formName && formPattern ? 'pointer' : 'not-allowed', fontFamily: 'inherit',
+                    }}
+                  >Next →</button>
+                ) : (
+                  <button
+                    onClick={handleSave}
+                    disabled={formEndpoints.length === 0 || formEndpoints.some(ep => !ep.region)}
+                    style={{
+                      backgroundColor: colors.gold, color: '#0A0A0A', border: 'none', borderRadius: 6,
+                      padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
+                    }}
+                  >{editingId ? 'Save Changes' : 'Create Route'}</button>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       )}

@@ -331,7 +331,7 @@ const initialNamespaces: Namespace[] = [
 const colors = {
   bg: '#0A0A0A',
   card: '#161616',
-  border: 'rgba(212, 168, 67, 0.10)',
+  border: 'rgba(129, 140, 248, 0.10)',
   text: '#E8E8E8',
   textMuted: '#999',
   textDim: '#666',
@@ -339,9 +339,9 @@ const colors = {
   amber: '#F59E0B',
   red: '#EF4444',
   blue: '#60A5FA',
-  gold: '#D4A843',
-  goldDim: '#B8923A',
-  goldMuted: 'rgba(212, 168, 67, 0.15)',
+  gold: '#818CF8',
+  goldDim: '#6366F1',
+  goldMuted: 'rgba(129, 140, 248, 0.15)',
   purple: '#A78BFA',
 }
 
@@ -655,7 +655,7 @@ const Namespaces: React.FC = () => {
             <div style={sectionTitle}>
               <span style={{ fontSize: 16 }}>📦</span>
               <span>Assets</span>
-              <span style={badge('rgba(212, 168, 67, 0.12)', colors.gold)}>{ns.totalAssets}</span>
+              <span style={badge('rgba(129, 140, 248, 0.12)', colors.gold)}>{ns.totalAssets}</span>
             </div>
           </div>
           <div style={card}>
@@ -680,8 +680,8 @@ const Namespaces: React.FC = () => {
               <span style={badge('rgba(167, 139, 250, 0.15)', colors.purple)}>{peopleCount}</span>
             </div>
             <button onClick={() => setShowAddMember(!showAddMember)} style={{
-              padding: '6px 14px', borderRadius: 6, border: '1px solid rgba(212, 168, 67, 0.3)',
-              backgroundColor: 'rgba(212, 168, 67, 0.1)', color: colors.gold,
+              padding: '6px 14px', borderRadius: 6, border: '1px solid rgba(129, 140, 248, 0.3)',
+              backgroundColor: 'rgba(129, 140, 248, 0.1)', color: colors.gold,
               fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
             }}>
               + Add Member
@@ -695,7 +695,7 @@ const Namespaces: React.FC = () => {
                 <option value="Editor">Editor</option>
                 <option value="Viewer">Viewer</option>
               </select>
-              <button onClick={handleAddMember} style={{ padding: '6px 14px', borderRadius: 6, border: 'none', backgroundColor: colors.gold, color: '#0A0A0A', fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>Add</button>
+              <button onClick={handleAddMember} style={{ padding: '6px 14px', borderRadius: 6, border: 'none', backgroundColor: colors.gold, color: '#FFFFFF', fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>Add</button>
             </div>
           )}
           <div style={card}>
@@ -738,8 +738,8 @@ const Namespaces: React.FC = () => {
               <span style={badge('rgba(74, 222, 128, 0.15)', colors.green)}>{ns.policies.length + ns.credentials.length}</span>
             </div>
             <button style={{
-              padding: '6px 14px', borderRadius: 6, border: '1px solid rgba(212, 168, 67, 0.3)',
-              backgroundColor: 'rgba(212, 168, 67, 0.1)', color: colors.gold,
+              padding: '6px 14px', borderRadius: 6, border: '1px solid rgba(129, 140, 248, 0.3)',
+              backgroundColor: 'rgba(129, 140, 248, 0.1)', color: colors.gold,
               fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
             }} onClick={() => alert('Navigate to Secrets page to add a credential scoped to this namespace')}>
               + Add Credential
@@ -749,7 +749,7 @@ const Namespaces: React.FC = () => {
             {ns.policies.length > 0 ? (
               <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                 {ns.policies.map(p => (
-                  <span key={p} style={badge('rgba(212, 168, 67, 0.12)', colors.gold)}>{p}</span>
+                  <span key={p} style={badge('rgba(129, 140, 248, 0.12)', colors.gold)}>{p}</span>
                 ))}
               </div>
             ) : (
@@ -767,7 +767,7 @@ const Namespaces: React.FC = () => {
                         <span style={{ fontFamily: 'monospace', fontSize: 12, color: '#9cdcfe' }}>{cr.name}</span>
                       </div>
                       <div style={{ display: 'flex', gap: 6 }}>
-                        <span style={badge('rgba(212, 168, 67, 0.06)', colors.textMuted)}>{cr.type}</span>
+                        <span style={badge('rgba(129, 140, 248, 0.06)', colors.textMuted)}>{cr.type}</span>
                         <span style={badge(credEc.bg, credEc.color)}>{cr.environment}</span>
                       </div>
                     </div>
@@ -796,11 +796,11 @@ const Namespaces: React.FC = () => {
                 <div style={sectionTitle}>
                   <span style={{ fontSize: 16 }}>💰</span>
                   <span>Budget Rules</span>
-                  <span style={badge('rgba(212, 168, 67, 0.12)', colors.gold)}>{nsRules.length}</span>
+                  <span style={badge('rgba(129, 140, 248, 0.12)', colors.gold)}>{nsRules.length}</span>
                 </div>
                 <button onClick={openBudgetModal} style={{
-                  padding: '6px 14px', borderRadius: 6, border: '1px solid rgba(212, 168, 67, 0.3)',
-                  backgroundColor: 'rgba(212, 168, 67, 0.1)', color: colors.gold,
+                  padding: '6px 14px', borderRadius: 6, border: '1px solid rgba(129, 140, 248, 0.3)',
+                  backgroundColor: 'rgba(129, 140, 248, 0.1)', color: colors.gold,
                   fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
                 }}>
                   + Create Rule
@@ -813,7 +813,7 @@ const Namespaces: React.FC = () => {
                   <div style={{ color: colors.textMuted, fontSize: 13, marginBottom: 12 }}>No budget rules configured for this namespace</div>
                   <button onClick={openBudgetModal} style={{
                     padding: '8px 18px', borderRadius: 6, border: 'none',
-                    backgroundColor: colors.gold, color: '#0A0A0A',
+                    backgroundColor: colors.gold, color: '#FFFFFF',
                     fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
                   }}>
                     Create First Budget Rule
@@ -839,7 +839,7 @@ const Namespaces: React.FC = () => {
                           </div>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                             <span style={badge(ac.bg, ac.color)}>{ac.label}</span>
-                            <span style={badge('rgba(212,168,67,0.06)', colors.textMuted)}>{rule.period}</span>
+                            <span style={badge('rgba(129, 140, 248,0.06)', colors.textMuted)}>{rule.period}</span>
                             <button
                               onClick={() => handleToggleBudgetRule(rule.id)}
                               title={rule.status === 'active' ? 'Pause rule' : 'Activate rule'}
@@ -871,7 +871,7 @@ const Namespaces: React.FC = () => {
                           <span style={{ fontSize: 12, fontWeight: 600, color: barColor }}>{pct}%</span>
                         </div>
 
-                        <div style={{ height: 6, backgroundColor: 'rgba(212,168,67,0.06)', borderRadius: 3, overflow: 'hidden', marginBottom: 6 }}>
+                        <div style={{ height: 6, backgroundColor: 'rgba(129, 140, 248,0.06)', borderRadius: 3, overflow: 'hidden', marginBottom: 6 }}>
                           <div style={{ height: '100%', width: `${Math.min(pct, 100)}%`, backgroundColor: barColor, borderRadius: 3, transition: 'width 0.4s ease' }} />
                         </div>
 
@@ -909,7 +909,7 @@ const Namespaces: React.FC = () => {
                         onClick={() => setBudgetForm(p => ({ ...p, scope: s, scopeTarget: s === 'namespace' ? (selectedNs?.name || '') : '' }))}
                         style={{
                           flex: 1, padding: '8px 4px', borderRadius: 6, border: `1px solid ${budgetForm.scope === s ? colors.gold : colors.border}`,
-                          backgroundColor: budgetForm.scope === s ? 'rgba(212,168,67,0.12)' : 'transparent',
+                          backgroundColor: budgetForm.scope === s ? 'rgba(129, 140, 248,0.12)' : 'transparent',
                           color: budgetForm.scope === s ? colors.gold : colors.textMuted,
                           fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
                           display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
@@ -974,7 +974,7 @@ const Namespaces: React.FC = () => {
                       style={{
                         flex: 1, padding: '10px 8px', borderRadius: 6,
                         border: `1px solid ${budgetForm.action === a.key ? colors.gold : colors.border}`,
-                        backgroundColor: budgetForm.action === a.key ? 'rgba(212,168,67,0.12)' : 'transparent',
+                        backgroundColor: budgetForm.action === a.key ? 'rgba(129, 140, 248,0.12)' : 'transparent',
                         color: budgetForm.action === a.key ? '#fff' : colors.textMuted,
                         fontSize: 12, cursor: 'pointer', fontFamily: 'inherit', textAlign: 'center',
                       }}
@@ -1001,7 +1001,7 @@ const Namespaces: React.FC = () => {
                         style={{
                           padding: '6px 14px', borderRadius: 6,
                           border: `1px solid ${isActive ? colors.gold : colors.border}`,
-                          backgroundColor: isActive ? 'rgba(212,168,67,0.12)' : 'transparent',
+                          backgroundColor: isActive ? 'rgba(129, 140, 248,0.12)' : 'transparent',
                           color: isActive ? colors.gold : colors.textMuted,
                           fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
                         }}
@@ -1016,7 +1016,7 @@ const Namespaces: React.FC = () => {
 
               <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 4 }}>
                 <button onClick={() => setShowBudgetModal(false)} style={{ padding: '8px 18px', borderRadius: 6, border: `1px solid ${colors.border}`, backgroundColor: 'transparent', color: colors.textMuted, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>Cancel</button>
-                <button onClick={handleCreateBudgetRule} style={{ padding: '8px 18px', borderRadius: 6, border: 'none', backgroundColor: colors.gold, color: '#0A0A0A', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>Create Rule</button>
+                <button onClick={handleCreateBudgetRule} style={{ padding: '8px 18px', borderRadius: 6, border: 'none', backgroundColor: colors.gold, color: '#FFFFFF', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>Create Rule</button>
               </div>
             </div>
           </div>
@@ -1062,7 +1062,7 @@ const Namespaces: React.FC = () => {
             onChange={e => setSearch(e.target.value)}
             style={{
               minWidth: 280, padding: '8px 12px', borderRadius: 6,
-              border: '1px solid rgba(212, 168, 67, 0.10)', backgroundColor: '#1a1a1a',
+              border: '1px solid rgba(129, 140, 248, 0.10)', backgroundColor: '#1a1a1a',
               color: colors.text, fontSize: 13, fontFamily: 'inherit', outline: 'none',
             }}
           />
@@ -1070,7 +1070,7 @@ const Namespaces: React.FC = () => {
         </div>
         <button onClick={() => openCreateModal()} style={{
           padding: '8px 18px', borderRadius: 6, border: 'none',
-          backgroundColor: colors.gold, color: '#0A0A0A',
+          backgroundColor: colors.gold, color: '#FFFFFF',
           fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
         }}>
           + Create Namespace
@@ -1124,7 +1124,7 @@ const Namespaces: React.FC = () => {
                 cursor: 'pointer',
                 transition: 'all 0.15s',
                 boxShadow: isHovered ? '0 4px 20px rgba(0,0,0,0.4)' : 'none',
-                borderColor: isHovered ? 'rgba(212, 168, 67, 0.20)' : String(colors.border),
+                borderColor: isHovered ? 'rgba(129, 140, 248, 0.20)' : String(colors.border),
                 display: 'flex',
                 flexDirection: 'column',
                 gap: 8,
@@ -1183,7 +1183,7 @@ const Namespaces: React.FC = () => {
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 11 }}>
                     <span style={{ color: colors.textMuted }}>💰</span>
                     <span style={{ color: colors.textMuted }}>${bs.totalSpent.toLocaleString()} / ${bs.totalBudget.toLocaleString()}</span>
-                    <div style={{ flex: 1, height: 4, backgroundColor: 'rgba(212,168,67,0.06)', borderRadius: 2, overflow: 'hidden' }}>
+                    <div style={{ flex: 1, height: 4, backgroundColor: 'rgba(129, 140, 248,0.06)', borderRadius: 2, overflow: 'hidden' }}>
                       <div style={{ height: '100%', width: `${Math.min(pct, 100)}%`, backgroundColor: barColor, borderRadius: 2 }} />
                     </div>
                     <span style={{ color: barColor, fontWeight: 600 }}>{pct}%</span>
@@ -1236,7 +1236,7 @@ const Namespaces: React.FC = () => {
             </div>
             <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 8 }}>
               <button onClick={() => setShowCreateModal(false)} style={{ padding: '8px 18px', borderRadius: 6, border: `1px solid ${colors.border}`, backgroundColor: 'transparent', color: colors.textMuted, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>Cancel</button>
-              <button onClick={handleCreateOrEdit} style={{ padding: '8px 18px', borderRadius: 6, border: 'none', backgroundColor: colors.gold, color: '#0A0A0A', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>{editingNs ? 'Save' : 'Create'}</button>
+              <button onClick={handleCreateOrEdit} style={{ padding: '8px 18px', borderRadius: 6, border: 'none', backgroundColor: colors.gold, color: '#FFFFFF', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>{editingNs ? 'Save' : 'Create'}</button>
             </div>
           </div>
         </div>

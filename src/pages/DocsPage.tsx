@@ -8,10 +8,10 @@ interface DocsPageProps {
 
 /* ─── palette (matches LandingPage) ─── */
 const C = {
-  bg: '#0A0A0A', bgDeep: '#050505', gold: '#D4A843', goldDim: '#B8923A',
+  bg: '#0A0A0A', bgDeep: '#050505', gold: '#818CF8', goldDim: '#6366F1',
   amber: '#F59E0B', purple: '#A78BFA', blue: '#60A5FA', pink: '#f472b6',
   white: '#fff', gray: '#b0b0b0', green: '#4ADE80',
-  cardBg: 'rgba(212, 168, 67, 0.05)', cardBorder: 'rgba(212, 168, 67, 0.10)',
+  cardBg: 'rgba(129, 140, 248, 0.05)', cardBorder: 'rgba(129, 140, 248, 0.10)',
   font: "'Segoe UI', system-ui, -apple-system, sans-serif",
 };
 
@@ -29,7 +29,7 @@ const btnSolid: CSSProperties = {
   fontSize: 16,
   fontWeight: 600,
   fontFamily: C.font,
-  color: '#0A0A0A',
+  color: '#FFFFFF',
   background: C.gold,
   border: 'none',
   borderRadius: 8,
@@ -335,7 +335,7 @@ const DocsPage: FC<DocsPageProps> = ({ onLogin, onSignup }) => {
         padding: '0 48px', height: 64,
         background: 'rgba(10,10,10,0.85)',
         backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
-        borderBottom: '1px solid rgba(212, 168, 67, 0.06)',
+        borderBottom: '1px solid rgba(129, 140, 248, 0.06)',
         fontFamily: C.font,
       }}
     >
@@ -396,7 +396,7 @@ const DocsPage: FC<DocsPageProps> = ({ onLogin, onSignup }) => {
             onClick={onSignup}
             style={{
               padding: '8px 20px', fontSize: 14, fontWeight: 600, fontFamily: C.font,
-              color: '#0A0A0A', background: C.gold, border: 'none', borderRadius: 6,
+              color: '#FFFFFF', background: C.gold, border: 'none', borderRadius: 6,
               cursor: 'pointer', boxShadow: `0 0 16px ${C.gold}55`, transition: 'box-shadow .15s',
             }}
             onMouseEnter={(e) => (e.currentTarget.style.boxShadow = `0 0 28px ${C.gold}99`)}
@@ -579,7 +579,7 @@ const DocsPage: FC<DocsPageProps> = ({ onLogin, onSignup }) => {
                 onClick={onSignup}
                 style={{
                   padding: '10px 24px', fontSize: 13, fontWeight: 600, fontFamily: C.font,
-                  color: '#0A0A0A', background: card.accent, border: 'none',
+                  color: '#FFFFFF', background: card.accent, border: 'none',
                   borderRadius: 6, cursor: 'pointer', transition: 'box-shadow .15s',
                   boxShadow: `0 0 16px ${card.accent}44`,
                 }}
@@ -699,7 +699,7 @@ const DocsPage: FC<DocsPageProps> = ({ onLogin, onSignup }) => {
       <div
         style={{
           ...glassCard, overflow: 'hidden',
-          boxShadow: `0 0 60px ${C.gold}08, inset 0 1px 0 rgba(212, 168, 67, 0.08)`,
+          boxShadow: `0 0 60px ${C.gold}08, inset 0 1px 0 rgba(129, 140, 248, 0.08)`,
         }}
       >
         {/* tabs */}
@@ -776,7 +776,7 @@ const DocsPage: FC<DocsPageProps> = ({ onLogin, onSignup }) => {
       <div
         style={{
           ...glassCard, padding: '32px 48px', maxWidth: 860, width: '100%', margin: '0 auto',
-          boxShadow: `0 0 80px ${C.gold}12, 0 0 160px ${C.goldDim}08, inset 0 1px 0 rgba(212, 168, 67, 0.10)`,
+          boxShadow: `0 0 80px ${C.gold}12, 0 0 160px ${C.goldDim}08, inset 0 1px 0 rgba(129, 140, 248, 0.10)`,
           position: 'relative', overflow: 'hidden',
         }}
       >
@@ -801,8 +801,8 @@ const DocsPage: FC<DocsPageProps> = ({ onLogin, onSignup }) => {
                 key={c.label}
                 style={{
                   padding: '8px 26px', fontSize: 13, fontWeight: 600, color: '#e0e0e0',
-                  border: '1px solid rgba(212, 168, 67, 0.12)', borderRadius: 10, fontFamily: C.font,
-                  background: 'linear-gradient(135deg, rgba(212, 168, 67, 0.06) 0%, rgba(212, 168, 67, 0.02) 100%)',
+                  border: '1px solid rgba(129, 140, 248, 0.12)', borderRadius: 10, fontFamily: C.font,
+                  background: 'linear-gradient(135deg, rgba(129, 140, 248, 0.06) 0%, rgba(129, 140, 248, 0.02) 100%)',
                   display: 'flex', alignItems: 'center', gap: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
                 }}
               >
@@ -888,7 +888,7 @@ const DocsPage: FC<DocsPageProps> = ({ onLogin, onSignup }) => {
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'center' }}>
               {['OpenAI', 'Anthropic', 'Azure OpenAI', 'Google Gemini', 'Self-Hosted'].map((b) => (
-                <div key={b} style={{ padding: '6px 16px', fontSize: 11, fontWeight: 600, color: '#ccc', border: '1px solid rgba(212, 168, 67, 0.10)', borderRadius: 8, fontFamily: C.font, background: 'rgba(212, 168, 67, 0.03)', boxShadow: '0 2px 8px rgba(0,0,0,0.2)', width: '80%' }}>
+                <div key={b} style={{ padding: '6px 16px', fontSize: 11, fontWeight: 600, color: '#ccc', border: '1px solid rgba(129, 140, 248, 0.10)', borderRadius: 8, fontFamily: C.font, background: 'rgba(129, 140, 248, 0.03)', boxShadow: '0 2px 8px rgba(0,0,0,0.2)', width: '80%' }}>
                   {b}
                 </div>
               ))}
@@ -901,7 +901,7 @@ const DocsPage: FC<DocsPageProps> = ({ onLogin, onSignup }) => {
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'center' }}>
               {['MCP Servers', 'REST APIs', 'SaaS Connectors', 'OpenAPI Endpoints'].map((b) => (
-                <div key={b} style={{ padding: '6px 16px', fontSize: 11, fontWeight: 600, color: '#ccc', border: '1px solid rgba(212, 168, 67, 0.10)', borderRadius: 8, fontFamily: C.font, background: 'rgba(212, 168, 67, 0.03)', boxShadow: '0 2px 8px rgba(0,0,0,0.2)', width: '80%' }}>
+                <div key={b} style={{ padding: '6px 16px', fontSize: 11, fontWeight: 600, color: '#ccc', border: '1px solid rgba(129, 140, 248, 0.10)', borderRadius: 8, fontFamily: C.font, background: 'rgba(129, 140, 248, 0.03)', boxShadow: '0 2px 8px rgba(0,0,0,0.2)', width: '80%' }}>
                   {b}
                 </div>
               ))}
@@ -914,7 +914,7 @@ const DocsPage: FC<DocsPageProps> = ({ onLogin, onSignup }) => {
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'center' }}>
               {['LangChain', 'Foundry Agents', 'A2A Protocol', 'Custom Agents'].map((b) => (
-                <div key={b} style={{ padding: '6px 16px', fontSize: 11, fontWeight: 600, color: '#ccc', border: '1px solid rgba(212, 168, 67, 0.10)', borderRadius: 8, fontFamily: C.font, background: 'rgba(212, 168, 67, 0.03)', boxShadow: '0 2px 8px rgba(0,0,0,0.2)', width: '80%' }}>
+                <div key={b} style={{ padding: '6px 16px', fontSize: 11, fontWeight: 600, color: '#ccc', border: '1px solid rgba(129, 140, 248, 0.10)', borderRadius: 8, fontFamily: C.font, background: 'rgba(129, 140, 248, 0.03)', boxShadow: '0 2px 8px rgba(0,0,0,0.2)', width: '80%' }}>
                   {b}
                 </div>
               ))}

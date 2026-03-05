@@ -11,7 +11,7 @@ interface ConnectFoundryPanelProps {
 const fieldGroup: CSSProperties = { marginBottom: 12 };
 const labelStyle: CSSProperties = { color: '#999', fontSize: 12, marginBottom: 4, display: 'block' };
 const inputStyle: CSSProperties = {
-  width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)',
+  width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(129, 140, 248,0.15)',
   color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit',
   boxSizing: 'border-box' as const,
 };
@@ -76,16 +76,16 @@ export default function ConnectFoundryPanel({
       {connectedProjects.length === 0 && !showConnect && (
         <div style={{
           marginTop: 8, padding: '12px 14px', borderRadius: 6,
-          backgroundColor: 'rgba(212,168,67,0.06)', border: '1px solid rgba(212,168,67,0.15)',
+          backgroundColor: 'rgba(129, 140, 248,0.06)', border: '1px solid rgba(129, 140, 248,0.15)',
         }}>
-          <div style={{ fontSize: 12, color: '#D4A843', fontWeight: 600, marginBottom: 4 }}>No Foundry projects connected</div>
+          <div style={{ fontSize: 12, color: '#818CF8', fontWeight: 600, marginBottom: 4 }}>No Foundry projects connected</div>
           <div style={{ fontSize: 11, color: '#999' }}>
             Connect an Azure AI Foundry project to discover and import assets into the gateway.
           </div>
           <button
             onClick={() => setShowConnect(true)}
             style={{
-              marginTop: 8, backgroundColor: '#D4A843', color: '#0A0A0A', border: 'none',
+              marginTop: 8, backgroundColor: '#818CF8', color: '#FFFFFF', border: 'none',
               borderRadius: 6, padding: '6px 14px', fontSize: 12, fontWeight: 600,
               cursor: 'pointer', fontFamily: 'inherit',
             }}
@@ -98,9 +98,9 @@ export default function ConnectFoundryPanel({
       {showConnect && (
         <div style={{
           marginTop: 8, padding: 16, borderRadius: 8,
-          backgroundColor: '#1a1a1a', border: '1px solid rgba(212,168,67,0.25)',
+          backgroundColor: '#1a1a1a', border: '1px solid rgba(129, 140, 248,0.25)',
         }}>
-          <div style={{ fontSize: 13, fontWeight: 600, color: '#D4A843', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
+          <div style={{ fontSize: 13, fontWeight: 600, color: '#818CF8', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
             ◆ Connect Azure AI Foundry Project
           </div>
 
@@ -147,7 +147,7 @@ export default function ConnectFoundryPanel({
             <button
               onClick={() => { setShowConnect(false); setConnectForm({ projectName: '', subscriptionId: '', resourceGroup: '' }); }}
               style={{
-                backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(212,168,67,0.10)',
+                backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(129, 140, 248,0.10)',
                 borderRadius: 6, padding: '6px 14px', fontSize: 12, cursor: 'pointer', fontFamily: 'inherit',
               }}
             >
@@ -156,7 +156,7 @@ export default function ConnectFoundryPanel({
             <button
               onClick={() => canConnect && !connecting && handleConnect()}
               style={{
-                backgroundColor: connected ? '#4ADE80' : canConnect && !connecting ? '#D4A843' : '#555',
+                backgroundColor: connected ? '#4ADE80' : canConnect && !connecting ? '#818CF8' : '#555',
                 color: connected ? '#0A0A0A' : canConnect ? '#0A0A0A' : '#999',
                 border: 'none', borderRadius: 6, padding: '6px 14px', fontSize: 12, fontWeight: 600,
                 cursor: canConnect && !connecting ? 'pointer' : 'not-allowed', fontFamily: 'inherit',

@@ -44,7 +44,7 @@ const useStyles = makeStyles({
   topBar: {
     height: '40px',
     backgroundColor: '#0A0A0A',
-    borderBottom: '1px solid rgba(212, 168, 67, 0.10)',
+    borderBottom: '1px solid rgba(129, 140, 248, 0.10)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -64,8 +64,8 @@ const useStyles = makeStyles({
   topBarBadge: {
     fontSize: '10px',
     fontWeight: 600,
-    color: '#D4A843',
-    backgroundColor: 'rgba(212, 168, 67, 0.12)',
+    color: '#818CF8',
+    backgroundColor: 'rgba(129, 140, 248, 0.12)',
     padding: '1px 6px',
     borderRadius: '3px',
     letterSpacing: '0.3px',
@@ -127,8 +127,8 @@ const useStyles = makeStyles({
     width: '26px',
     height: '26px',
     borderRadius: '50%',
-    backgroundColor: '#D4A843',
-    color: '#0A0A0A',
+    backgroundColor: '#818CF8',
+    color: '#FFFFFF',
     fontSize: '11px',
     fontWeight: 700,
     display: 'flex',
@@ -145,7 +145,7 @@ const useStyles = makeStyles({
     top: '36px',
     right: '0',
     backgroundColor: '#141414',
-    border: '1px solid rgba(212, 168, 67, 0.15)',
+    border: '1px solid rgba(129, 140, 248, 0.15)',
     borderRadius: '6px',
     padding: '12px 0',
     minWidth: '220px',
@@ -171,7 +171,7 @@ const useStyles = makeStyles({
   },
   profileDropdownDivider: {
     height: '1px',
-    backgroundColor: 'rgba(212, 168, 67, 0.15)',
+    backgroundColor: 'rgba(129, 140, 248, 0.15)',
     margin: '4px 0',
   },
   profileDropdownItem: {
@@ -210,7 +210,7 @@ const useStyles = makeStyles({
     display: 'none',
   },
   logoIcon: {
-    color: '#D4A843',
+    color: '#818CF8',
     fontSize: '18px',
     display: 'flex',
     alignItems: 'center',
@@ -229,7 +229,7 @@ const useStyles = makeStyles({
     padding: '4px 16px 8px',
     fontSize: '11px',
     fontWeight: 600,
-    color: '#B8923A',
+    color: '#6366F1',
     textTransform: 'uppercase',
     letterSpacing: '0.5px',
   },
@@ -254,12 +254,12 @@ const useStyles = makeStyles({
     alignItems: 'center',
     gap: '10px',
     padding: '8px 20px',
-    color: '#D4A843',
+    color: '#818CF8',
     cursor: 'pointer',
     fontSize: '13px',
     textDecoration: 'none',
-    backgroundColor: 'rgba(212, 168, 67, 0.08)',
-    borderLeft: '3px solid #D4A843',
+    backgroundColor: 'rgba(129, 140, 248, 0.08)',
+    borderLeft: '3px solid #818CF8',
     fontWeight: 600,
   },
   content: {
@@ -270,7 +270,7 @@ const useStyles = makeStyles({
   header: {
     backgroundColor: '#111111',
     padding: '10px 20px',
-    borderBottom: '1px solid rgba(212, 168, 67, 0.10)',
+    borderBottom: '1px solid rgba(129, 140, 248, 0.10)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -302,7 +302,7 @@ const useStyles = makeStyles({
     padding: '16px 20px',
   },
   sidebarFooter: {
-    borderTop: '1px solid rgba(212, 168, 67, 0.10)',
+    borderTop: '1px solid rgba(129, 140, 248, 0.10)',
     padding: '8px 0',
     flexShrink: 0,
   },
@@ -469,7 +469,7 @@ const Layout: React.FC<LayoutProps> = ({ onSignOut }) => {
       {/* Top Bar */}
       <div className={styles.topBar}>
         <div className={styles.topBarBrand} onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
-          <span style={{ color: '#D4A843', fontSize: 20 }}>⚡</span> Azure AI Gateway
+          <span style={{ color: '#818CF8', fontSize: 20 }}>⚡</span> Azure AI Gateway
           <span className={styles.topBarBadge}>Preview</span>
         </div>
         <div />
@@ -485,7 +485,7 @@ const Layout: React.FC<LayoutProps> = ({ onSignOut }) => {
                 top: 36,
                 right: 0,
                 backgroundColor: '#141414',
-                border: '1px solid rgba(212, 168, 67, 0.15)',
+                border: '1px solid rgba(129, 140, 248, 0.15)',
                 borderRadius: 6,
                 padding: '8px 0',
                 minWidth: 340,
@@ -493,7 +493,7 @@ const Layout: React.FC<LayoutProps> = ({ onSignOut }) => {
                 boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
               }}>
                 <div style={{ padding: '4px 14px 8px', fontSize: 13, fontWeight: 600, color: '#fff' }}>Notifications</div>
-                <div style={{ height: 1, backgroundColor: 'rgba(212, 168, 67, 0.15)', margin: '0 0 4px' }} />
+                <div style={{ height: 1, backgroundColor: 'rgba(129, 140, 248, 0.15)', margin: '0 0 4px' }} />
                 {visibleNotifs.length === 0 && (
                   <div style={{ padding: '16px 14px', fontSize: 12, color: '#999', textAlign: 'center' }}>No notifications</div>
                 )}
@@ -540,7 +540,7 @@ const Layout: React.FC<LayoutProps> = ({ onSignOut }) => {
                 })}
                 {visibleNotifs.length > 0 && (
                   <>
-                    <div style={{ height: 1, backgroundColor: 'rgba(212, 168, 67, 0.15)', margin: '4px 0' }} />
+                    <div style={{ height: 1, backgroundColor: 'rgba(129, 140, 248, 0.15)', margin: '4px 0' }} />
                     <button
                       onClick={() => { setDismissedNotifs(notifications.map((n) => n.id)); }}
                       style={{
@@ -549,7 +549,7 @@ const Layout: React.FC<LayoutProps> = ({ onSignOut }) => {
                         textAlign: 'center',
                         background: 'transparent',
                         border: 'none',
-                        color: '#D4A843',
+                        color: '#818CF8',
                         fontSize: 12,
                         fontWeight: 600,
                         padding: '8px 14px',
@@ -612,8 +612,8 @@ const Layout: React.FC<LayoutProps> = ({ onSignOut }) => {
               onClick={() => navigate('/')}
               style={{
                 cursor: 'pointer',
-                color: location.pathname === '/' ? '#D4A843' : '#B8923A',
-                backgroundColor: location.pathname === '/' ? 'rgba(212, 168, 67, 0.08)' : 'transparent',
+                color: location.pathname === '/' ? '#818CF8' : '#6366F1',
+                backgroundColor: location.pathname === '/' ? 'rgba(129, 140, 248, 0.08)' : 'transparent',
                 borderRadius: 6,
                 margin: '0 8px',
                 padding: '6px 10px 6px',

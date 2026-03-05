@@ -199,7 +199,7 @@ const styles: Record<string, React.CSSProperties> = {
     alignItems: 'center',
     justifyContent: 'space-between',
     padding: '12px 20px',
-    borderBottom: '1px solid rgba(212, 168, 67, 0.10)',
+    borderBottom: '1px solid rgba(129, 140, 248, 0.10)',
     flexShrink: 0,
   },
   headerLeft: {
@@ -214,13 +214,13 @@ const styles: Record<string, React.CSSProperties> = {
     margin: 0,
   },
   badge: {
-    backgroundColor: 'rgba(212, 168, 67, 0.15)',
-    color: '#D4A843',
+    backgroundColor: 'rgba(129, 140, 248, 0.15)',
+    color: '#818CF8',
     borderRadius: '12px',
     padding: '2px 10px',
     fontSize: '11px',
     fontWeight: 600,
-    border: '1px solid #D4A843',
+    border: '1px solid #818CF8',
   },
   columns: {
     display: 'grid',
@@ -231,7 +231,7 @@ const styles: Record<string, React.CSSProperties> = {
   // Left column
   leftPanel: {
     backgroundColor: '#0A0A0A',
-    borderRight: '1px solid rgba(212, 168, 67, 0.10)',
+    borderRight: '1px solid rgba(129, 140, 248, 0.10)',
     padding: '16px',
     overflowY: 'auto',
     display: 'flex',
@@ -261,7 +261,7 @@ const styles: Record<string, React.CSSProperties> = {
   select: {
     backgroundColor: '#161616',
     color: '#e0e0e0',
-    border: '1px solid rgba(212, 168, 67, 0.10)',
+    border: '1px solid rgba(129, 140, 248, 0.10)',
     borderRadius: '6px',
     padding: '8px 10px',
     fontSize: '13px',
@@ -273,7 +273,7 @@ const styles: Record<string, React.CSSProperties> = {
   input: {
     backgroundColor: '#161616',
     color: '#e0e0e0',
-    border: '1px solid rgba(212, 168, 67, 0.10)',
+    border: '1px solid rgba(129, 140, 248, 0.10)',
     borderRadius: '6px',
     padding: '8px 10px',
     fontSize: '13px',
@@ -285,7 +285,7 @@ const styles: Record<string, React.CSSProperties> = {
   textarea: {
     backgroundColor: '#161616',
     color: '#e0e0e0',
-    border: '1px solid rgba(212, 168, 67, 0.10)',
+    border: '1px solid rgba(129, 140, 248, 0.10)',
     borderRadius: '6px',
     padding: '8px 10px',
     fontSize: '13px',
@@ -322,7 +322,7 @@ const styles: Record<string, React.CSSProperties> = {
     padding: '3px 0',
   },
   checkbox: {
-    accentColor: '#D4A843',
+    accentColor: '#818CF8',
     width: '14px',
     height: '14px',
     cursor: 'pointer',
@@ -333,8 +333,8 @@ const styles: Record<string, React.CSSProperties> = {
     cursor: 'pointer',
   },
   sendButton: {
-    backgroundColor: '#D4A843',
-    color: '#0A0A0A',
+    backgroundColor: '#818CF8',
+    color: '#FFFFFF',
     border: 'none',
     borderRadius: '8px',
     padding: '10px 16px',
@@ -350,7 +350,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   divider: {
     border: 'none',
-    borderTop: '1px solid rgba(212, 168, 67, 0.10)',
+    borderTop: '1px solid rgba(129, 140, 248, 0.10)',
     margin: '4px 0',
   },
   // Center column
@@ -362,7 +362,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   centerHeader: {
     padding: '12px 16px',
-    borderBottom: '1px solid rgba(212, 168, 67, 0.10)',
+    borderBottom: '1px solid rgba(129, 140, 248, 0.10)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -402,7 +402,7 @@ const styles: Record<string, React.CSSProperties> = {
   traceLine: {
     width: '2px',
     flex: 1,
-    backgroundColor: 'rgba(212, 168, 67, 0.10)',
+    backgroundColor: 'rgba(129, 140, 248, 0.10)',
     minHeight: '12px',
   },
   traceContent: {
@@ -451,7 +451,7 @@ const styles: Record<string, React.CSSProperties> = {
   // Right column
   rightPanel: {
     backgroundColor: '#0A0A0A',
-    borderLeft: '1px solid rgba(212, 168, 67, 0.10)',
+    borderLeft: '1px solid rgba(129, 140, 248, 0.10)',
     padding: '16px',
     overflowY: 'auto',
     display: 'flex',
@@ -658,7 +658,7 @@ const TestConsole: React.FC = () => {
               <button
                 style={{
                   ...styles.toggle,
-                  backgroundColor: useManagedIdentity ? '#D4A843' : '#333',
+                  backgroundColor: useManagedIdentity ? '#818CF8' : '#333',
                 }}
                 onClick={() => setUseManagedIdentity(!useManagedIdentity)}
                 aria-label="Toggle managed identity"
@@ -687,8 +687,8 @@ const TestConsole: React.FC = () => {
             )}
             {useManagedIdentity && (
               <div style={{
-                backgroundColor: 'rgba(212, 168, 67, 0.08)',
-                border: '1px solid rgba(212, 168, 67, 0.15)',
+                backgroundColor: 'rgba(129, 140, 248, 0.08)',
+                border: '1px solid rgba(129, 140, 248, 0.15)',
                 borderRadius: '6px',
                 padding: '8px 10px',
                 fontSize: '12px',

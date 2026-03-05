@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom'
 const colors = {
   bg: '#0A0A0A',
   card: '#161616',
-  border: 'rgba(212, 168, 67, 0.10)',
+  border: 'rgba(129, 140, 248, 0.10)',
   text: '#E8E8E8',
   textMuted: '#999',
   textDim: '#666',
@@ -14,9 +14,9 @@ const colors = {
   amber: '#F59E0B',
   red: '#EF4444',
   blue: '#60A5FA',
-  gold: '#D4A843',
-  goldDim: '#B8923A',
-  goldMuted: 'rgba(212, 168, 67, 0.15)',
+  gold: '#818CF8',
+  goldDim: '#6366F1',
+  goldMuted: 'rgba(129, 140, 248, 0.15)',
   purple: '#A78BFA',
   cyan: '#22D3EE',
 }
@@ -129,7 +129,7 @@ export default function GovernanceDashboard() {
               }}
               onMouseEnter={e => {
                 e.currentTarget.style.background = colors.gold
-                e.currentTarget.style.color = '#0A0A0A'
+                e.currentTarget.style.color = '#FFFFFF'
                 e.currentTarget.style.borderColor = colors.gold
                 e.currentTarget.style.transform = 'translateY(-1px)'
                 e.currentTarget.style.boxShadow = `0 4px 16px ${colors.gold}40`

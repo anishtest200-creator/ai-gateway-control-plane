@@ -6,7 +6,7 @@ import type { CSSProperties } from 'react';
 const colors = {
   bg: '#0A0A0A',
   card: '#161616',
-  border: 'rgba(212, 168, 67, 0.10)',
+  border: 'rgba(129, 140, 248, 0.10)',
   text: '#E8E8E8',
   textMuted: '#999',
   textDim: '#666',
@@ -14,9 +14,9 @@ const colors = {
   amber: '#F59E0B',
   red: '#EF4444',
   blue: '#60A5FA',
-  gold: '#D4A843',
-  goldDim: '#B8923A',
-  goldMuted: 'rgba(212, 168, 67, 0.15)',
+  gold: '#818CF8',
+  goldDim: '#6366F1',
+  goldMuted: 'rgba(129, 140, 248, 0.15)',
   purple: '#A78BFA',
 };
 
@@ -385,7 +385,7 @@ const Observability: React.FC = () => {
     return { namespace: ns, total };
   });
   const nsMax = Math.max(...nsUsage.map((n) => n.total));
-  const nsColors = ['#D4A843', '#B8923A', '#d4875e', '#9b59b6', '#ff9900'];
+  const nsColors = ['#818CF8', '#6366F1', '#d4875e', '#9b59b6', '#ff9900'];
 
   const totalBudget = budgetData.reduce((s, b) => s + (budgetEdits[b.namespace] ?? b.budget), 0);
   const totalSpent = budgetData.reduce((s, b) => s + b.spent, 0);
@@ -572,7 +572,7 @@ const Observability: React.FC = () => {
                     <span style={{ color: colors.text }}>{p.label}</span>
                     <span style={{ color: colors.textMuted }}>{p.pct}% · {p.value}</span>
                   </div>
-                  <div style={{ height: 6, backgroundColor: 'rgba(212,168,67,0.06)', borderRadius: 3, overflow: 'hidden' }}>
+                  <div style={{ height: 6, backgroundColor: 'rgba(129, 140, 248,0.06)', borderRadius: 3, overflow: 'hidden' }}>
                     <div style={{ height: '100%', width: `${p.pct}%`, backgroundColor: p.color, borderRadius: 3 }} />
                   </div>
                 </div>
@@ -592,7 +592,7 @@ const Observability: React.FC = () => {
                     <span style={{ color: colors.text }}>{e.label}</span>
                     <span style={{ color: colors.textMuted }}>{e.value}</span>
                   </div>
-                  <div style={{ height: 6, backgroundColor: 'rgba(212,168,67,0.06)', borderRadius: 3, overflow: 'hidden' }}>
+                  <div style={{ height: 6, backgroundColor: 'rgba(129, 140, 248,0.06)', borderRadius: 3, overflow: 'hidden' }}>
                     <div style={{ height: '100%', width: `${Math.max(e.pct, 1.5)}%`, backgroundColor: e.color, borderRadius: 3 }} />
                   </div>
                 </div>
@@ -646,7 +646,7 @@ const Observability: React.FC = () => {
                         </td>
                         <td style={{ ...tdStyle, textAlign: 'right' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'flex-end' }}>
-                            <div style={{ width: 80, height: 6, backgroundColor: 'rgba(212,168,67,0.06)', borderRadius: 3, overflow: 'hidden', display: 'flex' }}>
+                            <div style={{ width: 80, height: 6, backgroundColor: 'rgba(129, 140, 248,0.06)', borderRadius: 3, overflow: 'hidden', display: 'flex' }}>
                               <div style={{ width: `${inPct}%`, backgroundColor: colors.gold, borderRadius: '3px 0 0 3px' }} />
                               <div style={{ flex: 1, backgroundColor: colors.goldDim, borderRadius: '0 3px 3px 0' }} />
                             </div>
@@ -672,7 +672,7 @@ const Observability: React.FC = () => {
                     <span style={{ width: 130, textAlign: 'right', fontSize: 12, fontWeight: 600, color: colors.text, flexShrink: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {ns.namespace}
                     </span>
-                    <div style={{ flex: 1, height: 18, backgroundColor: 'rgba(212,168,67,0.06)', borderRadius: 4, overflow: 'hidden', position: 'relative' }}>
+                    <div style={{ flex: 1, height: 18, backgroundColor: 'rgba(129, 140, 248,0.06)', borderRadius: 4, overflow: 'hidden', position: 'relative' }}>
                       <div style={{
                         height: '100%', width: `${pct}%`, backgroundColor: nsColors[i % nsColors.length],
                         borderRadius: 4, transition: 'width 0.4s ease',
@@ -758,7 +758,7 @@ const Observability: React.FC = () => {
                   key={a.id}
                   style={{
                     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                    backgroundColor: 'rgba(212,168,67,0.04)',
+                    backgroundColor: 'rgba(129, 140, 248,0.04)',
                     borderLeft: `4px solid ${a.borderColor}`, borderRadius: 6, padding: '10px 14px',
                   }}
                 >
@@ -785,7 +785,7 @@ const Observability: React.FC = () => {
                 const costPct = totalCost > 0 ? (m.cost / totalCost) * 100 : 0;
                 const costPerToken = m.totalTokens > 0 ? (m.cost / m.totalTokens) * 1000 : 0;
                 return (
-                  <div key={m.modelId} style={{ backgroundColor: 'rgba(212,168,67,0.04)', border: `1px solid ${colors.border}`, borderRadius: 8, padding: 14 }}>
+                  <div key={m.modelId} style={{ backgroundColor: 'rgba(129, 140, 248,0.04)', border: `1px solid ${colors.border}`, borderRadius: 8, padding: 14 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
                       <span style={{ color: '#fff', fontSize: 13, fontWeight: 600 }}>{m.modelName}</span>
                       <span style={{ fontSize: 10, fontWeight: 600, color: pColor, backgroundColor: `${pColor}1a`, padding: '2px 8px', borderRadius: 4 }}>{m.provider}</span>
@@ -794,7 +794,7 @@ const Observability: React.FC = () => {
                       <span style={{ fontSize: 11, color: colors.textMuted }}>{costPct.toFixed(1)}% of total spend</span>
                       <span style={{ color: '#fff', fontWeight: 700, fontSize: 18 }}>{formatCost(m.cost * mult)}</span>
                     </div>
-                    <div style={{ height: 6, backgroundColor: 'rgba(212,168,67,0.06)', borderRadius: 3, overflow: 'hidden', marginBottom: 10 }}>
+                    <div style={{ height: 6, backgroundColor: 'rgba(129, 140, 248,0.06)', borderRadius: 3, overflow: 'hidden', marginBottom: 10 }}>
                       <div style={{ height: '100%', width: `${costPct}%`, backgroundColor: pColor, borderRadius: 3, transition: 'width 0.4s ease' }} />
                     </div>
                     <div style={{ display: 'flex', gap: 12, fontSize: 11, color: colors.textMuted }}>
@@ -923,7 +923,7 @@ const Observability: React.FC = () => {
                             <span style={{ fontSize: 12, fontWeight: 600, color: quotaColor, minWidth: 36, textAlign: 'right' }}>
                               {quotaPct.toFixed(0)}%
                             </span>
-                            <div style={{ width: 50, height: 5, backgroundColor: 'rgba(212,168,67,0.06)', borderRadius: 3, overflow: 'hidden' }}>
+                            <div style={{ width: 50, height: 5, backgroundColor: 'rgba(129, 140, 248,0.06)', borderRadius: 3, overflow: 'hidden' }}>
                               <div style={{ height: '100%', width: `${quotaPct}%`, backgroundColor: quotaColor, borderRadius: 3 }} />
                             </div>
                           </div>
@@ -970,7 +970,7 @@ const Observability: React.FC = () => {
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                       <span style={{ fontSize: 14, fontWeight: 600, color: '#fff' }}>{b.namespace}</span>
-                      <span style={{ fontSize: 9, fontWeight: 600, color: colors.textMuted, backgroundColor: 'rgba(212,168,67,0.10)', padding: '1px 6px', borderRadius: 3 }}>
+                      <span style={{ fontSize: 9, fontWeight: 600, color: colors.textMuted, backgroundColor: 'rgba(129, 140, 248,0.10)', padding: '1px 6px', borderRadius: 3 }}>
                         {b.env}
                       </span>
                     </div>
@@ -1013,7 +1013,7 @@ const Observability: React.FC = () => {
                     <span style={{ fontSize: 11, color: barColor, fontWeight: 600 }}>{pct}%</span>
                   </div>
 
-                  <div style={{ height: 8, backgroundColor: 'rgba(212,168,67,0.06)', borderRadius: 4, overflow: 'hidden', marginBottom: 10 }}>
+                  <div style={{ height: 8, backgroundColor: 'rgba(129, 140, 248,0.06)', borderRadius: 4, overflow: 'hidden', marginBottom: 10 }}>
                     <div style={{ height: '100%', width: `${Math.min(pct, 100)}%`, backgroundColor: barColor, borderRadius: 4, transition: 'width 0.4s ease' }} />
                   </div>
 
@@ -1045,7 +1045,7 @@ const Observability: React.FC = () => {
                   key={a.id}
                   style={{
                     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                    backgroundColor: 'rgba(212,168,67,0.04)',
+                    backgroundColor: 'rgba(129, 140, 248,0.04)',
                     borderLeft: `4px solid ${a.borderColor}`, borderRadius: 6, padding: '10px 14px',
                   }}
                 >

@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 const colors = {
   bg: '#0A0A0A',
   card: '#161616',
-  border: 'rgba(212, 168, 67, 0.10)',
+  border: 'rgba(129, 140, 248, 0.10)',
   text: '#E8E8E8',
   textMuted: '#999',
   textDim: '#666',
@@ -15,9 +15,9 @@ const colors = {
   amber: '#F59E0B',
   red: '#EF4444',
   blue: '#60A5FA',
-  gold: '#D4A843',
-  goldDim: '#B8923A',
-  goldMuted: 'rgba(212, 168, 67, 0.15)',
+  gold: '#818CF8',
+  goldDim: '#6366F1',
+  goldMuted: 'rgba(129, 140, 248, 0.15)',
   purple: '#A78BFA',
 };
 
@@ -51,7 +51,7 @@ const tdStyle: CSSProperties = {
 const inputStyle: CSSProperties = {
   backgroundColor: '#1A1A1A',
   color: '#ccc',
-  border: '1px solid rgba(212, 168, 67, 0.10)',
+  border: '1px solid rgba(129, 140, 248, 0.10)',
   borderRadius: 6,
   padding: '6px 10px',
   fontSize: 13,
@@ -279,7 +279,7 @@ const Logs: React.FC = () => {
           style={{
             padding: '6px 14px',
             borderRadius: 6,
-            border: '1px solid rgba(212, 168, 67, 0.10)',
+            border: '1px solid rgba(129, 140, 248, 0.10)',
             backgroundColor: '#1A1A1A',
             color: '#ccc',
             fontSize: 13,
@@ -299,9 +299,9 @@ const Logs: React.FC = () => {
           style={{
             padding: '6px 14px',
             borderRadius: 6,
-            border: '1px solid rgba(212, 168, 67, 0.30)',
-            backgroundColor: 'rgba(212, 168, 67, 0.1)',
-            color: '#D4A843',
+            border: '1px solid rgba(129, 140, 248, 0.30)',
+            backgroundColor: 'rgba(129, 140, 248, 0.1)',
+            color: '#818CF8',
             fontSize: 13,
             fontWeight: 600,
             fontFamily: 'inherit',
@@ -379,7 +379,7 @@ const Logs: React.FC = () => {
                           fontSize: 11,
                           fontWeight: 600,
                           fontFamily: 'monospace',
-                          border: '1px solid rgba(212, 168, 67, 0.10)',
+                          border: '1px solid rgba(129, 140, 248, 0.10)',
                           color: colors.textMuted,
                         }}
                       >
@@ -429,7 +429,7 @@ const Logs: React.FC = () => {
 
       {/* ── detail panel (slide-in overlay) ─────────────────────────── */}
       {selected && (
-        <div style={{ position: 'fixed', top: 0, right: 0, bottom: 0, width: 420, backgroundColor: '#1A1A1A', borderLeft: '1px solid rgba(212, 168, 67, 0.10)', zIndex: 1000, overflowY: 'auto', padding: 24, display: 'flex', flexDirection: 'column', gap: 16, boxShadow: '-4px 0 20px rgba(0,0,0,0.5)' }}>
+        <div style={{ position: 'fixed', top: 0, right: 0, bottom: 0, width: 420, backgroundColor: '#1A1A1A', borderLeft: '1px solid rgba(129, 140, 248, 0.10)', zIndex: 1000, overflowY: 'auto', padding: 24, display: 'flex', flexDirection: 'column', gap: 16, boxShadow: '-4px 0 20px rgba(0,0,0,0.5)' }}>
           {/* close */}
           <button onClick={() => { setSelectedId(null); setReqBodyOpen(false); setResBodyOpen(false); }} style={{ position: 'absolute', top: 16, right: 16, background: 'none', border: 'none', color: colors.textMuted, fontSize: 20, cursor: 'pointer', padding: '0 4px', fontFamily: 'inherit', lineHeight: 1 }}>✕</button>
 
@@ -501,7 +501,7 @@ const Logs: React.FC = () => {
 
       {/* ── toast ─────────────────────────────────────────────────────── */}
       {showToast && (
-        <div style={{ position: 'fixed', bottom: 24, right: 24, backgroundColor: '#1A1A1A', border: '1px solid rgba(212, 168, 67, 0.30)', borderRadius: 8, padding: '12px 20px', color: colors.gold, fontSize: 13, fontWeight: 600, zIndex: 2000, boxShadow: '0 4px 16px rgba(0,0,0,0.4)' }}>
+        <div style={{ position: 'fixed', bottom: 24, right: 24, backgroundColor: '#1A1A1A', border: '1px solid rgba(129, 140, 248, 0.30)', borderRadius: 8, padding: '12px 20px', color: colors.gold, fontSize: 13, fontWeight: 600, zIndex: 2000, boxShadow: '0 4px 16px rgba(0,0,0,0.4)' }}>
           Audit log exported to CSV
         </div>
       )}

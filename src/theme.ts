@@ -1,7 +1,7 @@
 /**
  * Shared design system for Azure AI Gateway
  *
- * Black + Gold "fire" palette — governance-first, premium feel.
+ * Black + Indigo palette — modern, enterprise-grade, universally appealing.
  * Every page imports from here. No more per-file color definitions.
  */
 import type { CSSProperties } from 'react'
@@ -19,21 +19,21 @@ export const colors = {
   surface: '#1E1E1E',
 
   // Borders
-  border: 'rgba(212, 168, 67, 0.10)',
+  border: 'rgba(129, 140, 248, 0.12)',
   borderSubtle: 'rgba(255, 255, 255, 0.06)',
 
-  // Gold accent family (the "fire")
-  gold: '#D4A843',
-  goldBright: '#E5B94B',
-  goldDim: '#B8923A',
-  goldMuted: 'rgba(212, 168, 67, 0.15)',
-  goldSubtle: 'rgba(212, 168, 67, 0.08)',
+  // Indigo accent family
+  gold: '#818CF8',
+  goldBright: '#A5B4FC',
+  goldDim: '#6366F1',
+  goldMuted: 'rgba(129, 140, 248, 0.15)',
+  goldSubtle: 'rgba(129, 140, 248, 0.08)',
 
   // Text
   text: '#E8E8E8',
   textSecondary: '#999',
   textDim: '#666',
-  textGold: '#D4A843',
+  textGold: '#818CF8',
 
   // Semantic
   green: '#4ADE80',
@@ -96,7 +96,7 @@ export const tdStyle: CSSProperties = {
 
 export const primaryBtn: CSSProperties = {
   backgroundColor: colors.gold,
-  color: '#0A0A0A',
+  color: '#FFFFFF',
   border: 'none',
   borderRadius: 6,
   padding: '7px 18px',

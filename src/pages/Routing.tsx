@@ -135,9 +135,9 @@ const initialGroups: RouteGroup[] = [
 
 /* ── Styles ── */
 const colors = {
-  gold: '#D4A843',
+  gold: '#818CF8',
   card: '#161616',
-  border: 'rgba(212, 168, 67, 0.10)',
+  border: 'rgba(129, 140, 248, 0.10)',
   text: '#E8E8E8',
   textMuted: '#999',
   green: '#4ADE80',
@@ -157,7 +157,7 @@ const card: React.CSSProperties = {
 const inputStyle: React.CSSProperties = {
   width: '100%',
   backgroundColor: '#0F0F0F',
-  border: '1px solid rgba(212,168,67,0.15)',
+  border: '1px solid rgba(129, 140, 248,0.15)',
   color: colors.text,
   padding: '8px 12px',
   borderRadius: 6,
@@ -294,7 +294,7 @@ const Routing: React.FC = () => {
 
       {/* ── Action Bar ── */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-        <button onClick={openCreate} style={{ backgroundColor: colors.gold, color: '#0A0A0A', border: 'none', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
+        <button onClick={openCreate} style={{ backgroundColor: colors.gold, color: '#FFFFFF', border: 'none', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
           + Create Route
         </button>
         <input
@@ -439,7 +439,7 @@ const Routing: React.FC = () => {
                             <span>{ep.provider} ({ep.region})</span>
                             <span style={{ fontWeight: 600 }}>{ep.weight}%</span>
                           </div>
-                          <div style={{ height: 5, backgroundColor: 'rgba(212,168,67,0.06)', borderRadius: 3, overflow: 'hidden' }}>
+                          <div style={{ height: 5, backgroundColor: 'rgba(129, 140, 248,0.06)', borderRadius: 3, overflow: 'hidden' }}>
                             <div style={{ width: `${ep.weight}%`, height: '100%', backgroundColor: providerColors[ep.provider] || colors.gold, borderRadius: 3 }} />
                           </div>
                         </div>
@@ -560,7 +560,7 @@ const Routing: React.FC = () => {
                         style={{
                           padding: '10px 12px', borderRadius: 8, cursor: 'pointer',
                           backgroundColor: formStrategy === key ? `${meta.color}15` : '#0F0F0F',
-                          border: `1px solid ${formStrategy === key ? meta.color : 'rgba(212,168,67,0.10)'}`,
+                          border: `1px solid ${formStrategy === key ? meta.color : 'rgba(129, 140, 248,0.10)'}`,
                           transition: 'all 0.15s',
                         }}
                       >
@@ -783,7 +783,7 @@ const Routing: React.FC = () => {
                     onClick={handleSave}
                     disabled={formEndpoints.length === 0 || formEndpoints.some(ep => !ep.region)}
                     style={{
-                      backgroundColor: colors.gold, color: '#0A0A0A', border: 'none', borderRadius: 6,
+                      backgroundColor: colors.gold, color: '#FFFFFF', border: 'none', borderRadius: 6,
                       padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
                     }}
                   >{editingId ? 'Save Changes' : 'Create Route'}</button>

@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom'
 const colors = {
   bg: '#0A0A0A',
   card: '#161616',
-  border: 'rgba(212, 168, 67, 0.10)',
+  border: 'rgba(129, 140, 248, 0.10)',
   text: '#E8E8E8',
   textMuted: '#999',
   textDim: '#666',
@@ -14,9 +14,9 @@ const colors = {
   amber: '#F59E0B',
   red: '#EF4444',
   blue: '#60A5FA',
-  gold: '#D4A843',
-  goldDim: '#B8923A',
-  goldMuted: 'rgba(212, 168, 67, 0.15)',
+  gold: '#818CF8',
+  goldDim: '#6366F1',
+  goldMuted: 'rgba(129, 140, 248, 0.15)',
   purple: '#A78BFA',
 }
 
@@ -243,7 +243,7 @@ const Compliance: React.FC = () => {
               borderRadius: 6,
               border: 'none',
               backgroundColor: colors.gold,
-              color: '#0A0A0A',
+              color: '#FFFFFF',
               fontWeight: 600,
               fontSize: 13,
               cursor: 'pointer',
@@ -280,7 +280,7 @@ const Compliance: React.FC = () => {
               padding: '7px 16px',
               borderRadius: 6,
               border: activeFramework === f.key ? `1px solid ${colors.gold}` : `1px solid ${colors.border}`,
-              backgroundColor: activeFramework === f.key ? 'rgba(212, 168, 67, 0.15)' : 'transparent',
+              backgroundColor: activeFramework === f.key ? 'rgba(129, 140, 248, 0.15)' : 'transparent',
               color: activeFramework === f.key ? colors.gold : colors.textMuted,
               fontWeight: 600,
               fontSize: 13,
@@ -310,7 +310,7 @@ const Compliance: React.FC = () => {
         </div>
 
         {/* progress bar */}
-        <div style={{ width: '100%', height: 8, backgroundColor: 'rgba(212, 168, 67, 0.06)', borderRadius: 4, overflow: 'hidden', marginBottom: 14 }}>
+        <div style={{ width: '100%', height: 8, backgroundColor: 'rgba(129, 140, 248, 0.06)', borderRadius: 4, overflow: 'hidden', marginBottom: 14 }}>
           <div style={{ width: `${score.pct}%`, height: '100%', backgroundColor: barColor(score.pct), borderRadius: 4, transition: 'width 0.3s' }} />
         </div>
 
@@ -375,7 +375,7 @@ const Compliance: React.FC = () => {
                       onMouseLeave={() => setHoveredRow(null)}
                       style={{
                         borderBottom: `1px solid ${colors.border}`,
-                        backgroundColor: isHovered ? 'rgba(212, 168, 67, 0.04)' : 'transparent',
+                        backgroundColor: isHovered ? 'rgba(129, 140, 248, 0.04)' : 'transparent',
                         transition: 'background-color 0.15s',
                       }}
                     >
@@ -450,7 +450,7 @@ const Compliance: React.FC = () => {
                 padding: '11px 16px',
                 borderBottom: idx < complianceEvents.length - 1 ? `1px solid ${colors.border}` : 'none',
                 cursor: 'pointer',
-                backgroundColor: isHovered ? 'rgba(212, 168, 67, 0.04)' : 'transparent',
+                backgroundColor: isHovered ? 'rgba(129, 140, 248, 0.04)' : 'transparent',
                 transition: 'background-color 0.15s',
               }}
             >
@@ -515,7 +515,7 @@ const Compliance: React.FC = () => {
       </div>
     </div>
       {compToast && (
-        <div style={{ position: 'fixed', bottom: 24, right: 24, backgroundColor: '#1A1A1A', border: '1px solid #D4A843', borderRadius: 8, padding: '12px 20px', color: '#D4A843', fontSize: 13, fontWeight: 600, zIndex: 1001, boxShadow: '0 4px 12px rgba(0,0,0,0.5)' }}>
+        <div style={{ position: 'fixed', bottom: 24, right: 24, backgroundColor: '#1A1A1A', border: '1px solid #818CF8', borderRadius: 8, padding: '12px 20px', color: '#818CF8', fontSize: 13, fontWeight: 600, zIndex: 1001, boxShadow: '0 4px 12px rgba(0,0,0,0.5)' }}>
           {compToast}
         </div>
       )}

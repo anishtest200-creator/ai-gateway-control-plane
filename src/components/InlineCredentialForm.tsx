@@ -8,7 +8,7 @@ interface InlineCredentialFormProps {
 
 const formWrap: CSSProperties = {
   backgroundColor: '#1a1a1a',
-  border: '1px solid rgba(212,168,67,0.25)',
+  border: '1px solid rgba(129, 140, 248,0.25)',
   borderRadius: 8,
   padding: 16,
   marginTop: 8,
@@ -17,7 +17,7 @@ const formWrap: CSSProperties = {
 const fieldGroup: CSSProperties = { marginBottom: 12 };
 const labelStyle: CSSProperties = { color: '#999', fontSize: 12, marginBottom: 4, display: 'block' };
 const inputStyle: CSSProperties = {
-  width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)',
+  width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(129, 140, 248,0.15)',
   color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit',
   boxSizing: 'border-box' as const,
 };
@@ -39,7 +39,7 @@ export default function InlineCredentialForm({ onSave, onCancel }: InlineCredent
 
   return (
     <div style={formWrap}>
-      <div style={{ fontSize: 13, fontWeight: 600, color: '#D4A843', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
+      <div style={{ fontSize: 13, fontWeight: 600, color: '#818CF8', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
         🔑 Create New Credential
       </div>
 
@@ -82,14 +82,14 @@ export default function InlineCredentialForm({ onSave, onCancel }: InlineCredent
       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 4 }}>
         <button
           onClick={onCancel}
-          style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(212,168,67,0.10)', borderRadius: 6, padding: '6px 14px', fontSize: 12, cursor: 'pointer', fontFamily: 'inherit' }}
+          style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(129, 140, 248,0.10)', borderRadius: 6, padding: '6px 14px', fontSize: 12, cursor: 'pointer', fontFamily: 'inherit' }}
         >
           Cancel
         </button>
         <button
           onClick={() => canSave && onSave(name.trim())}
           style={{
-            backgroundColor: canSave ? '#D4A843' : '#555', color: canSave ? '#0A0A0A' : '#999',
+            backgroundColor: canSave ? '#818CF8' : '#555', color: canSave ? '#0A0A0A' : '#999',
             border: 'none', borderRadius: 6, padding: '6px 14px', fontSize: 12, fontWeight: 600,
             cursor: canSave ? 'pointer' : 'not-allowed', fontFamily: 'inherit',
           }}

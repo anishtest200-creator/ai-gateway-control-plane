@@ -268,7 +268,7 @@ const assetTypeEmoji: Record<string, string> = {
 const card: CSSProperties = {
   backgroundColor: '#161616',
   borderRadius: 8,
-  border: '1px solid rgba(212, 168, 67, 0.10)',
+  border: '1px solid rgba(129, 140, 248, 0.10)',
   padding: 20,
 };
 
@@ -426,7 +426,7 @@ const Credentials: React.FC = () => {
     };
 
     const impactStats = [
-      { label: 'Dependent Assets', value: d.assets.length, color: '#D4A843' },
+      { label: 'Dependent Assets', value: d.assets.length, color: '#818CF8' },
       { label: 'Active Routes', value: d.routes.length, color: '#A78BFA' },
       { label: 'Namespaces', value: d.namespaces.length, color: '#4ADE80' },
       { label: 'Requests (24h)', value: formatRequests(d.requests24h), color: '#F59E0B' },
@@ -439,7 +439,7 @@ const Credentials: React.FC = () => {
           <button
             onClick={() => setSelectedCredential(null)}
             style={{
-              background: 'none', border: 'none', color: '#D4A843', cursor: 'pointer',
+              background: 'none', border: 'none', color: '#818CF8', cursor: 'pointer',
               fontSize: 14, fontWeight: 500, padding: 0, display: 'flex', alignItems: 'center', gap: 6,
             }}
           >
@@ -466,7 +466,7 @@ const Credentials: React.FC = () => {
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
           <button
             onClick={() => { setRotateMsg('Credential rotated successfully ✓'); setTimeout(() => setRotateMsg(null), 2000); }}
-            style={{ backgroundColor: 'transparent', color: '#D4A843', border: '1px solid #D4A843', borderRadius: 6, padding: '6px 16px', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}
+            style={{ backgroundColor: 'transparent', color: '#818CF8', border: '1px solid #818CF8', borderRadius: 6, padding: '6px 16px', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}
           >Rotate</button>
           <button
             onClick={() => { if (confirm('Revoke this credential?')) { setCredList(prev => prev.map(c => c.name === selectedCredential.name ? { ...c, status: 'revoked' as const } : c)); setSelectedCredential(null); } }}
@@ -474,7 +474,7 @@ const Credentials: React.FC = () => {
           >Revoke</button>
           <button
             onClick={openEditScope}
-            style={{ backgroundColor: 'transparent', color: '#D4A843', border: '1px solid #D4A843', borderRadius: 6, padding: '6px 16px', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}
+            style={{ backgroundColor: 'transparent', color: '#818CF8', border: '1px solid #818CF8', borderRadius: 6, padding: '6px 16px', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}
           >Edit Scope</button>
           {rotateMsg && <span style={{ color: '#4ADE80', fontSize: 13 }}>{rotateMsg}</span>}
         </div>
@@ -494,7 +494,7 @@ const Credentials: React.FC = () => {
 
         {/* Dependent Assets */}
         <div style={{ ...card, padding: 0, overflow: 'hidden' }}>
-          <div style={{ padding: '16px 20px', borderBottom: '1px solid rgba(212, 168, 67, 0.10)', fontWeight: 600, fontSize: 14 }}>
+          <div style={{ padding: '16px 20px', borderBottom: '1px solid rgba(129, 140, 248, 0.10)', fontWeight: 600, fontSize: 14 }}>
             Dependent Assets
           </div>
           {d.assets.length === 0 ? (
@@ -507,7 +507,7 @@ const Credentials: React.FC = () => {
                   onClick={() => navigate('/assets')}
                   style={{
                     display: 'flex', alignItems: 'center', gap: 12, padding: '12px 20px',
-                    borderBottom: i < d.assets.length - 1 ? '1px solid rgba(212, 168, 67, 0.06)' : 'none',
+                    borderBottom: i < d.assets.length - 1 ? '1px solid rgba(129, 140, 248, 0.06)' : 'none',
                     cursor: 'pointer', transition: 'background-color 0.15s',
                   }}
                   onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.backgroundColor = '#1E1E1E'; }}
@@ -527,7 +527,7 @@ const Credentials: React.FC = () => {
 
         {/* Routing Rules */}
         <div style={{ ...card, padding: 0, overflow: 'hidden' }}>
-          <div style={{ padding: '16px 20px', borderBottom: '1px solid rgba(212, 168, 67, 0.10)', fontWeight: 600, fontSize: 14 }}>
+          <div style={{ padding: '16px 20px', borderBottom: '1px solid rgba(129, 140, 248, 0.10)', fontWeight: 600, fontSize: 14 }}>
             Routing Rules
           </div>
           {d.routes.length === 0 ? (
@@ -540,13 +540,13 @@ const Credentials: React.FC = () => {
                   onClick={() => navigate('/routing')}
                   style={{
                     display: 'flex', alignItems: 'center', gap: 12, padding: '12px 20px',
-                    borderBottom: i < d.routes.length - 1 ? '1px solid rgba(212, 168, 67, 0.06)' : 'none',
+                    borderBottom: i < d.routes.length - 1 ? '1px solid rgba(129, 140, 248, 0.06)' : 'none',
                     cursor: 'pointer', transition: 'background-color 0.15s',
                   }}
                   onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.backgroundColor = '#1E1E1E'; }}
                   onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.backgroundColor = 'transparent'; }}
                 >
-                  <code style={{ color: '#D4A843', fontSize: 13, flex: 1, fontFamily: 'monospace' }}>{route.pattern}</code>
+                  <code style={{ color: '#818CF8', fontSize: 13, flex: 1, fontFamily: 'monospace' }}>{route.pattern}</code>
                   <span style={{
                     backgroundColor: '#1E1E1E', padding: '2px 8px', borderRadius: 4, fontSize: 11, color: '#A78BFA',
                   }}>{route.strategy}</span>
@@ -562,7 +562,7 @@ const Credentials: React.FC = () => {
 
         {/* Access Audit */}
         <div style={{ ...card, padding: 0, overflow: 'hidden' }}>
-          <div style={{ padding: '16px 20px', borderBottom: '1px solid rgba(212, 168, 67, 0.10)', fontWeight: 600, fontSize: 14 }}>
+          <div style={{ padding: '16px 20px', borderBottom: '1px solid rgba(129, 140, 248, 0.10)', fontWeight: 600, fontSize: 14 }}>
             Recent Access (Last 24h)
           </div>
           {d.recentAccess.length === 0 ? (
@@ -571,7 +571,7 @@ const Credentials: React.FC = () => {
             <div style={{ overflowX: 'auto' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
                 <thead>
-                  <tr style={{ borderBottom: '1px solid rgba(212, 168, 67, 0.10)', color: '#999', textAlign: 'left' }}>
+                  <tr style={{ borderBottom: '1px solid rgba(129, 140, 248, 0.10)', color: '#999', textAlign: 'left' }}>
                     {['Timestamp', 'Method', 'Path', 'Consumer', 'Status', 'Latency'].map((h) => (
                       <th key={h} style={{ padding: '10px 16px', fontWeight: 600, fontSize: 11, whiteSpace: 'nowrap' }}>{h}</th>
                     ))}
@@ -583,7 +583,7 @@ const Credentials: React.FC = () => {
                       key={`${access.timestamp}-${i}`}
                       onClick={() => navigate('/logs')}
                       style={{
-                        borderBottom: '1px solid rgba(212, 168, 67, 0.06)', cursor: 'pointer', transition: 'background-color 0.15s',
+                        borderBottom: '1px solid rgba(129, 140, 248, 0.06)', cursor: 'pointer', transition: 'background-color 0.15s',
                       }}
                       onMouseEnter={(e) => { (e.currentTarget as HTMLTableRowElement).style.backgroundColor = '#1E1E1E'; }}
                       onMouseLeave={(e) => { (e.currentTarget as HTMLTableRowElement).style.backgroundColor = 'transparent'; }}
@@ -592,7 +592,7 @@ const Credentials: React.FC = () => {
                       <td style={{ padding: '8px 16px' }}>
                         <span style={{
                           backgroundColor: access.method === 'GET' ? '#1a3a2a' : access.method === 'POST' ? '#1a2a3a' : '#2a2a1a',
-                          color: access.method === 'GET' ? '#4ADE80' : access.method === 'POST' ? '#D4A843' : '#F59E0B',
+                          color: access.method === 'GET' ? '#4ADE80' : access.method === 'POST' ? '#818CF8' : '#F59E0B',
                           padding: '1px 6px', borderRadius: 3, fontSize: 11, fontWeight: 600, fontFamily: 'monospace',
                         }}>{access.method}</span>
                       </td>
@@ -641,13 +641,13 @@ const Credentials: React.FC = () => {
               }} onClick={() => showCredToast('✓ Credential rotated — all references updated')}>
                 Rotate & Update References
               </button>
-              <span style={{ color: '#D4A843', fontSize: 12 }}>
+              <span style={{ color: '#818CF8', fontSize: 12 }}>
                 Generate new credential and update all {d.assets.length + d.routes.length} reference{(d.assets.length + d.routes.length) !== 1 ? 's' : ''} automatically
               </span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
               <button style={{
-                backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(212, 168, 67, 0.10)', borderRadius: 6,
+                backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(129, 140, 248, 0.10)', borderRadius: 6,
                 padding: '8px 18px', fontWeight: 600, fontSize: 13, cursor: 'pointer', whiteSpace: 'nowrap',
               }} onClick={() => showCredToast(`✓ Alert sent to ${d.namespaces.length} namespace admin${d.namespaces.length !== 1 ? 's' : ''}`)}>
                 Notify Stakeholders
@@ -662,10 +662,10 @@ const Credentials: React.FC = () => {
         {/* Edit Scope Modal */}
         {showEditScope && (
           <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
-            <div style={{ backgroundColor: '#1A1A1A', borderTop: '3px solid #D4A843', borderRadius: 8, padding: 24, width: '100%', maxWidth: 640, border: '1px solid rgba(212, 168, 67, 0.10)', maxHeight: '85vh', overflowY: 'auto' }}>
+            <div style={{ backgroundColor: '#1A1A1A', borderTop: '3px solid #818CF8', borderRadius: 8, padding: 24, width: '100%', maxWidth: 640, border: '1px solid rgba(129, 140, 248, 0.10)', maxHeight: '85vh', overflowY: 'auto' }}>
               <h3 style={{ color: '#fff', fontSize: 16, fontWeight: 600, margin: '0 0 4px' }}>Edit Credential Scope</h3>
               <p style={{ color: '#999', fontSize: 12, margin: '0 0 20px' }}>
-                Configure where <span style={{ color: '#D4A843' }}>{selectedCredential.name}</span> can be used — by namespace, environment, and asset binding.
+                Configure where <span style={{ color: '#818CF8' }}>{selectedCredential.name}</span> can be used — by namespace, environment, and asset binding.
               </p>
 
               {/* Primary Namespace */}
@@ -674,7 +674,7 @@ const Credentials: React.FC = () => {
                 <select
                   value={editScopeData.primaryNamespace}
                   onChange={e => setEditScopeData(prev => ({ ...prev, primaryNamespace: e.target.value }))}
-                  style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit' }}
+                  style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(129, 140, 248,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit' }}
                 >
                   {allNamespaces.map(ns => <option key={ns} value={ns}>{ns}</option>)}
                 </select>
@@ -698,9 +698,9 @@ const Credentials: React.FC = () => {
                             : [...prev.sharedNamespaces, ns],
                         }))}
                         style={{
-                          backgroundColor: isShared ? 'rgba(212,168,67,0.15)' : '#0F0F0F',
-                          border: `1px solid ${isShared ? '#D4A843' : 'rgba(212,168,67,0.10)'}`,
-                          color: isShared ? '#D4A843' : '#999',
+                          backgroundColor: isShared ? 'rgba(129, 140, 248,0.15)' : '#0F0F0F',
+                          border: `1px solid ${isShared ? '#818CF8' : 'rgba(129, 140, 248,0.10)'}`,
+                          color: isShared ? '#818CF8' : '#999',
                           borderRadius: 16, padding: '4px 12px', fontSize: 12, cursor: 'pointer', fontFamily: 'inherit',
                         }}
                       >
@@ -723,9 +723,9 @@ const Credentials: React.FC = () => {
                       key={env}
                       onClick={() => setEditScopeData(prev => ({ ...prev, environment: env }))}
                       style={{
-                        backgroundColor: editScopeData.environment === env ? 'rgba(212,168,67,0.15)' : '#0F0F0F',
-                        border: `1px solid ${editScopeData.environment === env ? '#D4A843' : 'rgba(212,168,67,0.10)'}`,
-                        color: editScopeData.environment === env ? '#D4A843' : '#999',
+                        backgroundColor: editScopeData.environment === env ? 'rgba(129, 140, 248,0.15)' : '#0F0F0F',
+                        border: `1px solid ${editScopeData.environment === env ? '#818CF8' : 'rgba(129, 140, 248,0.10)'}`,
+                        color: editScopeData.environment === env ? '#818CF8' : '#999',
                         borderRadius: 6, padding: '6px 14px', fontSize: 12, cursor: 'pointer', fontFamily: 'inherit', fontWeight: 500,
                       }}
                     >
@@ -766,17 +766,17 @@ const Credentials: React.FC = () => {
                             }}
                             style={{
                               display: 'flex', alignItems: 'center', gap: 10, padding: '6px 12px',
-                              backgroundColor: asset.bound ? 'rgba(212,168,67,0.08)' : '#0F0F0F',
-                              border: `1px solid ${asset.bound ? 'rgba(212,168,67,0.20)' : 'rgba(212,168,67,0.06)'}`,
+                              backgroundColor: asset.bound ? 'rgba(129, 140, 248,0.08)' : '#0F0F0F',
+                              border: `1px solid ${asset.bound ? 'rgba(129, 140, 248,0.20)' : 'rgba(129, 140, 248,0.06)'}`,
                               borderRadius: 6, cursor: 'pointer', transition: 'all 0.15s',
                             }}
                           >
                             <span style={{
                               width: 16, height: 16, borderRadius: 4,
-                              border: `1px solid ${asset.bound ? '#D4A843' : '#555'}`,
-                              backgroundColor: asset.bound ? '#D4A843' : 'transparent',
+                              border: `1px solid ${asset.bound ? '#818CF8' : '#555'}`,
+                              backgroundColor: asset.bound ? '#818CF8' : 'transparent',
                               display: 'flex', alignItems: 'center', justifyContent: 'center',
-                              fontSize: 10, color: '#0A0A0A', fontWeight: 700, flexShrink: 0,
+                              fontSize: 10, color: '#FFFFFF', fontWeight: 700, flexShrink: 0,
                             }}>
                               {asset.bound ? '✓' : ''}
                             </span>
@@ -791,10 +791,10 @@ const Credentials: React.FC = () => {
               </div>
 
               {/* Summary */}
-              <div style={{ backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.10)', borderRadius: 6, padding: 12, marginBottom: 16 }}>
+              <div style={{ backgroundColor: '#0F0F0F', border: '1px solid rgba(129, 140, 248,0.10)', borderRadius: 6, padding: 12, marginBottom: 16 }}>
                 <div style={{ color: '#999', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 }}>Scope Summary</div>
                 <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap', fontSize: 12 }}>
-                  <span style={{ color: '#D4A843' }}>Primary: {editScopeData.primaryNamespace}</span>
+                  <span style={{ color: '#818CF8' }}>Primary: {editScopeData.primaryNamespace}</span>
                   <span style={{ color: '#4ADE80' }}>Shared: {editScopeData.sharedNamespaces.length > 0 ? editScopeData.sharedNamespaces.join(', ') : 'None'}</span>
                   <span style={{ color: '#A78BFA' }}>Env: {editScopeData.environment}</span>
                   <span style={{ color: '#F59E0B' }}>Bound: {editScopeData.assetBindings.filter(a => a.bound).length} assets</span>
@@ -803,15 +803,15 @@ const Credentials: React.FC = () => {
 
               {/* Actions */}
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
-                <button onClick={() => setShowEditScope(false)} style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(212, 168, 67, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>Cancel</button>
-                <button onClick={handleSaveScope} style={{ backgroundColor: '#D4A843', color: '#0A0A0A', border: 'none', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>Save Scope</button>
+                <button onClick={() => setShowEditScope(false)} style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(129, 140, 248, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>Cancel</button>
+                <button onClick={handleSaveScope} style={{ backgroundColor: '#818CF8', color: '#FFFFFF', border: 'none', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>Save Scope</button>
               </div>
             </div>
           </div>
         )}
 
         {credToast && (
-          <div style={{ position: 'fixed', bottom: 24, right: 24, backgroundColor: '#1A1A1A', border: '1px solid #D4A843', borderRadius: 8, padding: '12px 20px', color: '#D4A843', fontSize: 13, fontWeight: 600, zIndex: 1001, boxShadow: '0 4px 12px rgba(0,0,0,0.5)' }}>
+          <div style={{ position: 'fixed', bottom: 24, right: 24, backgroundColor: '#1A1A1A', border: '1px solid #818CF8', borderRadius: 8, padding: '12px 20px', color: '#818CF8', fontSize: 13, fontWeight: 600, zIndex: 1001, boxShadow: '0 4px 12px rgba(0,0,0,0.5)' }}>
             {credToast}
           </div>
         )}
@@ -824,7 +824,7 @@ const Credentials: React.FC = () => {
       {/* Stat cards (matches Access page) */}
       <div style={{ display: 'flex', gap: 14, alignItems: 'stretch' }}>
         {[
-          { label: 'Total Credentials', value: stats[0].value, color: '#D4A843' },
+          { label: 'Total Credentials', value: stats[0].value, color: '#818CF8' },
           { label: 'Healthy', value: stats[1].value, color: '#4ADE80' },
           { label: 'Expiring Soon', value: stats[2].value, color: '#F59E0B' },
           { label: 'Expired', value: stats[3].value, color: '#EF4444' },
@@ -844,7 +844,7 @@ const Credentials: React.FC = () => {
         <button
           onClick={() => setShowAddCredential(true)}
           style={{
-            backgroundColor: '#D4A843', color: '#0A0A0A', border: 'none', borderRadius: 6,
+            backgroundColor: '#818CF8', color: '#FFFFFF', border: 'none', borderRadius: 6,
             padding: '8px 18px', fontWeight: 600, fontSize: 13, cursor: 'pointer', whiteSpace: 'nowrap',
           }}>
           + Add Credential
@@ -853,12 +853,12 @@ const Credentials: React.FC = () => {
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           placeholder="Search credentials..."
-          style={{ flex: 1, minWidth: 180, backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit' }}
+          style={{ flex: 1, minWidth: 180, backgroundColor: '#0F0F0F', border: '1px solid rgba(129, 140, 248,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit' }}
         />
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          style={{ backgroundColor: '#1E1E1E', color: '#ccc', border: '1px solid rgba(212, 168, 67, 0.10)', borderRadius: 6, padding: '8px 12px', fontSize: 13, fontFamily: 'inherit' }}
+          style={{ backgroundColor: '#1E1E1E', color: '#ccc', border: '1px solid rgba(129, 140, 248, 0.10)', borderRadius: 6, padding: '8px 12px', fontSize: 13, fontFamily: 'inherit' }}
         >
           <option value="all">All Status</option>
           <option value="active">Active</option>
@@ -873,7 +873,7 @@ const Credentials: React.FC = () => {
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
             <thead>
-              <tr style={{ borderBottom: '1px solid rgba(212, 168, 67, 0.10)', color: '#999', textAlign: 'left' }}>
+              <tr style={{ borderBottom: '1px solid rgba(129, 140, 248, 0.10)', color: '#999', textAlign: 'left' }}>
                 {['Name', 'Type', 'Namespace', 'Target', 'Status', 'Expires'].map((h) => (
                   <th key={h} style={{ padding: '10px 16px', fontWeight: 600, fontSize: 12, whiteSpace: 'nowrap' }}>{h}</th>
                 ))}
@@ -887,13 +887,13 @@ const Credentials: React.FC = () => {
                   onMouseLeave={() => setHoveredRow(null)}
                   onClick={() => setSelectedCredential(c)}
                   style={{
-                    borderBottom: '1px solid rgba(212, 168, 67, 0.06)',
+                    borderBottom: '1px solid rgba(129, 140, 248, 0.06)',
                     backgroundColor: hoveredRow === i ? '#2d2c2b' : 'transparent',
                     transition: 'background-color 0.15s',
                     cursor: 'pointer',
                   }}
                 >
-                  <td style={{ padding: '10px 16px', fontWeight: 500, color: '#D4A843' }}>{c.name}</td>
+                  <td style={{ padding: '10px 16px', fontWeight: 500, color: '#818CF8' }}>{c.name}</td>
                   <td style={{ padding: '10px 16px' }}>
                     <span style={{ backgroundColor: '#1E1E1E', padding: '2px 8px', borderRadius: 4, fontSize: 12 }}>{c.type}</span>
                   </td>
@@ -917,7 +917,7 @@ const Credentials: React.FC = () => {
       {/* Add Credential Modal */}
       {showAddCredential && (
         <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
-          <div style={{ backgroundColor: '#1A1A1A', borderTop: '3px solid #D4A843', borderRadius: 8, padding: 24, width: '100%', maxWidth: 560, border: '1px solid rgba(212, 168, 67, 0.10)' }}>
+          <div style={{ backgroundColor: '#1A1A1A', borderTop: '3px solid #818CF8', borderRadius: 8, padding: 24, width: '100%', maxWidth: 560, border: '1px solid rgba(129, 140, 248, 0.10)' }}>
             {/* Step indicator */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20 }}>
               {['Details', 'Assign'].map((label, idx) => {
@@ -926,14 +926,14 @@ const Credentials: React.FC = () => {
                 const done = addCredStep > step;
                 return (
                   <React.Fragment key={label}>
-                    {idx > 0 && <div style={{ flex: 1, height: 1, backgroundColor: done ? '#D4A843' : 'rgba(212,168,67,0.15)' }} />}
+                    {idx > 0 && <div style={{ flex: 1, height: 1, backgroundColor: done ? '#818CF8' : 'rgba(129, 140, 248,0.15)' }} />}
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                       <span style={{
                         width: 22, height: 22, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
                         fontSize: 11, fontWeight: 600,
-                        backgroundColor: active ? '#D4A843' : done ? 'rgba(212,168,67,0.25)' : '#1E1E1E',
-                        color: active ? '#0A0A0A' : done ? '#D4A843' : '#666',
-                        border: active ? 'none' : '1px solid rgba(212,168,67,0.15)',
+                        backgroundColor: active ? '#818CF8' : done ? 'rgba(129, 140, 248,0.25)' : '#1E1E1E',
+                        color: active ? '#0A0A0A' : done ? '#818CF8' : '#666',
+                        border: active ? 'none' : '1px solid rgba(129, 140, 248,0.15)',
                       }}>{done ? '✓' : step}</span>
                       <span style={{ fontSize: 12, color: active ? '#fff' : '#888', fontWeight: active ? 600 : 400 }}>{label}</span>
                     </div>
@@ -948,11 +948,11 @@ const Credentials: React.FC = () => {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                   <div>
                     <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Name</label>
-                    <input value={credFormData.name} onChange={e => setCredFormData(f => ({ ...f, name: e.target.value }))} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' as const }} />
+                    <input value={credFormData.name} onChange={e => setCredFormData(f => ({ ...f, name: e.target.value }))} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(129, 140, 248,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' as const }} />
                   </div>
                   <div>
                     <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Type</label>
-                    <select value={credFormData.type} onChange={e => setCredFormData(f => ({ ...f, type: e.target.value }))} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit' }}>
+                    <select value={credFormData.type} onChange={e => setCredFormData(f => ({ ...f, type: e.target.value }))} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(129, 140, 248,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit' }}>
                       <option>API Key</option>
                       <option>OAuth 2.0</option>
                       <option>Managed Identity</option>
@@ -963,11 +963,11 @@ const Credentials: React.FC = () => {
                   </div>
                   <div>
                     <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Provider</label>
-                    <input value={credFormData.provider} onChange={e => setCredFormData(f => ({ ...f, provider: e.target.value }))} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' as const }} />
+                    <input value={credFormData.provider} onChange={e => setCredFormData(f => ({ ...f, provider: e.target.value }))} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(129, 140, 248,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' as const }} />
                   </div>
                   <div>
                     <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Namespace</label>
-                    <select value={credFormData.namespace} onChange={e => setCredFormData(f => ({ ...f, namespace: e.target.value }))} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit' }}>
+                    <select value={credFormData.namespace} onChange={e => setCredFormData(f => ({ ...f, namespace: e.target.value }))} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(129, 140, 248,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit' }}>
                       <option value="ai-platform">ai-platform</option>
                       <option value="ml-inference">ml-inference</option>
                       <option value="customer-support-ai">customer-support-ai</option>
@@ -976,16 +976,16 @@ const Credentials: React.FC = () => {
                   </div>
                   <div>
                     <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Expires</label>
-                    <input type="date" value={credFormData.expires} onChange={e => setCredFormData(f => ({ ...f, expires: e.target.value }))} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' as const }} />
+                    <input type="date" value={credFormData.expires} onChange={e => setCredFormData(f => ({ ...f, expires: e.target.value }))} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(129, 140, 248,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' as const }} />
                   </div>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 20 }}>
-                  <button onClick={() => { setShowAddCredential(false); setAddCredStep(1); setCredAssignments({}); setAssignMode('namespace'); setAssignNsSelections({}); setAssignAssetSearch(''); }} style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(212, 168, 67, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>Cancel</button>
+                  <button onClick={() => { setShowAddCredential(false); setAddCredStep(1); setCredAssignments({}); setAssignMode('namespace'); setAssignNsSelections({}); setAssignAssetSearch(''); }} style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(129, 140, 248, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>Cancel</button>
                   <button
                     disabled={!credFormData.name || !credFormData.provider}
                     onClick={() => setAddCredStep(2)}
                     style={{
-                      backgroundColor: !credFormData.name || !credFormData.provider ? '#555' : '#D4A843',
+                      backgroundColor: !credFormData.name || !credFormData.provider ? '#555' : '#818CF8',
                       color: !credFormData.name || !credFormData.provider ? '#999' : '#0A0A0A',
                       border: 'none', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: !credFormData.name || !credFormData.provider ? 'not-allowed' : 'pointer', fontFamily: 'inherit',
                     }}>
@@ -1009,14 +1009,14 @@ const Credentials: React.FC = () => {
                   </p>
 
                   {/* Mode toggle */}
-                  <div style={{ display: 'flex', gap: 0, marginBottom: 16, borderRadius: 6, overflow: 'hidden', border: '1px solid rgba(212,168,67,0.15)' }}>
+                  <div style={{ display: 'flex', gap: 0, marginBottom: 16, borderRadius: 6, overflow: 'hidden', border: '1px solid rgba(129, 140, 248,0.15)' }}>
                     {([['namespace', 'Namespaces'], ['asset', 'Individual Assets']] as const).map(([mode, label]) => (
                       <button
                         key={mode}
                         onClick={() => setAssignMode(mode)}
                         style={{
                           flex: 1, padding: '8px 12px', fontSize: 13, fontWeight: 600, border: 'none', cursor: 'pointer', fontFamily: 'inherit',
-                          backgroundColor: assignMode === mode ? '#D4A843' : '#1E1E1E',
+                          backgroundColor: assignMode === mode ? '#818CF8' : '#1E1E1E',
                           color: assignMode === mode ? '#0A0A0A' : '#999',
                           transition: 'all 0.15s',
                         }}
@@ -1035,8 +1035,8 @@ const Credentials: React.FC = () => {
                             key={ns}
                             style={{
                               display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', borderRadius: 6,
-                              backgroundColor: checked ? 'rgba(212,168,67,0.08)' : 'transparent',
-                              border: '1px solid ' + (checked ? 'rgba(212,168,67,0.25)' : 'rgba(212,168,67,0.06)'),
+                              backgroundColor: checked ? 'rgba(129, 140, 248,0.08)' : 'transparent',
+                              border: '1px solid ' + (checked ? 'rgba(129, 140, 248,0.25)' : 'rgba(129, 140, 248,0.06)'),
                               cursor: 'pointer', transition: 'all 0.15s',
                             }}
                           >
@@ -1044,7 +1044,7 @@ const Credentials: React.FC = () => {
                               type="checkbox"
                               checked={checked}
                               onChange={() => setAssignNsSelections(prev => ({ ...prev, [ns]: !prev[ns] }))}
-                              style={{ accentColor: '#D4A843' }}
+                              style={{ accentColor: '#818CF8' }}
                             />
                             <span style={{ fontSize: 13, color: '#E8E8E8', flex: 1 }}>{ns}</span>
                             <span style={{ fontSize: 11, color: '#666' }}>{assetCount} asset{assetCount !== 1 ? 's' : ''}</span>
@@ -1061,7 +1061,7 @@ const Credentials: React.FC = () => {
                         value={assignAssetSearch}
                         onChange={e => setAssignAssetSearch(e.target.value)}
                         placeholder="Search models, tools, agents..."
-                        style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' as const, marginBottom: 12 }}
+                        style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(129, 140, 248,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' as const, marginBottom: 12 }}
                       />
                       <div style={{ maxHeight: 260, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 14, paddingRight: 4 }}>
                         {assetTypes.map(aType => {
@@ -1087,8 +1087,8 @@ const Credentials: React.FC = () => {
                                       key={a.name}
                                       style={{
                                         display: 'flex', alignItems: 'center', gap: 10, padding: '6px 10px', borderRadius: 6,
-                                        backgroundColor: checked ? 'rgba(212,168,67,0.08)' : 'transparent',
-                                        border: '1px solid ' + (checked ? 'rgba(212,168,67,0.25)' : 'rgba(212,168,67,0.06)'),
+                                        backgroundColor: checked ? 'rgba(129, 140, 248,0.08)' : 'transparent',
+                                        border: '1px solid ' + (checked ? 'rgba(129, 140, 248,0.25)' : 'rgba(129, 140, 248,0.06)'),
                                         cursor: 'pointer', transition: 'all 0.15s',
                                       }}
                                     >
@@ -1096,7 +1096,7 @@ const Credentials: React.FC = () => {
                                         type="checkbox"
                                         checked={checked}
                                         onChange={() => setCredAssignments(prev => ({ ...prev, [a.name]: !prev[a.name] }))}
-                                        style={{ accentColor: '#D4A843' }}
+                                        style={{ accentColor: '#818CF8' }}
                                       />
                                       <span style={{ fontSize: 13, color: '#E8E8E8', flex: 1 }}>{a.name}</span>
                                       <span style={{ fontSize: 11, color: '#666' }}>{a.namespace}</span>
@@ -1116,7 +1116,7 @@ const Credentials: React.FC = () => {
 
                   {/* Selection summary */}
                   {totalAssigned > 0 && (
-                    <div style={{ marginTop: 12, padding: '8px 12px', backgroundColor: 'rgba(212,168,67,0.06)', borderRadius: 6, fontSize: 12, color: '#D4A843', display: 'flex', gap: 12 }}>
+                    <div style={{ marginTop: 12, padding: '8px 12px', backgroundColor: 'rgba(129, 140, 248,0.06)', borderRadius: 6, fontSize: 12, color: '#818CF8', display: 'flex', gap: 12 }}>
                       {assignedNsCount > 0 && <span>{assignedNsCount} namespace{assignedNsCount !== 1 ? 's' : ''}</span>}
                       {assignedNsCount > 0 && assignedAssetCount > 0 && <span style={{ color: '#555' }}>·</span>}
                       {assignedAssetCount > 0 && <span>{assignedAssetCount} individual asset{assignedAssetCount !== 1 ? 's' : ''}</span>}
@@ -1124,10 +1124,10 @@ const Credentials: React.FC = () => {
                   )}
 
                   <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, marginTop: 20 }}>
-                    <button onClick={() => setAddCredStep(1)} style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(212, 168, 67, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>← Back</button>
+                    <button onClick={() => setAddCredStep(1)} style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(129, 140, 248, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>← Back</button>
                     <div style={{ display: 'flex', gap: 10 }}>
-                      <button onClick={() => { setCredAssignments({}); setAssignNsSelections({}); handleAddCredential(); }} style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(212, 168, 67, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>Skip</button>
-                      <button onClick={handleAddCredential} style={{ backgroundColor: '#D4A843', color: '#0A0A0A', border: 'none', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
+                      <button onClick={() => { setCredAssignments({}); setAssignNsSelections({}); handleAddCredential(); }} style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(129, 140, 248, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>Skip</button>
+                      <button onClick={handleAddCredential} style={{ backgroundColor: '#818CF8', color: '#FFFFFF', border: 'none', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
                         {totalAssigned > 0 ? `Create & Assign (${totalAssigned})` : 'Create'}
                       </button>
                     </div>
@@ -1139,7 +1139,7 @@ const Credentials: React.FC = () => {
         </div>
       )}
       {credToast && (
-        <div style={{ position: 'fixed', bottom: 24, right: 24, backgroundColor: '#1A1A1A', border: '1px solid #D4A843', borderRadius: 8, padding: '12px 20px', color: '#D4A843', fontSize: 13, fontWeight: 600, zIndex: 1001, boxShadow: '0 4px 12px rgba(0,0,0,0.5)' }}>
+        <div style={{ position: 'fixed', bottom: 24, right: 24, backgroundColor: '#1A1A1A', border: '1px solid #818CF8', borderRadius: 8, padding: '12px 20px', color: '#818CF8', fontSize: 13, fontWeight: 600, zIndex: 1001, boxShadow: '0 4px 12px rgba(0,0,0,0.5)' }}>
           {credToast}
         </div>
       )}

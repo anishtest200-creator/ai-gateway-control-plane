@@ -52,8 +52,8 @@ const tabBase: CSSProperties = {
 
 const tabActive: CSSProperties = {
   ...tabBase,
-  backgroundColor: 'rgba(212, 168, 67, 0.15)',
-  color: '#D4A843',
+  backgroundColor: 'rgba(129, 140, 248, 0.15)',
+  color: '#818CF8',
 };
 
 const tabInactive: CSSProperties = {
@@ -65,9 +65,9 @@ const tabInactive: CSSProperties = {
 const registerBtn: CSSProperties = {
   padding: '7px 16px',
   borderRadius: 6,
-  border: '1px solid rgba(212, 168, 67, 0.3)',
-  backgroundColor: 'rgba(212, 168, 67, 0.1)',
-  color: '#D4A843',
+  border: '1px solid rgba(129, 140, 248, 0.3)',
+  backgroundColor: 'rgba(129, 140, 248, 0.1)',
+  color: '#818CF8',
   fontSize: 13,
   fontWeight: 600,
   fontFamily: 'inherit',
@@ -79,7 +79,7 @@ const summary: CSSProperties = { color: '#aaa', fontSize: 13, marginBottom: 16 }
 
 const tableWrap: CSSProperties = {
   overflowX: 'auto',
-  border: '1px solid rgba(212, 168, 67, 0.10)',
+  border: '1px solid rgba(129, 140, 248, 0.10)',
   borderRadius: 8,
   backgroundColor: '#111111',
 };
@@ -99,13 +99,13 @@ const th: CSSProperties = {
   fontSize: 11,
   textTransform: 'uppercase',
   letterSpacing: 0.4,
-  borderBottom: '1px solid rgba(212, 168, 67, 0.10)',
+  borderBottom: '1px solid rgba(129, 140, 248, 0.10)',
   backgroundColor: '#161616',
 };
 
 const td: CSSProperties = {
   padding: '10px 14px',
-  borderBottom: '1px solid rgba(212, 168, 67, 0.06)',
+  borderBottom: '1px solid rgba(129, 140, 248, 0.06)',
   color: '#ccc',
 };
 
@@ -123,7 +123,7 @@ const badge = (bg: string, fg: string): CSSProperties => ({
 const healthy: CSSProperties = badge('rgba(74,222,128,0.15)', '#4ADE80');
 const degraded: CSSProperties = badge('rgba(245,158,11,0.15)', '#F59E0B');
 const down: CSSProperties = badge('rgba(239,68,68,0.15)', '#EF4444');
-const policyBadge: CSSProperties = badge('rgba(212, 168, 67, 0.1)', '#D4A843');
+const policyBadge: CSSProperties = badge('rgba(129, 140, 248, 0.1)', '#818CF8');
 const mono: CSSProperties = { fontFamily: 'monospace', fontSize: 12, color: '#9cdcfe' };
 
 // Governance overview styles
@@ -257,7 +257,7 @@ function Assets() {
       <div style={govSection}>
         {/* Row 1 — Stat cards */}
         <div style={statRow}>
-          <div style={statCard('rgba(212, 168, 67, 0.10)')}>
+          <div style={statCard('rgba(129, 140, 248, 0.10)')}>
             <div style={statValue}>44</div>
             <div style={statLabel}>Total Assets</div>
             <div style={statSub}>All registered</div>
@@ -302,7 +302,7 @@ function Assets() {
             minWidth: 220,
             padding: '7px 12px',
             borderRadius: 6,
-            border: '1px solid rgba(212, 168, 67, 0.10)',
+            border: '1px solid rgba(129, 140, 248, 0.10)',
             backgroundColor: '#1A1A1A',
             color: '#E8E8E8',
             fontSize: 13,
@@ -316,7 +316,7 @@ function Assets() {
           style={{
             padding: '7px 12px',
             borderRadius: 6,
-            border: '1px solid rgba(212, 168, 67, 0.10)',
+            border: '1px solid rgba(129, 140, 248, 0.10)',
             backgroundColor: '#1A1A1A',
             color: '#E8E8E8',
             fontSize: 13,
@@ -336,7 +336,7 @@ function Assets() {
           style={{
             padding: '7px 12px',
             borderRadius: 6,
-            border: '1px solid rgba(212, 168, 67, 0.10)',
+            border: '1px solid rgba(129, 140, 248, 0.10)',
             backgroundColor: '#1A1A1A',
             color: '#E8E8E8',
             fontSize: 13,
@@ -406,8 +406,8 @@ function Assets() {
                     <td style={{ ...td, ...mono }}>{r.region}</td>
                     <td style={td}>
                       <span style={badge(
-                        r.routing === 'Primary' ? 'rgba(212, 168, 67, 0.1)' : 'rgba(245,158,11,0.12)',
-                        r.routing === 'Primary' ? '#D4A843' : '#F59E0B',
+                        r.routing === 'Primary' ? 'rgba(129, 140, 248, 0.1)' : 'rgba(245,158,11,0.12)',
+                        r.routing === 'Primary' ? '#818CF8' : '#F59E0B',
                       )}>{r.routing}</span>
                     </td>
                     <td style={td}><Policies list={r.policies} /></td>
@@ -447,7 +447,7 @@ function Assets() {
                   <tr key={i} style={{ cursor: 'pointer' }} onClick={() => setDetailItem({ name: r.tool, provider: r.type, source: r.source, endpoint: r.endpoint, region: '—', governance: r.governance, health: r.health, policies: r.policies, namespace: r.namespace })}>
                     <td style={{ ...td, fontWeight: 600, color: '#fff' }}>{r.tool}</td>
                     <td style={td}>
-                      <span style={badge('rgba(212, 168, 67, 0.1)', '#D4A843')}>{r.type}</span>
+                      <span style={badge('rgba(129, 140, 248, 0.1)', '#818CF8')}>{r.type}</span>
                     </td>
                     <td style={td}><SourceBadge source={r.source} /></td>
                     <td style={{ ...td, ...mono }}>{r.endpoint}</td>
@@ -490,7 +490,7 @@ function Assets() {
                   <tr key={i} style={{ cursor: 'pointer' }} onClick={() => setDetailItem({ name: r.agent, provider: r.protocol, source: r.source, endpoint: r.endpoint, region: '—', governance: r.governance, health: r.health, policies: r.policies, namespace: r.namespace })}>
                     <td style={{ ...td, fontWeight: 600, color: '#fff' }}>{r.agent}</td>
                     <td style={td}>
-                      <span style={badge('rgba(212, 168, 67, 0.1)', '#D4A843')}>{r.protocol}</span>
+                      <span style={badge('rgba(129, 140, 248, 0.1)', '#818CF8')}>{r.protocol}</span>
                     </td>
                     <td style={td}><SourceBadge source={r.source} /></td>
                     <td style={{ ...td, ...mono }}>{r.endpoint}</td>
@@ -510,7 +510,7 @@ function Assets() {
 
       {/* Detail Panel Overlay */}
       {detailItem && (
-        <div style={{ position: 'fixed', top: 0, right: 0, bottom: 0, width: 400, backgroundColor: '#1A1A1A', borderLeft: '1px solid rgba(212, 168, 67, 0.10)', borderTop: '3px solid #D4A843', zIndex: 1000, overflowY: 'auto', padding: 24, display: 'flex', flexDirection: 'column', gap: 16, boxShadow: '-4px 0 20px rgba(0,0,0,0.5)' }}>
+        <div style={{ position: 'fixed', top: 0, right: 0, bottom: 0, width: 400, backgroundColor: '#1A1A1A', borderLeft: '1px solid rgba(129, 140, 248, 0.10)', borderTop: '3px solid #818CF8', zIndex: 1000, overflowY: 'auto', padding: 24, display: 'flex', flexDirection: 'column', gap: 16, boxShadow: '-4px 0 20px rgba(0,0,0,0.5)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span style={{ fontSize: 18, fontWeight: 700, color: '#fff' }}>{detailItem.name}</span>
             <button onClick={() => setDetailItem(null)} style={{ background: 'none', border: 'none', color: '#999', fontSize: 20, cursor: 'pointer', padding: '0 4px', fontFamily: 'inherit', lineHeight: 1 }}>✕</button>

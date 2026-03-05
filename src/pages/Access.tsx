@@ -8,7 +8,7 @@ import type { CSSProperties } from 'react'
 const colors = {
   bg: '#0A0A0A',
   card: '#161616',
-  border: 'rgba(212, 168, 67, 0.10)',
+  border: 'rgba(129, 140, 248, 0.10)',
   text: '#E8E8E8',
   textMuted: '#999',
   textDim: '#666',
@@ -16,9 +16,9 @@ const colors = {
   amber: '#F59E0B',
   red: '#EF4444',
   blue: '#60A5FA',
-  gold: '#D4A843',
-  goldDim: '#B8923A',
-  goldMuted: 'rgba(212, 168, 67, 0.15)',
+  gold: '#818CF8',
+  goldDim: '#6366F1',
+  goldMuted: 'rgba(129, 140, 248, 0.15)',
   purple: '#A78BFA',
 }
 
@@ -41,7 +41,7 @@ const badge = (bg: string, fg: string): CSSProperties => ({
 
 const authMethodStyles: Record<string, { bg: string; color: string; label: string }> = {
   'api-key': { bg: '#3d3200', color: '#F7C948', label: 'API Key' },
-  'entra-id': { bg: '#1a2d4d', color: '#D4A843', label: 'Entra ID' },
+  'entra-id': { bg: '#1a2d4d', color: '#818CF8', label: 'Entra ID' },
   'oauth2': { bg: '#1a3a2a', color: '#4ade80', label: 'OAuth 2.0' },
   'managed-identity': { bg: '#2d1a4d', color: '#c084fc', label: 'Managed Identity' },
 }
@@ -56,7 +56,7 @@ const requestTypeStyles: Record<string, { bg: string; color: string; label: stri
 const inputStyle: CSSProperties = {
   backgroundColor: '#2d2c2b',
   color: '#ccc',
-  border: '1px solid rgba(212, 168, 67, 0.10)',
+  border: '1px solid rgba(129, 140, 248, 0.10)',
   borderRadius: 6,
   padding: '6px 12px',
   fontSize: 13,
@@ -66,7 +66,7 @@ const inputStyle: CSSProperties = {
 
 const primaryBtn: CSSProperties = {
   backgroundColor: colors.gold,
-  color: '#0A0A0A',
+  color: '#FFFFFF',
   border: 'none',
   borderRadius: 6,
   padding: '8px 18px',
@@ -366,7 +366,7 @@ const QuotaBar: React.FC<{ used: number; limit: number }> = ({ used, limit }) =>
   const barColor = pct > 80 ? '#D13438' : pct > 60 ? '#F7C948' : '#4ADE80'
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-      <div style={{ width: 100, height: 8, backgroundColor: 'rgba(212, 168, 67, 0.10)', borderRadius: 4, overflow: 'hidden' }}>
+      <div style={{ width: 100, height: 8, backgroundColor: 'rgba(129, 140, 248, 0.10)', borderRadius: 4, overflow: 'hidden' }}>
         <div style={{ width: `${pct}%`, height: '100%', backgroundColor: barColor, borderRadius: 4, transition: 'width 0.4s ease' }} />
       </div>
       <span style={{ fontSize: 11, color: colors.textMuted, minWidth: 32 }}>{Math.round(pct)}%</span>
@@ -743,19 +743,19 @@ const Access: React.FC = () => {
               <div>
                 <div style={{ fontSize: 12, color: '#999', marginBottom: 4 }}>Email</div>
                 <input value={inviteEmail} onChange={e => setInviteEmail(e.target.value)} placeholder="user@contoso.com"
-                  style={{ width: '100%', boxSizing: 'border-box', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', borderRadius: 6, padding: '8px 12px', color: '#E8E8E8', fontSize: 13 }} />
+                  style={{ width: '100%', boxSizing: 'border-box', backgroundColor: '#0F0F0F', border: '1px solid rgba(129, 140, 248,0.15)', borderRadius: 6, padding: '8px 12px', color: '#E8E8E8', fontSize: 13 }} />
               </div>
               <div>
                 <div style={{ fontSize: 12, color: '#999', marginBottom: 4 }}>Role</div>
                 <select value={inviteRole} onChange={e => setInviteRole(e.target.value)}
-                  style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', borderRadius: 6, padding: '8px 12px', color: '#E8E8E8', fontSize: 13 }}>
+                  style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(129, 140, 248,0.15)', borderRadius: 6, padding: '8px 12px', color: '#E8E8E8', fontSize: 13 }}>
                   <option>Viewer</option><option>Editor</option><option>Admin</option>
                 </select>
               </div>
               <div>
                 <div style={{ fontSize: 12, color: '#999', marginBottom: 4 }}>Namespace</div>
                 <select value={inviteNs} onChange={e => setInviteNs(e.target.value)}
-                  style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', borderRadius: 6, padding: '8px 12px', color: '#E8E8E8', fontSize: 13 }}>
+                  style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(129, 140, 248,0.15)', borderRadius: 6, padding: '8px 12px', color: '#E8E8E8', fontSize: 13 }}>
                   <option value="platform">platform</option><option value="research">research</option><option value="customer-support">customer-support</option><option value="finance">finance</option>
                 </select>
               </div>

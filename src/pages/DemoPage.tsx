@@ -10,8 +10,8 @@ interface DemoPageProps {
 const C = {
   bg: '#0A0A0A',
   bgDeep: '#050505',
-  gold: '#D4A843',
-  goldDim: '#B8923A',
+  gold: '#818CF8',
+  goldDim: '#6366F1',
   amber: '#F59E0B',
   purple: '#A78BFA',
   blue: '#60A5FA',
@@ -20,8 +20,8 @@ const C = {
   gray: '#b0b0b0',
   green: '#4ADE80',
   red: '#EF4444',
-  cardBg: 'rgba(212, 168, 67, 0.05)',
-  cardBorder: 'rgba(212, 168, 67, 0.10)',
+  cardBg: 'rgba(129, 140, 248, 0.05)',
+  cardBorder: 'rgba(129, 140, 248, 0.10)',
   font: "'Segoe UI', system-ui, -apple-system, sans-serif",
 };
 
@@ -39,7 +39,7 @@ const btnSolid: CSSProperties = {
   fontSize: 16,
   fontWeight: 600,
   fontFamily: C.font,
-  color: '#0A0A0A',
+  color: '#FFFFFF',
   background: C.gold,
   border: 'none',
   borderRadius: 8,
@@ -168,9 +168,9 @@ const DemoPage: FC<DemoPageProps> = ({ onLogin, onSignup }) => {
         to { opacity: 1; transform: translateX(0); }
       }
       @keyframes flowPulse {
-        0% { box-shadow: 0 0 0 0 rgba(212, 168, 67, 0.4); }
-        70% { box-shadow: 0 0 0 8px rgba(212, 168, 67, 0); }
-        100% { box-shadow: 0 0 0 0 rgba(212, 168, 67, 0); }
+        0% { box-shadow: 0 0 0 0 rgba(129, 140, 248, 0.4); }
+        70% { box-shadow: 0 0 0 8px rgba(129, 140, 248, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(129, 140, 248, 0); }
       }
     `;
     document.head.appendChild(style);
@@ -238,7 +238,7 @@ const DemoPage: FC<DemoPageProps> = ({ onLogin, onSignup }) => {
         background: 'rgba(10,10,10,0.85)',
         backdropFilter: 'blur(16px)',
         WebkitBackdropFilter: 'blur(16px)',
-        borderBottom: '1px solid rgba(212, 168, 67, 0.06)',
+        borderBottom: '1px solid rgba(129, 140, 248, 0.06)',
         fontFamily: C.font,
       }}
     >
@@ -326,7 +326,7 @@ const DemoPage: FC<DemoPageProps> = ({ onLogin, onSignup }) => {
               fontSize: 14,
               fontWeight: 600,
               fontFamily: C.font,
-              color: '#0A0A0A',
+              color: '#FFFFFF',
               background: C.gold,
               border: 'none',
               borderRadius: 6,
@@ -429,10 +429,10 @@ const DemoPage: FC<DemoPageProps> = ({ onLogin, onSignup }) => {
           fontSize: 13,
           fontWeight: 600,
           color: '#e0e0e0',
-          border: '1px solid rgba(212, 168, 67, 0.12)',
+          border: '1px solid rgba(129, 140, 248, 0.12)',
           borderRadius: 10,
           fontFamily: C.font,
-          background: 'linear-gradient(135deg, rgba(212, 168, 67, 0.06) 0%, rgba(212, 168, 67, 0.02) 100%)',
+          background: 'linear-gradient(135deg, rgba(129, 140, 248, 0.06) 0%, rgba(129, 140, 248, 0.02) 100%)',
           boxShadow: activeStep >= 0 ? `0 0 12px ${currentScenario.accent}22` : 'none',
           transition: 'box-shadow .4s',
           display: 'flex',
@@ -524,10 +524,10 @@ const DemoPage: FC<DemoPageProps> = ({ onLogin, onSignup }) => {
           fontSize: 13,
           fontWeight: 600,
           color: activeStep >= 4 ? '#e0e0e0' : '#666',
-          border: `1px solid ${activeStep >= 4 ? `${currentScenario.accent}44` : 'rgba(212, 168, 67, 0.12)'}`,
+          border: `1px solid ${activeStep >= 4 ? `${currentScenario.accent}44` : 'rgba(129, 140, 248, 0.12)'}`,
           borderRadius: 10,
           fontFamily: C.font,
-          background: 'linear-gradient(135deg, rgba(212, 168, 67, 0.06) 0%, rgba(212, 168, 67, 0.02) 100%)',
+          background: 'linear-gradient(135deg, rgba(129, 140, 248, 0.06) 0%, rgba(129, 140, 248, 0.02) 100%)',
           boxShadow: activeStep >= 5 ? `0 0 12px ${currentScenario.accent}22` : 'none',
           transition: 'all .4s',
           display: 'flex',
@@ -603,7 +603,7 @@ const DemoPage: FC<DemoPageProps> = ({ onLogin, onSignup }) => {
           padding: '32px 32px 40px',
           maxWidth: 960,
           margin: '0 auto',
-          boxShadow: `0 0 80px ${C.gold}12, inset 0 1px 0 rgba(212, 168, 67, 0.10)`,
+          boxShadow: `0 0 80px ${C.gold}12, inset 0 1px 0 rgba(129, 140, 248, 0.10)`,
           position: 'relative',
           overflow: 'hidden',
         }}

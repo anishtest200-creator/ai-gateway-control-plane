@@ -228,7 +228,7 @@ const auditTrailEntries: PolicyAuditEntry[] = [
 const colors = {
   bg: '#0A0A0A',
   card: '#161616',
-  border: 'rgba(212, 168, 67, 0.10)',
+  border: 'rgba(129, 140, 248, 0.10)',
   text: '#E8E8E8',
   textMuted: '#999',
   textDim: '#666',
@@ -236,9 +236,9 @@ const colors = {
   amber: '#F59E0B',
   red: '#EF4444',
   blue: '#60A5FA',
-  gold: '#D4A843',
-  goldDim: '#B8923A',
-  goldMuted: 'rgba(212, 168, 67, 0.15)',
+  gold: '#818CF8',
+  goldDim: '#6366F1',
+  goldMuted: 'rgba(129, 140, 248, 0.15)',
   purple: '#A78BFA',
 }
 
@@ -272,7 +272,7 @@ const tabBase: CSSProperties = {
 }
 
 const tabActive: CSSProperties = {
-  ...tabBase, backgroundColor: 'rgba(212, 168, 67, 0.15)', color: '#D4A843',
+  ...tabBase, backgroundColor: 'rgba(129, 140, 248, 0.15)', color: '#818CF8',
 }
 
 const tabInactive: CSSProperties = {
@@ -284,7 +284,7 @@ const tabInactive: CSSProperties = {
 /* ------------------------------------------------------------------ */
 
 const categoryConfig: Record<PolicyCategory, { label: string; color: string; bg: string; icon: string }> = {
-  'authentication': { label: 'Authentication', color: '#D4A843', bg: 'rgba(212, 168, 67, 0.15)', icon: '🔑' },
+  'authentication': { label: 'Authentication', color: '#818CF8', bg: 'rgba(129, 140, 248, 0.15)', icon: '🔑' },
   'credentials': { label: 'Credentials', color: '#c084fc', bg: '#2d1a4d', icon: '🔒' },
   'rate-limits': { label: 'Rate Limits & Quotas', color: '#fbbf24', bg: '#3d2800', icon: '⏱' },
   'content-safety': { label: 'Content Safety', color: '#f87171', bg: '#3d1a1a', icon: '🛡' },
@@ -362,7 +362,7 @@ const Toggle: React.FC<{ enabled: boolean; onToggle: () => void }> = ({ enabled,
     onClick={onToggle}
     style={{
       display: 'inline-flex', alignItems: 'center', width: 36, height: 20,
-      borderRadius: 10, backgroundColor: enabled ? 'rgba(74,222,128,0.25)' : 'rgba(212, 168, 67, 0.10)',
+      borderRadius: 10, backgroundColor: enabled ? 'rgba(74,222,128,0.25)' : 'rgba(129, 140, 248, 0.10)',
       cursor: 'pointer', padding: 2, transition: 'background-color 0.15s', flexShrink: 0,
     }}
   >
@@ -714,7 +714,7 @@ const Policies: React.FC = () => {
                                 <div key={v.version} style={{
                                   display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                                   padding: '6px 10px', borderRadius: 6,
-                                  backgroundColor: vi === 0 ? 'rgba(212, 168, 67, 0.06)' : 'rgba(212, 168, 67, 0.04)',
+                                  backgroundColor: vi === 0 ? 'rgba(129, 140, 248, 0.06)' : 'rgba(129, 140, 248, 0.04)',
                                   fontSize: 11,
                                 }}>
                                   <div style={{ flex: 1, minWidth: 0 }}>
@@ -887,7 +887,7 @@ const Policies: React.FC = () => {
                 {/* Stats row */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                   {g.appliesTo.map(model => (
-                    <span key={model} style={badge('rgba(212, 168, 67, 0.06)', colors.textMuted)}>{model}</span>
+                    <span key={model} style={badge('rgba(129, 140, 248, 0.06)', colors.textMuted)}>{model}</span>
                   ))}
                   <span style={{ color: colors.textDim, fontSize: 11 }}>·</span>
                   <span
@@ -946,7 +946,7 @@ const Policies: React.FC = () => {
       <div style={{ ...card, padding: 0, overflow: 'hidden' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
           <thead>
-            <tr style={{ borderBottom: '1px solid rgba(212, 168, 67, 0.10)', color: '#999', textAlign: 'left' }}>
+            <tr style={{ borderBottom: '1px solid rgba(129, 140, 248, 0.10)', color: '#999', textAlign: 'left' }}>
               <th style={{ padding: '10px 16px', fontWeight: 600, fontSize: 12, whiteSpace: 'nowrap' }}>Time</th>
               <th style={{ padding: '10px 16px', fontWeight: 600, fontSize: 12, whiteSpace: 'nowrap' }}>Action</th>
               <th style={{ padding: '10px 16px', fontWeight: 600, fontSize: 12, whiteSpace: 'nowrap' }}>Policy</th>
@@ -964,7 +964,7 @@ const Policies: React.FC = () => {
                   onMouseEnter={() => setHoveredRow(`audit-${i}`)}
                   onMouseLeave={() => setHoveredRow(null)}
                   style={{
-                    borderBottom: '1px solid rgba(212, 168, 67, 0.10)',
+                    borderBottom: '1px solid rgba(129, 140, 248, 0.10)',
                     backgroundColor: hoveredRow === `audit-${i}` ? '#1A1A1A' : 'transparent',
                     transition: 'background-color 0.15s',
                   }}
@@ -975,7 +975,7 @@ const Policies: React.FC = () => {
                   </td>
                   <td style={{ padding: '10px 16px', fontWeight: 500, color: colors.gold, whiteSpace: 'nowrap' }}>{entry.policyName}</td>
                   <td style={{ padding: '10px 16px' }}>
-                    <span style={badge('rgba(212, 168, 67, 0.06)', colors.textMuted)}>v{entry.version}</span>
+                    <span style={badge('rgba(129, 140, 248, 0.06)', colors.textMuted)}>v{entry.version}</span>
                   </td>
                   <td style={{ padding: '10px 16px', color: colors.textMuted, fontSize: 12, lineHeight: 1.4 }}>
                     {entry.details}
@@ -998,7 +998,7 @@ const Policies: React.FC = () => {
     <div style={{ ...card, padding: 0, overflow: 'hidden' }}>
       <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
         <thead>
-          <tr style={{ borderBottom: '1px solid rgba(212, 168, 67, 0.10)', color: '#999', textAlign: 'left' }}>
+          <tr style={{ borderBottom: '1px solid rgba(129, 140, 248, 0.10)', color: '#999', textAlign: 'left' }}>
             <th style={{ padding: '10px 16px', fontWeight: 600, fontSize: 12, whiteSpace: 'nowrap' }}>Asset</th>
             <th style={{ padding: '10px 16px', fontWeight: 600, fontSize: 12, whiteSpace: 'nowrap' }}>Type</th>
             <th style={{ padding: '10px 16px', fontWeight: 600, fontSize: 12, whiteSpace: 'nowrap' }}>Action</th>
@@ -1016,7 +1016,7 @@ const Policies: React.FC = () => {
               onMouseEnter={() => setHoveredRow(`approval-${i}`)}
               onMouseLeave={() => setHoveredRow(null)}
               style={{
-                borderBottom: '1px solid rgba(212, 168, 67, 0.10)',
+                borderBottom: '1px solid rgba(129, 140, 248, 0.10)',
                 backgroundColor: hoveredRow === `approval-${i}` ? '#1A1A1A' : 'transparent',
                 transition: 'background-color 0.15s',
               }}
@@ -1084,7 +1084,7 @@ const Policies: React.FC = () => {
             <span style={{ color: '#fff', fontSize: 28, fontWeight: 700, lineHeight: 1.1 }}>{s.value}</span>
           </div>
         ))}
-        <button onClick={() => { setShowCreateFlow(true); setCreateFlowCategory(null); setCreateFlowMethod(null); setAiComposeInput(''); setAiCompiling(false); setAiCompiled(false); setTemplateSelected(false) }} style={{ backgroundColor: '#D4A843', color: '#0A0A0A', border: 'none', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap', alignSelf: 'center' }}>✚ Create Policy</button>
+        <button onClick={() => { setShowCreateFlow(true); setCreateFlowCategory(null); setCreateFlowMethod(null); setAiComposeInput(''); setAiCompiling(false); setAiCompiled(false); setTemplateSelected(false) }} style={{ backgroundColor: '#818CF8', color: '#FFFFFF', border: 'none', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap', alignSelf: 'center' }}>✚ Create Policy</button>
       </div>
 
       {/* Tabs */}
@@ -1119,7 +1119,7 @@ const Policies: React.FC = () => {
         const isLibraryView = createFlowCategory !== null && createFlowMethod === 'library' && !templateSelected
         return (
         <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
-          <div style={{ backgroundColor: '#1A1A1A', borderTop: '3px solid #D4A843', borderRadius: 8, padding: 24, width: '100%', maxWidth: isLibraryView ? 640 : 560, border: '1px solid rgba(212, 168, 67, 0.10)', transition: 'max-width 0.2s' }}>
+          <div style={{ backgroundColor: '#1A1A1A', borderTop: '3px solid #818CF8', borderRadius: 8, padding: 24, width: '100%', maxWidth: isLibraryView ? 640 : 560, border: '1px solid rgba(129, 140, 248, 0.10)', transition: 'max-width 0.2s' }}>
             <style>{`@keyframes aiPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }`}</style>
 
             {/* Step 1: Category picker */}
@@ -1130,7 +1130,7 @@ const Policies: React.FC = () => {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                   {([
                     { key: 'access' as const, icon: '🔑', label: 'Asset Access Rule', desc: 'Control who can access assets by roles, namespaces, or domains', color: '#c084fc', bg: '#2d1a4d' },
-                    { key: 'runtime' as const, icon: '⚙️', label: 'Runtime Rule', desc: 'Authentication, rate limits, routing, and execution policies', color: '#D4A843', bg: 'rgba(212,168,67,0.15)' },
+                    { key: 'runtime' as const, icon: '⚙️', label: 'Runtime Rule', desc: 'Authentication, rate limits, routing, and execution policies', color: '#818CF8', bg: 'rgba(129, 140, 248,0.15)' },
                     { key: 'guardrail' as const, icon: '🛡', label: 'Safety Guardrail', desc: 'Content safety, PII detection, prompt injection shields', color: '#f87171', bg: '#3d1a1a' },
                   ]).map(cat => (
                     <button
@@ -1138,11 +1138,11 @@ const Policies: React.FC = () => {
                       onClick={() => setCreateFlowCategory(cat.key)}
                       style={{
                         display: 'flex', alignItems: 'center', gap: 14, padding: '14px 16px', borderRadius: 8,
-                        backgroundColor: 'transparent', border: `1px solid rgba(212,168,67,0.10)`,
+                        backgroundColor: 'transparent', border: `1px solid rgba(129, 140, 248,0.10)`,
                         cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left', transition: 'all 0.15s',
                       }}
                       onMouseEnter={e => { e.currentTarget.style.backgroundColor = cat.bg; e.currentTarget.style.borderColor = cat.color }}
-                      onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.borderColor = 'rgba(212,168,67,0.10)' }}
+                      onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.borderColor = 'rgba(129, 140, 248,0.10)' }}
                     >
                       <span style={{ width: 40, height: 40, borderRadius: 10, backgroundColor: cat.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0 }}>{cat.icon}</span>
                       <div>
@@ -1154,7 +1154,7 @@ const Policies: React.FC = () => {
                   ))}
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 20 }}>
-                  <button onClick={() => setShowCreateFlow(false)} style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(212, 168, 67, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>Cancel</button>
+                  <button onClick={() => setShowCreateFlow(false)} style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(129, 140, 248, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>Cancel</button>
                 </div>
               </>
             )}
@@ -1177,11 +1177,11 @@ const Policies: React.FC = () => {
                       style={{
                         flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,
                         padding: '20px 16px', borderRadius: 8, backgroundColor: 'transparent',
-                        border: '1px solid rgba(212,168,67,0.10)', cursor: 'pointer',
+                        border: '1px solid rgba(129, 140, 248,0.10)', cursor: 'pointer',
                         fontFamily: 'inherit', textAlign: 'center', transition: 'all 0.15s',
                       }}
                       onMouseEnter={e => { e.currentTarget.style.backgroundColor = method.bg; e.currentTarget.style.borderColor = method.color }}
-                      onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.borderColor = 'rgba(212,168,67,0.10)' }}
+                      onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.borderColor = 'rgba(129, 140, 248,0.10)' }}
                     >
                       <span style={{ fontSize: 28 }}>{method.icon}</span>
                       <div style={{ color: '#fff', fontWeight: 600, fontSize: 14 }}>{method.label}</div>
@@ -1190,7 +1190,7 @@ const Policies: React.FC = () => {
                   ))}
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'flex-start', marginTop: 20 }}>
-                  <button onClick={() => setCreateFlowCategory(null)} style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(212, 168, 67, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>← Back</button>
+                  <button onClick={() => setCreateFlowCategory(null)} style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(129, 140, 248, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>← Back</button>
                 </div>
               </>
             )}
@@ -1248,11 +1248,11 @@ const Policies: React.FC = () => {
                         style={{
                           display: 'flex', flexDirection: 'column', gap: 6, padding: '12px 14px',
                           borderRadius: 8, backgroundColor: '#0F0F0F',
-                          border: '1px solid rgba(212,168,67,0.10)', cursor: 'pointer',
+                          border: '1px solid rgba(129, 140, 248,0.10)', cursor: 'pointer',
                           fontFamily: 'inherit', textAlign: 'left', transition: 'all 0.15s',
                         }}
                         onMouseEnter={e => { e.currentTarget.style.borderColor = categoryColor; e.currentTarget.style.backgroundColor = '#161616' }}
-                        onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(212,168,67,0.10)'; e.currentTarget.style.backgroundColor = '#0F0F0F' }}
+                        onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(129, 140, 248,0.10)'; e.currentTarget.style.backgroundColor = '#0F0F0F' }}
                       >
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                           <span style={{ fontSize: 18 }}>{t.icon}</span>
@@ -1261,14 +1261,14 @@ const Policies: React.FC = () => {
                         <div style={{ color: '#999', fontSize: 11, lineHeight: 1.4 }}>{t.description}</div>
                         <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginTop: 2 }}>
                           {t.tags.map(tag => (
-                            <span key={tag} style={{ display: 'inline-block', padding: '2px 6px', borderRadius: 4, fontSize: 10, fontWeight: 600, backgroundColor: 'rgba(212,168,67,0.08)', color: '#888' }}>{tag}</span>
+                            <span key={tag} style={{ display: 'inline-block', padding: '2px 6px', borderRadius: 4, fontSize: 10, fontWeight: 600, backgroundColor: 'rgba(129, 140, 248,0.08)', color: '#888' }}>{tag}</span>
                           ))}
                         </div>
                       </button>
                     ))}
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'flex-start', marginTop: 16 }}>
-                    <button onClick={() => setCreateFlowMethod(null)} style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(212, 168, 67, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>← Back</button>
+                    <button onClick={() => setCreateFlowMethod(null)} style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(129, 140, 248, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>← Back</button>
                   </div>
                 </>
               )
@@ -1315,7 +1315,7 @@ const Policies: React.FC = () => {
                   <button
                     onClick={() => { setCreateFlowMethod(null); setAiComposeInput('') }}
                     disabled={aiCompiling}
-                    style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(212, 168, 67, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: aiCompiling ? 'not-allowed' : 'pointer', fontFamily: 'inherit', opacity: aiCompiling ? 0.5 : 1 }}
+                    style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(129, 140, 248, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: aiCompiling ? 'not-allowed' : 'pointer', fontFamily: 'inherit', opacity: aiCompiling ? 0.5 : 1 }}
                   >← Back</button>
                   <button
                     onClick={handleAICompile}
@@ -1359,14 +1359,14 @@ const Policies: React.FC = () => {
                     const done = policyFormStep > step
                     return (
                       <React.Fragment key={label}>
-                        {idx > 0 && <div style={{ flex: 1, height: 1, backgroundColor: done ? '#D4A843' : 'rgba(212,168,67,0.15)' }} />}
+                        {idx > 0 && <div style={{ flex: 1, height: 1, backgroundColor: done ? '#818CF8' : 'rgba(129, 140, 248,0.15)' }} />}
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                           <span style={{
                             width: 22, height: 22, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
                             fontSize: 11, fontWeight: 600,
-                            backgroundColor: active ? '#D4A843' : done ? 'rgba(212,168,67,0.25)' : '#1E1E1E',
-                            color: active ? '#0A0A0A' : done ? '#D4A843' : '#666',
-                            border: active ? 'none' : '1px solid rgba(212,168,67,0.15)',
+                            backgroundColor: active ? '#818CF8' : done ? 'rgba(129, 140, 248,0.25)' : '#1E1E1E',
+                            color: active ? '#0A0A0A' : done ? '#818CF8' : '#666',
+                            border: active ? 'none' : '1px solid rgba(129, 140, 248,0.15)',
                           }}>{done ? '✓' : step}</span>
                           <span style={{ fontSize: 12, color: active ? '#fff' : '#888', fontWeight: active ? 600 : 400 }}>{label}</span>
                         </div>
@@ -1383,14 +1383,14 @@ const Policies: React.FC = () => {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                       <div>
                         <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Policy Name</label>
-                        <input value={policyFormData.name} onChange={e => setPolicyFormData(f => ({ ...f, name: e.target.value }))} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' as const }} />
+                        <input value={policyFormData.name} onChange={e => setPolicyFormData(f => ({ ...f, name: e.target.value }))} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(129, 140, 248,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' as const }} />
                       </div>
                       <div>
                         <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>
                           Category
                           {(templateSelected || aiCompiled) && <span style={{ color: '#888', fontSize: 11, marginLeft: 6 }}>{aiCompiled ? '(from AI)' : '(from template)'}</span>}
                         </label>
-                        <select value={policyFormData.category} onChange={e => setPolicyFormData(f => ({ ...f, category: e.target.value as PolicyCategory }))} disabled={templateSelected || aiCompiled} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit', ...((templateSelected || aiCompiled) ? { opacity: 0.6, cursor: 'not-allowed' } : {}) }}>
+                        <select value={policyFormData.category} onChange={e => setPolicyFormData(f => ({ ...f, category: e.target.value as PolicyCategory }))} disabled={templateSelected || aiCompiled} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(129, 140, 248,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit', ...((templateSelected || aiCompiled) ? { opacity: 0.6, cursor: 'not-allowed' } : {}) }}>
                           <option value="authentication">Authentication</option>
                           <option value="rate-limits">Rate Limits</option>
                           <option value="content-safety">Content Safety</option>
@@ -1401,11 +1401,11 @@ const Policies: React.FC = () => {
                       </div>
                       <div>
                         <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Description</label>
-                        <textarea value={policyFormData.description} onChange={e => setPolicyFormData(f => ({ ...f, description: e.target.value }))} rows={3} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit', resize: 'vertical' as const, boxSizing: 'border-box' as const }} />
+                        <textarea value={policyFormData.description} onChange={e => setPolicyFormData(f => ({ ...f, description: e.target.value }))} rows={3} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(129, 140, 248,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit', resize: 'vertical' as const, boxSizing: 'border-box' as const }} />
                       </div>
                       <div>
                         <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Enforcement</label>
-                        <select value={policyFormData.enforcement} onChange={e => setPolicyFormData(f => ({ ...f, enforcement: e.target.value }))} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit' }}>
+                        <select value={policyFormData.enforcement} onChange={e => setPolicyFormData(f => ({ ...f, enforcement: e.target.value }))} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(129, 140, 248,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit' }}>
                           <option>Enforce</option>
                           <option>Audit</option>
                           <option>Disabled</option>
@@ -1413,7 +1413,7 @@ const Policies: React.FC = () => {
                       </div>
                       <div>
                         <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Target</label>
-                        <select value={policyFormData.target} onChange={e => setPolicyFormData(f => ({ ...f, target: e.target.value }))} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit' }}>
+                        <select value={policyFormData.target} onChange={e => setPolicyFormData(f => ({ ...f, target: e.target.value }))} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(129, 140, 248,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit' }}>
                           <option value="model-endpoints">Model Endpoints</option>
                           <option value="tool-endpoints">Tool Endpoints</option>
                           <option value="agent-endpoints">Agent Endpoints</option>
@@ -1423,13 +1423,13 @@ const Policies: React.FC = () => {
                       </div>
                       <div>
                         <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Threshold (optional)</label>
-                        <input type="number" value={policyFormData.threshold} onChange={e => setPolicyFormData(f => ({ ...f, threshold: e.target.value }))} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' as const }} />
+                        <input type="number" value={policyFormData.threshold} onChange={e => setPolicyFormData(f => ({ ...f, threshold: e.target.value }))} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(129, 140, 248,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' as const }} />
                       </div>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, marginTop: 20 }}>
-                      <button onClick={() => { handleFormBack(); setPolicyFormStep(1) }} style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(212, 168, 67, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>← Back</button>
+                      <button onClick={() => { handleFormBack(); setPolicyFormStep(1) }} style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(129, 140, 248, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>← Back</button>
                       <button disabled={!policyFormData.name} onClick={() => setPolicyFormStep(2)} style={{
-                        backgroundColor: !policyFormData.name ? '#555' : '#D4A843', color: !policyFormData.name ? '#999' : '#0A0A0A',
+                        backgroundColor: !policyFormData.name ? '#555' : '#818CF8', color: !policyFormData.name ? '#999' : '#0A0A0A',
                         border: 'none', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: !policyFormData.name ? 'not-allowed' : 'pointer', fontFamily: 'inherit',
                       }}>Next: Assign →</button>
                     </div>
@@ -1466,11 +1466,11 @@ const Policies: React.FC = () => {
                                   return (
                                     <label key={a.name} style={{
                                       display: 'flex', alignItems: 'center', gap: 10, padding: '6px 10px', borderRadius: 6,
-                                      backgroundColor: checked ? 'rgba(212,168,67,0.08)' : 'transparent',
-                                      border: '1px solid ' + (checked ? 'rgba(212,168,67,0.25)' : 'rgba(212,168,67,0.06)'),
+                                      backgroundColor: checked ? 'rgba(129, 140, 248,0.08)' : 'transparent',
+                                      border: '1px solid ' + (checked ? 'rgba(129, 140, 248,0.25)' : 'rgba(129, 140, 248,0.06)'),
                                       cursor: 'pointer', transition: 'all 0.15s',
                                     }}>
-                                      <input type="checkbox" checked={checked} onChange={() => setPolicyAssignments(prev => ({ ...prev, [a.name]: !prev[a.name] }))} style={{ accentColor: '#D4A843' }} />
+                                      <input type="checkbox" checked={checked} onChange={() => setPolicyAssignments(prev => ({ ...prev, [a.name]: !prev[a.name] }))} style={{ accentColor: '#818CF8' }} />
                                       <span style={{ fontSize: 13, color: '#E8E8E8', flex: 1 }}>{a.name}</span>
                                       <span style={{ fontSize: 11, color: '#666' }}>{a.namespace}</span>
                                     </label>
@@ -1485,15 +1485,15 @@ const Policies: React.FC = () => {
                         )}
                       </div>
                       {assignedCount > 0 && (
-                        <div style={{ marginTop: 12, padding: '8px 12px', backgroundColor: 'rgba(212,168,67,0.06)', borderRadius: 6, fontSize: 12, color: '#D4A843' }}>
+                        <div style={{ marginTop: 12, padding: '8px 12px', backgroundColor: 'rgba(129, 140, 248,0.06)', borderRadius: 6, fontSize: 12, color: '#818CF8' }}>
                           {assignedCount} asset{assignedCount !== 1 ? 's' : ''} selected
                         </div>
                       )}
                       <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, marginTop: 20 }}>
-                        <button onClick={() => setPolicyFormStep(1)} style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(212, 168, 67, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>← Back</button>
+                        <button onClick={() => setPolicyFormStep(1)} style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(129, 140, 248, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>← Back</button>
                         <div style={{ display: 'flex', gap: 10 }}>
-                          <button onClick={() => { setPolicyAssignments({}); handleCreatePolicy() }} style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(212, 168, 67, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>Skip (apply globally)</button>
-                          <button onClick={handleCreatePolicy} style={{ backgroundColor: '#D4A843', color: '#0A0A0A', border: 'none', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
+                          <button onClick={() => { setPolicyAssignments({}); handleCreatePolicy() }} style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(129, 140, 248, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>Skip (apply globally)</button>
+                          <button onClick={handleCreatePolicy} style={{ backgroundColor: '#818CF8', color: '#FFFFFF', border: 'none', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
                             {assignedCount > 0 ? `Create & Assign (${assignedCount})` : 'Create Runtime Rule'}
                           </button>
                         </div>
@@ -1515,14 +1515,14 @@ const Policies: React.FC = () => {
                     const done = policyFormStep > step
                     return (
                       <React.Fragment key={label}>
-                        {idx > 0 && <div style={{ flex: 1, height: 1, backgroundColor: done ? '#D4A843' : 'rgba(212,168,67,0.15)' }} />}
+                        {idx > 0 && <div style={{ flex: 1, height: 1, backgroundColor: done ? '#818CF8' : 'rgba(129, 140, 248,0.15)' }} />}
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                           <span style={{
                             width: 22, height: 22, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
                             fontSize: 11, fontWeight: 600,
-                            backgroundColor: active ? '#D4A843' : done ? 'rgba(212,168,67,0.25)' : '#1E1E1E',
-                            color: active ? '#0A0A0A' : done ? '#D4A843' : '#666',
-                            border: active ? 'none' : '1px solid rgba(212,168,67,0.15)',
+                            backgroundColor: active ? '#818CF8' : done ? 'rgba(129, 140, 248,0.25)' : '#1E1E1E',
+                            color: active ? '#0A0A0A' : done ? '#818CF8' : '#666',
+                            border: active ? 'none' : '1px solid rgba(129, 140, 248,0.15)',
                           }}>{done ? '✓' : step}</span>
                           <span style={{ fontSize: 12, color: active ? '#fff' : '#888', fontWeight: active ? 600 : 400 }}>{label}</span>
                         </div>
@@ -1539,14 +1539,14 @@ const Policies: React.FC = () => {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                       <div>
                         <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Guardrail Name</label>
-                        <input value={policyFormData.name} onChange={e => setPolicyFormData(f => ({ ...f, name: e.target.value }))} placeholder="e.g. Custom PII Filter" style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' as const }} />
+                        <input value={policyFormData.name} onChange={e => setPolicyFormData(f => ({ ...f, name: e.target.value }))} placeholder="e.g. Custom PII Filter" style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(129, 140, 248,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' as const }} />
                       </div>
                       <div>
                         <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>
                           Category
                           {(templateSelected || aiCompiled) && <span style={{ color: '#888', fontSize: 11, marginLeft: 6 }}>{aiCompiled ? '(from AI)' : '(from template)'}</span>}
                         </label>
-                        <select value={policyFormData.category} onChange={e => setPolicyFormData(f => ({ ...f, category: e.target.value as PolicyCategory }))} disabled={templateSelected || aiCompiled} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit', ...((templateSelected || aiCompiled) ? { opacity: 0.6, cursor: 'not-allowed' } : {}) }}>
+                        <select value={policyFormData.category} onChange={e => setPolicyFormData(f => ({ ...f, category: e.target.value as PolicyCategory }))} disabled={templateSelected || aiCompiled} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(129, 140, 248,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit', ...((templateSelected || aiCompiled) ? { opacity: 0.6, cursor: 'not-allowed' } : {}) }}>
                           <option value="content-safety">Content Safety</option>
                           <option value="authentication">Security</option>
                           <option value="agent-execution">Agent Safety</option>
@@ -1554,11 +1554,11 @@ const Policies: React.FC = () => {
                       </div>
                       <div>
                         <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Description</label>
-                        <textarea value={policyFormData.description} onChange={e => setPolicyFormData(f => ({ ...f, description: e.target.value }))} rows={2} placeholder="Describe what this guardrail detects or blocks..." style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit', resize: 'vertical' as const, boxSizing: 'border-box' as const }} />
+                        <textarea value={policyFormData.description} onChange={e => setPolicyFormData(f => ({ ...f, description: e.target.value }))} rows={2} placeholder="Describe what this guardrail detects or blocks..." style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(129, 140, 248,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit', resize: 'vertical' as const, boxSizing: 'border-box' as const }} />
                       </div>
                       <div>
                         <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Severity</label>
-                        <select value={policyFormData.enforcement} onChange={e => setPolicyFormData(f => ({ ...f, enforcement: e.target.value }))} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit' }}>
+                        <select value={policyFormData.enforcement} onChange={e => setPolicyFormData(f => ({ ...f, enforcement: e.target.value }))} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(129, 140, 248,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit' }}>
                           <option value="block">🛑 Block — prevent request/response</option>
                           <option value="warn">⚠️ Warn — flag but allow through</option>
                           <option value="log">📝 Log — record for audit only</option>
@@ -1566,7 +1566,7 @@ const Policies: React.FC = () => {
                       </div>
                       <div>
                         <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Target</label>
-                        <select value={policyFormData.target} onChange={e => setPolicyFormData(f => ({ ...f, target: e.target.value }))} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit' }}>
+                        <select value={policyFormData.target} onChange={e => setPolicyFormData(f => ({ ...f, target: e.target.value }))} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(129, 140, 248,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit' }}>
                           <option value="model-endpoints">Model Endpoints</option>
                           <option value="tool-endpoints">Tool Endpoints</option>
                           <option value="agent-endpoints">Agent Endpoints</option>
@@ -1576,9 +1576,9 @@ const Policies: React.FC = () => {
                       </div>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, marginTop: 20 }}>
-                      <button onClick={() => { handleFormBack(); setPolicyFormStep(1) }} style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(212, 168, 67, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>← Back</button>
+                      <button onClick={() => { handleFormBack(); setPolicyFormStep(1) }} style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(129, 140, 248, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>← Back</button>
                       <button disabled={!policyFormData.name} onClick={() => setPolicyFormStep(2)} style={{
-                        backgroundColor: !policyFormData.name ? '#555' : '#D4A843', color: !policyFormData.name ? '#999' : '#0A0A0A',
+                        backgroundColor: !policyFormData.name ? '#555' : '#818CF8', color: !policyFormData.name ? '#999' : '#0A0A0A',
                         border: 'none', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: !policyFormData.name ? 'not-allowed' : 'pointer', fontFamily: 'inherit',
                       }}>Next: Assign →</button>
                     </div>
@@ -1615,11 +1615,11 @@ const Policies: React.FC = () => {
                                   return (
                                     <label key={a.name} style={{
                                       display: 'flex', alignItems: 'center', gap: 10, padding: '6px 10px', borderRadius: 6,
-                                      backgroundColor: checked ? 'rgba(212,168,67,0.08)' : 'transparent',
-                                      border: '1px solid ' + (checked ? 'rgba(212,168,67,0.25)' : 'rgba(212,168,67,0.06)'),
+                                      backgroundColor: checked ? 'rgba(129, 140, 248,0.08)' : 'transparent',
+                                      border: '1px solid ' + (checked ? 'rgba(129, 140, 248,0.25)' : 'rgba(129, 140, 248,0.06)'),
                                       cursor: 'pointer', transition: 'all 0.15s',
                                     }}>
-                                      <input type="checkbox" checked={checked} onChange={() => setPolicyAssignments(prev => ({ ...prev, [a.name]: !prev[a.name] }))} style={{ accentColor: '#D4A843' }} />
+                                      <input type="checkbox" checked={checked} onChange={() => setPolicyAssignments(prev => ({ ...prev, [a.name]: !prev[a.name] }))} style={{ accentColor: '#818CF8' }} />
                                       <span style={{ fontSize: 13, color: '#E8E8E8', flex: 1 }}>{a.name}</span>
                                       <span style={{ fontSize: 11, color: '#666' }}>{a.namespace}</span>
                                     </label>
@@ -1634,15 +1634,15 @@ const Policies: React.FC = () => {
                         )}
                       </div>
                       {assignedCount > 0 && (
-                        <div style={{ marginTop: 12, padding: '8px 12px', backgroundColor: 'rgba(212,168,67,0.06)', borderRadius: 6, fontSize: 12, color: '#D4A843' }}>
+                        <div style={{ marginTop: 12, padding: '8px 12px', backgroundColor: 'rgba(129, 140, 248,0.06)', borderRadius: 6, fontSize: 12, color: '#818CF8' }}>
                           {assignedCount} asset{assignedCount !== 1 ? 's' : ''} selected
                         </div>
                       )}
                       <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, marginTop: 20 }}>
-                        <button onClick={() => setPolicyFormStep(1)} style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(212, 168, 67, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>← Back</button>
+                        <button onClick={() => setPolicyFormStep(1)} style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(129, 140, 248, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>← Back</button>
                         <div style={{ display: 'flex', gap: 10 }}>
-                          <button onClick={() => { setPolicyAssignments({}); handleCreatePolicy() }} style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(212, 168, 67, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>Skip (apply globally)</button>
-                          <button onClick={handleCreatePolicy} style={{ backgroundColor: '#D4A843', color: '#0A0A0A', border: 'none', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
+                          <button onClick={() => { setPolicyAssignments({}); handleCreatePolicy() }} style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(129, 140, 248, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>Skip (apply globally)</button>
+                          <button onClick={handleCreatePolicy} style={{ backgroundColor: '#818CF8', color: '#FFFFFF', border: 'none', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
                             {assignedCount > 0 ? `Create & Assign (${assignedCount})` : 'Create Guardrail'}
                           </button>
                         </div>
@@ -1664,14 +1664,14 @@ const Policies: React.FC = () => {
                     const done = accessRuleStep > step
                     return (
                       <React.Fragment key={label}>
-                        {idx > 0 && <div style={{ flex: 1, height: 1, backgroundColor: done ? '#D4A843' : 'rgba(212,168,67,0.15)' }} />}
+                        {idx > 0 && <div style={{ flex: 1, height: 1, backgroundColor: done ? '#818CF8' : 'rgba(129, 140, 248,0.15)' }} />}
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                           <span style={{
                             width: 22, height: 22, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
                             fontSize: 11, fontWeight: 600,
-                            backgroundColor: active ? '#D4A843' : done ? 'rgba(212,168,67,0.25)' : '#1E1E1E',
-                            color: active ? '#0A0A0A' : done ? '#D4A843' : '#666',
-                            border: active ? 'none' : '1px solid rgba(212,168,67,0.15)',
+                            backgroundColor: active ? '#818CF8' : done ? 'rgba(129, 140, 248,0.25)' : '#1E1E1E',
+                            color: active ? '#0A0A0A' : done ? '#818CF8' : '#666',
+                            border: active ? 'none' : '1px solid rgba(129, 140, 248,0.15)',
                           }}>{done ? '✓' : step}</span>
                           <span style={{ fontSize: 12, color: active ? '#fff' : '#888', fontWeight: active ? 600 : 400 }}>{label}</span>
                         </div>
@@ -1688,14 +1688,14 @@ const Policies: React.FC = () => {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                       <div>
                         <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Rule Name</label>
-                        <input value={accessRuleForm.name} onChange={e => setAccessRuleForm(f => ({ ...f, name: e.target.value }))} placeholder="e.g. Production Model RBAC" style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' as const }} />
+                        <input value={accessRuleForm.name} onChange={e => setAccessRuleForm(f => ({ ...f, name: e.target.value }))} placeholder="e.g. Production Model RBAC" style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(129, 140, 248,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' as const }} />
                       </div>
                       <div>
                         <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Rule Type</label>
                         <div style={{ display: 'flex', gap: 8 }}>
                           {(Object.entries(accessRuleConfig) as [AccessRuleType, typeof accessRuleConfig[AccessRuleType]][]).map(([key, cfg]) => (
                             <button key={key} onClick={() => setAccessRuleForm(f => ({ ...f, type: key }))} style={{
-                              flex: 1, padding: '10px 8px', borderRadius: 6, border: `1px solid ${accessRuleForm.type === key ? cfg.color : 'rgba(212,168,67,0.10)'}`,
+                              flex: 1, padding: '10px 8px', borderRadius: 6, border: `1px solid ${accessRuleForm.type === key ? cfg.color : 'rgba(129, 140, 248,0.10)'}`,
                               backgroundColor: accessRuleForm.type === key ? cfg.bg : 'transparent', cursor: 'pointer',
                               display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, fontFamily: 'inherit',
                             }}>
@@ -1707,19 +1707,19 @@ const Policies: React.FC = () => {
                       </div>
                       <div>
                         <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Policy Intent <span style={{ color: '#666' }}>(describe the rule's purpose — may be used by AI policy engine)</span></label>
-                        <textarea value={accessRuleForm.description} onChange={e => setAccessRuleForm(f => ({ ...f, description: e.target.value }))} rows={2} placeholder={accessRuleForm.type === 'who' ? 'e.g. Only ML engineers and admins can invoke production GPT-4 models' : 'e.g. Staging can import models from production but not from sandbox'} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit', resize: 'vertical' as const, boxSizing: 'border-box' as const }} />
+                        <textarea value={accessRuleForm.description} onChange={e => setAccessRuleForm(f => ({ ...f, description: e.target.value }))} rows={2} placeholder={accessRuleForm.type === 'who' ? 'e.g. Only ML engineers and admins can invoke production GPT-4 models' : 'e.g. Staging can import models from production but not from sandbox'} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(129, 140, 248,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit', resize: 'vertical' as const, boxSizing: 'border-box' as const }} />
                       </div>
                       {/* Type-specific fields */}
                       <div>
                         <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Asset Type</label>
-                        <select value={accessRuleForm.assetType} onChange={e => setAccessRuleForm(f => ({ ...f, assetType: e.target.value }))} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit' }}>
+                        <select value={accessRuleForm.assetType} onChange={e => setAccessRuleForm(f => ({ ...f, assetType: e.target.value }))} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(129, 140, 248,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit' }}>
                           <option>Model</option><option>Tool</option><option>Agent</option><option>Namespace</option><option>All</option>
                         </select>
                       </div>
                       {accessRuleForm.type === 'who' && (
                         <div>
                           <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Allowed Identities <span style={{ color: '#666' }}>(roles, groups, service principals, domains — comma-separated)</span></label>
-                          <input value={accessRuleForm.identities} onChange={e => setAccessRuleForm(f => ({ ...f, identities: e.target.value }))} placeholder="e.g. AI-Developer, ML-Engineer, contoso.com" style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' as const }} />
+                          <input value={accessRuleForm.identities} onChange={e => setAccessRuleForm(f => ({ ...f, identities: e.target.value }))} placeholder="e.g. AI-Developer, ML-Engineer, contoso.com" style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(129, 140, 248,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' as const }} />
                           {accessRuleForm.identities && <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginTop: 6 }}>{accessRuleForm.identities.split(',').map(r => r.trim()).filter(Boolean).map(r => <span key={r} style={badge('rgba(192,132,252,0.12)', '#c084fc')}>{r}</span>)}</div>}
                         </div>
                       )}
@@ -1730,9 +1730,9 @@ const Policies: React.FC = () => {
                       )}
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, marginTop: 20 }}>
-                      <button onClick={() => { handleFormBack(); setAccessRuleStep(1) }} style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(212, 168, 67, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>← Back</button>
+                      <button onClick={() => { handleFormBack(); setAccessRuleStep(1) }} style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(129, 140, 248, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>← Back</button>
                       <button disabled={!accessRuleForm.name} onClick={() => setAccessRuleStep(2)} style={{
-                        backgroundColor: !accessRuleForm.name ? '#555' : '#D4A843', color: !accessRuleForm.name ? '#999' : '#0A0A0A',
+                        backgroundColor: !accessRuleForm.name ? '#555' : '#818CF8', color: !accessRuleForm.name ? '#999' : '#0A0A0A',
                         border: 'none', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: !accessRuleForm.name ? 'not-allowed' : 'pointer', fontFamily: 'inherit',
                       }}>Next: Assign →</button>
                     </div>
@@ -1768,11 +1768,11 @@ const Policies: React.FC = () => {
                                   return (
                                     <label key={a.name} style={{
                                       display: 'flex', alignItems: 'center', gap: 10, padding: '6px 10px', borderRadius: 6,
-                                      backgroundColor: checked ? 'rgba(212,168,67,0.08)' : 'transparent',
-                                      border: '1px solid ' + (checked ? 'rgba(212,168,67,0.25)' : 'rgba(212,168,67,0.06)'),
+                                      backgroundColor: checked ? 'rgba(129, 140, 248,0.08)' : 'transparent',
+                                      border: '1px solid ' + (checked ? 'rgba(129, 140, 248,0.25)' : 'rgba(129, 140, 248,0.06)'),
                                       cursor: 'pointer', transition: 'all 0.15s',
                                     }}>
-                                      <input type="checkbox" checked={checked} onChange={() => setAccessRuleAssignments(prev => ({ ...prev, [a.name]: !prev[a.name] }))} style={{ accentColor: '#D4A843' }} />
+                                      <input type="checkbox" checked={checked} onChange={() => setAccessRuleAssignments(prev => ({ ...prev, [a.name]: !prev[a.name] }))} style={{ accentColor: '#818CF8' }} />
                                       <span style={{ fontSize: 13, color: '#E8E8E8', flex: 1 }}>{a.name}</span>
                                       <span style={{ fontSize: 11, color: '#666' }}>{a.namespace}</span>
                                     </label>
@@ -1787,15 +1787,15 @@ const Policies: React.FC = () => {
                         )}
                       </div>
                       {assignedCount > 0 && (
-                        <div style={{ marginTop: 12, padding: '8px 12px', backgroundColor: 'rgba(212,168,67,0.06)', borderRadius: 6, fontSize: 12, color: '#D4A843' }}>
+                        <div style={{ marginTop: 12, padding: '8px 12px', backgroundColor: 'rgba(129, 140, 248,0.06)', borderRadius: 6, fontSize: 12, color: '#818CF8' }}>
                           {assignedCount} asset{assignedCount !== 1 ? 's' : ''} selected
                         </div>
                       )}
                       <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, marginTop: 20 }}>
-                        <button onClick={() => setAccessRuleStep(1)} style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(212, 168, 67, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>← Back</button>
+                        <button onClick={() => setAccessRuleStep(1)} style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(129, 140, 248, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>← Back</button>
                         <div style={{ display: 'flex', gap: 10 }}>
-                          <button onClick={() => { setAccessRuleAssignments({}); handleCreateAccessRule() }} style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(212, 168, 67, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>Skip (apply to all)</button>
-                          <button onClick={handleCreateAccessRule} style={{ backgroundColor: '#D4A843', color: '#0A0A0A', border: 'none', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
+                          <button onClick={() => { setAccessRuleAssignments({}); handleCreateAccessRule() }} style={{ backgroundColor: 'transparent', color: '#ccc', border: '1px solid rgba(129, 140, 248, 0.10)', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>Skip (apply to all)</button>
+                          <button onClick={handleCreateAccessRule} style={{ backgroundColor: '#818CF8', color: '#FFFFFF', border: 'none', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
                             {assignedCount > 0 ? `Create & Assign (${assignedCount})` : 'Create Rule'}
                           </button>
                         </div>

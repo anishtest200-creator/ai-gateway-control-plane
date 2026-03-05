@@ -6,7 +6,7 @@ import type { CSSProperties } from 'react';
 const colors = {
   bg: '#0A0A0A',
   card: '#161616',
-  border: 'rgba(212, 168, 67, 0.10)',
+  border: 'rgba(129, 140, 248, 0.10)',
   text: '#E8E8E8',
   textMuted: '#999',
   textDim: '#666',
@@ -14,9 +14,9 @@ const colors = {
   amber: '#F59E0B',
   red: '#EF4444',
   blue: '#60A5FA',
-  gold: '#D4A843',
-  goldDim: '#B8923A',
-  goldMuted: 'rgba(212, 168, 67, 0.15)',
+  gold: '#818CF8',
+  goldDim: '#6366F1',
+  goldMuted: 'rgba(129, 140, 248, 0.15)',
   purple: '#A78BFA',
   azure: '#4F6BED',
   google: '#34A853',
@@ -96,7 +96,7 @@ const BarRow: React.FC<{
     <div
       style={{
         height: 6,
-        backgroundColor: 'rgba(212, 168, 67, 0.06)',
+        backgroundColor: 'rgba(129, 140, 248, 0.06)',
         borderRadius: 3,
         overflow: 'hidden',
       }}
@@ -170,7 +170,7 @@ const providerOptions = ['All Providers', 'Azure OpenAI', 'Anthropic', 'Google V
 const selectStyle: CSSProperties = {
   backgroundColor: '#1A1A1A',
   color: '#E8E8E8',
-  border: '1px solid rgba(212, 168, 67, 0.10)',
+  border: '1px solid rgba(129, 140, 248, 0.10)',
   borderRadius: 6,
   padding: '5px 10px',
   fontSize: 12,
@@ -336,7 +336,7 @@ const Traffic: React.FC<TrafficProps> = () => {
                     style={{
                       cursor: 'pointer',
                       backgroundColor: hoveredNsRow === ns.name ? '#1A1A1A' : 'transparent',
-                      borderLeft: hoveredNsRow === ns.name ? '3px solid #D4A843' : '3px solid transparent',
+                      borderLeft: hoveredNsRow === ns.name ? '3px solid #818CF8' : '3px solid transparent',
                       transition: 'all 0.15s',
                     }}
                   >

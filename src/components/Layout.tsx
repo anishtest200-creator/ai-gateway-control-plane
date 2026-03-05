@@ -397,7 +397,7 @@ const navItems: NavItem[] = [
   },
   {
     path: '/test-console',
-    label: 'Playground',
+    label: 'Test Console',
     icon: <Play24Regular />,
     activeIcon: <Play24Filled />,
   },
@@ -414,7 +414,7 @@ const pageTitles: Record<string, string> = {
   '/logs': 'Audit Log',
   '/namespaces': 'Namespaces',
   '/access': 'Access Control',
-  '/test-console': 'Playground',
+  '/test-console': 'Test Console',
 };
 
 const pageSubtitles: Record<string, string> = {

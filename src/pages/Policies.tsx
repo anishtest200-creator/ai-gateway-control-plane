@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom'
 /* ------------------------------------------------------------------ */
 
 type PolicyCategory = 'authentication' | 'credentials' | 'rate-limits' | 'content-safety' | 'routing' | 'agent-execution'
-type AccessRuleType = 'visibility' | 'namespace-access' | 'identity-access' | 'usage-requirements' | 'approval' | 'credential-scope'
+type AccessRuleType = 'role-based' | 'namespace-access' | 'domain-access'
 
 interface PolicyVersion {
   version: number
@@ -181,16 +181,17 @@ const policies: Policy[] = _basePolicies.map(p => ({
 }))
 
 const accessRules: AssetAccessRule[] = [
-  { id: 'ar1', name: 'Internal-Only Models', description: 'Restrict fine-tuned models to internal namespaces only.', type: 'visibility', assetType: 'Model', namespace: 'global', enabled: true, config: { visibility: 'internal', scope: 'All fine-tuned models' } },
-  { id: 'ar2', name: 'Public Tool Catalog', description: 'Allow all namespaces to discover and browse shared tools.', type: 'visibility', assetType: 'Tool', namespace: 'global', enabled: true, config: { visibility: 'public', scope: 'Shared tools' } },
-  { id: 'ar3', name: 'Cross-Namespace Model Import', description: 'Allow staging namespace to import models from production.', type: 'namespace-access', assetType: 'Model', namespace: 'staging', enabled: true, config: { allowedNamespaces: ['production'] } },
-  { id: 'ar4', name: 'Agent Sharing Policy', description: 'Restrict agent imports to approved partner namespaces.', type: 'namespace-access', assetType: 'Agent', namespace: 'global', enabled: true, config: { allowedNamespaces: ['partners', 'production'] } },
-  { id: 'ar5', name: 'Model Invoke RBAC', description: 'Only users with AI-Developer role can invoke GPT-4 class models.', type: 'identity-access', assetType: 'Model', namespace: 'global', enabled: true, config: { allowedRoles: ['AI-Developer', 'ML-Engineer', 'Admin'] } },
-  { id: 'ar6', name: 'Tool Execute Permissions', description: 'Restrict tool execution to service principals and managed identities.', type: 'identity-access', assetType: 'Tool', namespace: 'production', enabled: true, config: { allowedRoles: ['ServicePrincipal', 'ManagedIdentity'] } },
-  { id: 'ar7', name: 'Usage Terms Acceptance', description: 'Require acceptance of usage terms before invoking any model.', type: 'usage-requirements', assetType: 'Model', namespace: 'global', enabled: true, config: { requirements: ['Accept Terms of Use', 'Complete AI Safety Training'] } },
-  { id: 'ar8', name: 'Premium Model Approval', description: 'Require manager approval before accessing GPT-4 Turbo and Claude 3 Opus.', type: 'approval', assetType: 'Model', namespace: 'global', enabled: true, config: { approvers: ['namespace-admin', 'cost-center-owner'], autoExpire: '30 days' } },
-  { id: 'ar9', name: 'Agent Deploy Approval', description: 'Require security review before deploying new agents to production.', type: 'approval', assetType: 'Agent', namespace: 'production', enabled: true, config: { approvers: ['security-team'], autoExpire: '7 days' } },
-  { id: 'ar10', name: 'Provider Credential Scope', description: 'Restrict Azure OpenAI credentials to model assets only.', type: 'credential-scope', assetType: 'Credential', namespace: 'global', enabled: true, config: { credentialType: 'Azure OpenAI API Key', allowedAssetTypes: ['Model'] } },
+  { id: 'ar1', name: 'Model Invoke RBAC', description: 'Only users with AI-Developer or ML-Engineer role can invoke GPT-4 class models.', type: 'role-based', assetType: 'Model', namespace: 'global', enabled: true, config: { allowedRoles: ['AI-Developer', 'ML-Engineer', 'Admin'] } },
+  { id: 'ar2', name: 'Tool Execute Permissions', description: 'Restrict tool execution to service principals and managed identities only.', type: 'role-based', assetType: 'Tool', namespace: 'production', enabled: true, config: { allowedRoles: ['ServicePrincipal', 'ManagedIdentity'] } },
+  { id: 'ar3', name: 'Agent Operator Role', description: 'Only Agent-Operator and Admin roles can invoke or configure production agents.', type: 'role-based', assetType: 'Agent', namespace: 'production', enabled: true, config: { allowedRoles: ['Agent-Operator', 'Admin'] } },
+  { id: 'ar4', name: 'Read-Only Analyst Access', description: 'Analyst role can query models but cannot modify configurations or deploy.', type: 'role-based', assetType: 'Model', namespace: 'global', enabled: true, config: { allowedRoles: ['Analyst'] } },
+  { id: 'ar5', name: 'Cross-Namespace Model Import', description: 'Allow staging namespace to import and use models from production namespace.', type: 'namespace-access', assetType: 'Model', namespace: 'staging', enabled: true, config: { allowedNamespaces: ['production'] } },
+  { id: 'ar6', name: 'Agent Sharing Policy', description: 'Restrict agent imports to approved partner and production namespaces only.', type: 'namespace-access', assetType: 'Agent', namespace: 'global', enabled: true, config: { allowedNamespaces: ['partners', 'production'] } },
+  { id: 'ar7', name: 'Sandbox Isolation', description: 'Sandbox namespace cannot access production or staging models, tools, or agents.', type: 'namespace-access', assetType: 'Model', namespace: 'sandbox', enabled: true, config: { allowedNamespaces: ['sandbox', 'dev'] } },
+  { id: 'ar8', name: 'Tool Catalog Sharing', description: 'Allow all namespaces to discover shared tools but restrict execution to approved ones.', type: 'namespace-access', assetType: 'Tool', namespace: 'global', enabled: true, config: { allowedNamespaces: ['production', 'staging', 'dev'] } },
+  { id: 'ar9', name: 'Internal Domain Only', description: 'Restrict all model invocations to requests originating from @contoso.com domain.', type: 'domain-access', assetType: 'Model', namespace: 'global', enabled: true, config: { allowedDomains: ['contoso.com', 'contoso.onmicrosoft.com'] } },
+  { id: 'ar10', name: 'Partner Domain Access', description: 'Allow partner domains to invoke shared tools in the partners namespace.', type: 'domain-access', assetType: 'Tool', namespace: 'partners', enabled: true, config: { allowedDomains: ['partner-a.com', 'partner-b.com'] } },
+  { id: 'ar11', name: 'Agent Access by Domain', description: 'Only users from engineering domains can invoke data-pipeline agents.', type: 'domain-access', assetType: 'Agent', namespace: 'production', enabled: true, config: { allowedDomains: ['eng.contoso.com'] } },
 ]
 
 const guardrails: RAIGuardrail[] = [
@@ -294,12 +295,9 @@ const categoryConfig: Record<PolicyCategory, { label: string; color: string; bg:
 }
 
 const accessRuleConfig: Record<AccessRuleType, { label: string; color: string; bg: string; icon: string; desc: string }> = {
-  'visibility': { label: 'Visibility', color: '#38bdf8', bg: '#1a2d3d', icon: '👁', desc: 'Who can see an asset in the catalog' },
-  'namespace-access': { label: 'Namespace Access', color: '#4ade80', bg: '#1a3a2a', icon: '🛡', desc: 'Which namespaces can import and use' },
-  'identity-access': { label: 'Identity Access', color: '#c084fc', bg: '#2d1a4d', icon: '🔑', desc: 'Which users/services can invoke' },
-  'usage-requirements': { label: 'Usage Requirements', color: '#fbbf24', bg: '#3d2800', icon: '✓', desc: 'Conditions before usage' },
-  'approval': { label: 'Approval', color: '#fb923c', bg: '#3d2200', icon: '⏳', desc: 'Admin approval before usage' },
-  'credential-scope': { label: 'Credential Scope', color: '#f87171', bg: '#3d1a1a', icon: '🔐', desc: 'Which credentials for which assets' },
+  'role-based': { label: 'Role-Based Access', color: '#c084fc', bg: '#2d1a4d', icon: '🔑', desc: 'Control access by user or service principal roles' },
+  'namespace-access': { label: 'Namespace Access', color: '#4ade80', bg: '#1a3a2a', icon: '🛡', desc: 'Control which namespaces can share and import assets' },
+  'domain-access': { label: 'Domain Access', color: '#38bdf8', bg: '#1a2d3d', icon: '🌐', desc: 'Restrict access by identity domain or tenant' },
 }
 
 const severityConfig: Record<'block' | 'warn' | 'log', { color: string; bg: string; label: string }> = {
@@ -554,8 +552,15 @@ const Policies: React.FC = () => {
     const detailStyle: CSSProperties = { color: colors.textDim, fontSize: 11 }
 
     switch (rule.type) {
-      case 'visibility':
-        return <span style={detailStyle}>Visibility: <span style={{ color: colors.text }}>{String(cfg.visibility)}</span> · Scope: {String(cfg.scope)}</span>
+      case 'role-based':
+        return (
+          <span style={detailStyle}>
+            Allowed roles:{' '}
+            {(cfg.allowedRoles as string[]).map(role => (
+              <span key={role} style={badge('rgba(192,132,252,0.12)', '#c084fc')}>{role}</span>
+            ))}
+          </span>
+        )
       case 'namespace-access':
         return (
           <span style={detailStyle}>
@@ -565,41 +570,12 @@ const Policies: React.FC = () => {
             ))}
           </span>
         )
-      case 'identity-access':
+      case 'domain-access':
         return (
           <span style={detailStyle}>
-            Allowed roles:{' '}
-            {(cfg.allowedRoles as string[]).map(role => (
-              <span key={role} style={badge('rgba(192,132,252,0.12)', '#c084fc')}>{role}</span>
-            ))}
-          </span>
-        )
-      case 'usage-requirements':
-        return (
-          <span style={detailStyle}>
-            Requirements:{' '}
-            {(cfg.requirements as string[]).map(req => (
-              <span key={req} style={badge('rgba(251,191,36,0.12)', '#fbbf24')}>{req}</span>
-            ))}
-          </span>
-        )
-      case 'approval':
-        return (
-          <span style={detailStyle}>
-            Approvers:{' '}
-            {(cfg.approvers as string[]).map(a => (
-              <span key={a} style={badge('rgba(251,146,60,0.12)', '#fb923c')}>{a}</span>
-            ))}
-            {' '}· Auto-expire: {String(cfg.autoExpire)}
-          </span>
-        )
-      case 'credential-scope':
-        return (
-          <span style={detailStyle}>
-            Credential: <span style={{ color: colors.text }}>{String(cfg.credentialType)}</span>
-            {' '}· Allowed asset types:{' '}
-            {(cfg.allowedAssetTypes as string[]).map(t => (
-              <span key={t} style={badge('rgba(248,113,113,0.12)', '#f87171')}>{t}</span>
+            Allowed domains:{' '}
+            {(cfg.allowedDomains as string[]).map(d => (
+              <span key={d} style={badge('rgba(56,189,248,0.12)', '#38bdf8')}>{d}</span>
             ))}
           </span>
         )

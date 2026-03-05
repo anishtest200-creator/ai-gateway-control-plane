@@ -12,7 +12,7 @@ Azure AI Gateway is the **operations and governance layer** for AI workloads in 
 
 ## 2. What Is Azure AI Gateway?
 
-Azure AI Gateway is the **production operations layer for enterprise AI**. It provides:
+Azure AI Gateway is the **control plane for every AI model, tool, and agent in production**. It provides:
 
 - **Cloud-agnostic traffic mediation** — Route requests to any AI provider (Azure OpenAI, Bedrock, Vertex, self-hosted) through a single, governed entry point.
 - **Enterprise governance at the API boundary** — Enforce token quotas, content safety policies, and audit logging before traffic ever reaches a model.
@@ -102,7 +102,7 @@ The Azure AI Gateway is operated through two complementary portals, each serving
 
 ### AI Gateway Control Plane — Governance Portal
 
-The **AI Gateway Control Plane** is the governance-first portal for platform engineers, operations teams, and security teams. It provides:
+The **AI Gateway Control Plane** is the control plane for every AI model, tool, and agent in production — built for platform engineers, operations teams, and security teams. It provides:
 
 - **Operations-first interface** — Traffic dashboards, routing rules, policy management, credential configuration, and compliance monitoring.
 - **Enterprise governance at scale** — Namespace isolation, access control, token quotas, audit logging, and policy enforcement across all registered AI assets.
@@ -142,6 +142,6 @@ Centralizing secrets management means applications and developers never touch pr
 
 ## 8. Strategic Positioning Statement
 
-Azure AI Gateway is the operations layer for enterprise AI. It enables organizations to securely route, govern, and observe AI workloads across any combination of AI platforms — from Azure AI Foundry to AWS Bedrock to self-hosted models. While Foundry provides the tools to build AI applications, the Gateway provides the infrastructure to operate them safely at enterprise scale.
+Azure AI Gateway is the control plane for every AI model, tool, and agent in production. It enables organizations to securely route, govern, and observe AI workloads across any combination of AI platforms — from Azure AI Foundry to AWS Bedrock to self-hosted models. While Foundry provides the tools to build AI applications, the Gateway provides the infrastructure to operate them safely at enterprise scale.
 
 **Foundry builds AI. The Gateway operates AI.**

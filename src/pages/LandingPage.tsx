@@ -282,7 +282,7 @@ const LandingPage: FC<LandingPageProps> = ({ onLogin, onSignup }) => {
           animation: 'fadeInUp 0.8s ease-out, shimmer 6s ease-in-out infinite',
         }}
       >
-        One Control Plane for Every AI&nbsp;Model, Tool, and&nbsp;Agent
+        The Control Plane for Every AI&nbsp;Model, Tool, and&nbsp;Agent in&nbsp;Production
       </h1>
 
       <p

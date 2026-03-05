@@ -14,7 +14,7 @@
 
 | Step | Action | Page | Result | Status |
 |------|--------|------|--------|--------|
-| 1 | Open `/` | Landing | Hero: "One Control Plane for Every AI Model, Tool, and Agent" | ✅ |
+| 1 | Open `/` | Landing | Hero: "The Control Plane for Every AI Model, Tool, and Agent in Production" | ✅ |
 | 2 | Scroll down | Landing | Architecture diagram (3-column: Models / Tools / Agents), feature cards, stats | ✅ |
 | 3 | Click "Pricing" in top nav | Landing → Pricing | Navigate to `/pricing` | ✅ |
 | 4 | Browse 3 tiers (Developer / Pro / Enterprise) | Pricing | Cards with feature lists, price comparison | ✅ |

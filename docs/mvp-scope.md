@@ -7,7 +7,7 @@ Launch a functional standalone AI Gateway that demonstrates core value across th
 
 ### Portal Experience
 
-This repository contains the **Azure AI Gateway Control Plane** — a governance-first portal for platform engineers, operations teams, and security teams. Features a modern black + soft indigo design with 12 console pages and 4 public marketing pages. Navigation: **Configure** (Assets, Credentials, Routing, Policies), **Monitor** (Metrics, Audit Log), **Govern** (Namespaces, Access Control), **Tools** (Test Console).
+This repository contains the **Azure AI Gateway Control Plane** — the control plane for every AI model, tool, and agent in production. Features a modern black + soft indigo design with 12 console pages and 4 public marketing pages. Navigation: **Configure** (Assets, Credentials, Routing, Policies), **Monitor** (Metrics, Audit Log), **Govern** (Namespaces, Access Control), **Tools** (Test Console).
 
 See [standalone-ai-gateway](https://github.com/anishta_microsoft/standalone-ai-gateway) for the companion AI Gateway Studio portal.
 

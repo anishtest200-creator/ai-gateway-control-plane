@@ -114,7 +114,7 @@ Microsoft Foundry is the AI development and deployment platform — it provides 
 - Production-grade content safety enforcement at the API boundary
 
 **How They Work Together:**
-Foundry is where teams build and deploy AI models and agents. The Gateway sits in front of Foundry (and any other AI backend) to route, govern, secure, and observe all AI traffic in production. Organizations that use Foundry gain cross-cloud governance, multi-tenant isolation, and operational observability by adding the Gateway as their production operations layer.
+Foundry is where teams build and deploy AI models and agents. The Gateway sits in front of Foundry (and any other AI backend) as the control plane for every AI model, tool, and agent in production. Organizations that use Foundry gain cross-cloud governance, multi-tenant isolation, and operational observability by adding the Gateway.
 
 ---
 
@@ -173,7 +173,7 @@ The developer experience is built around AI workflows — not adapted from tradi
 
 ## Strategic Positioning
 
-Azure AI Gateway occupies a distinct position in the market: it is the **operations layer for AI in production**, not another AI development platform. While Azure AI Foundry provides the tools to build AI applications, the Gateway provides the infrastructure to operate them safely at enterprise scale. While competitors like LiteLLM and Portkey focus narrowly on model routing and observability, and traditional gateways like Kong and Cloudflare bolt AI features onto existing API management, the Azure AI Gateway is purpose-built as a cross-cloud governance and traffic mediation platform for compound AI workloads — covering models, tools, and agents under unified namespace-based governance.
+Azure AI Gateway occupies a distinct position in the market: it is the **control plane for every AI model, tool, and agent in production**, not another AI development platform. While Azure AI Foundry provides the tools to build AI applications, the Gateway provides the infrastructure to operate them safely at enterprise scale. While competitors like LiteLLM and Portkey focus narrowly on model routing and observability, and traditional gateways like Kong and Cloudflare bolt AI features onto existing API management, the Azure AI Gateway is purpose-built as a cross-cloud governance and traffic mediation platform for compound AI workloads — covering models, tools, and agents under unified namespace-based governance.
 
 **Value Proposition:** Azure AI Gateway is a multi-tenant platform that enables organizations to securely route, govern, and observe AI workloads built with models, tools, and agents.
 
@@ -181,6 +181,6 @@ Azure AI Gateway occupies a distinct position in the market: it is the **operati
 
 ## Long-Term Vision
 
-Azure AI Gateway is evolving beyond a routing and governance layer toward becoming the central platform for enterprise AI operations. As AI systems grow in complexity — with agents orchestrating chains of tools, models collaborating across providers, and workloads spanning organizational boundaries — the gateway becomes the control plane for agent execution, tool orchestration, workload governance, and operational intelligence. The long-term vision is a platform where every AI workload, regardless of provider or pattern, is routed securely, governed consistently, and observed comprehensively from a single pane of glass.
+Azure AI Gateway is evolving beyond a routing and governance layer toward becoming the central control plane for enterprise AI operations. As AI systems grow in complexity — with agents orchestrating chains of tools, models collaborating across providers, and workloads spanning organizational boundaries — the gateway becomes the control plane for every AI model, tool, and agent in production. The long-term vision is a platform where every AI workload, regardless of provider or pattern, is routed securely, governed consistently, and observed comprehensively from a single pane of glass.
 
-The Gateway is positioned as the natural companion to any AI development platform — working with Azure AI Foundry, AWS Bedrock, Google Vertex, or self-hosted models. As the industry converges on multi-provider AI architectures, the need for a dedicated operations layer becomes essential. The Gateway fills this role.
+The Gateway is positioned as the natural companion to any AI development platform — the control plane for every AI model, tool, and agent in production, working with Azure AI Foundry, AWS Bedrock, Google Vertex, or self-hosted models. As the industry converges on multi-provider AI architectures, the need for a dedicated control plane becomes essential. The Gateway fills this role.

@@ -2,9 +2,9 @@
 
 ## Overview
 
-The governance-first portal for managing AI traffic across providers in production environments. A single pane of glass over every model, tool, and agent — whether running on Azure AI Foundry, AWS Bedrock, Google Vertex, OpenAI, Anthropic, or self-hosted infrastructure.
+The control plane for every AI model, tool, and agent in production. A single pane of glass for platform engineers, operations teams, and security teams — whether workloads run on Azure AI Foundry, AWS Bedrock, Google Vertex, OpenAI, Anthropic, or self-hosted infrastructure.
 
-> **Configure. Monitor. Govern.** — The operations layer for AI workloads at enterprise scale.
+> **Configure. Monitor. Govern.** — The control plane for every AI model, tool, and agent in production and beyond.
 
 ## Portal
 
@@ -48,7 +48,7 @@ The governance-first portal for managing AI traffic across providers in producti
 
 Unlike LiteLLM and Portkey which focus primarily on model routing and observability, or Kong and Cloudflare which extend traditional API gateways for LLM traffic, Azure AI Gateway provides a complete **governance control plane** for AI workloads — supporting agentic applications, tool governance, namespace-based access control, and enterprise-grade safety enforcement.
 
-The gateway is designed as the **operations layer** for AI — complementary to development platforms like Azure AI Foundry, not a replacement. Foundry is where you build AI. The Gateway is where you operate it.
+The gateway is the **control plane for every AI model, tool, and agent in production** — complementary to development platforms like Azure AI Foundry, not a replacement. Foundry is where you build AI. The Gateway is where you operate it.
 
 ## Relationship to Azure AI Foundry
 
@@ -71,7 +71,7 @@ The gateway is designed as the **operations layer** for AI — complementary to 
 This repository contains the **AI Gateway Control Plane** portal. For the full-featured studio experience, see the parent repository:
 
 ### AI Gateway Control Plane (this repo)
-The governance-first portal for **platform engineers, operations teams, and security teams**. Focused on configuration, monitoring, governance, and compliance. Modern black + soft indigo design.
+The control plane for **platform engineers, operations teams, and security teams** — governing every AI model, tool, and agent in production. Modern black + soft indigo design.
 
 ### AI Gateway Studio → [**standalone-ai-gateway**](https://github.com/anishta_microsoft/standalone-ai-gateway)
 The developer-facing portal with asset catalogs, interactive playground, and full model/tool/agent management. Best for standalone deployments and multi-cloud teams.

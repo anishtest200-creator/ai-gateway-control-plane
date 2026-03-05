@@ -8,7 +8,7 @@
 ## 1. Product Definition
 
 ### What It Is
-Azure AI Gateway is the **control plane for enterprise AI traffic** — a multi-tenant platform that enables organizations to securely route, govern, and observe AI workloads across any combination of AI providers.
+Azure AI Gateway is the **control plane for every AI model, tool, and agent in production** — a multi-tenant platform that enables organizations to securely route, govern, and observe AI workloads across any combination of AI providers.
 
 ### What It Is Not
 - Not a model hosting/training platform (that's Azure AI Foundry)
@@ -17,7 +17,7 @@ Azure AI Gateway is the **control plane for enterprise AI traffic** — a multi-
 - Not a lightweight model proxy (that's LiteLLM)
 
 ### Core Value Proposition
-"One control plane for every AI model, tool, and agent in production — across Azure OpenAI, Amazon Bedrock, Google Vertex, Anthropic, and any backend."
+"The control plane for every AI model, tool, and agent in production — across Azure OpenAI, Amazon Bedrock, Google Vertex, Anthropic, and any backend."
 
 ### Four Pillars
 | Pillar | What It Does |

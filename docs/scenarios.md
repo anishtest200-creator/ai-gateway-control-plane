@@ -1,6 +1,6 @@
 # User Scenarios — Azure AI Gateway Control Plane
 
-This document catalogs every user scenario in the AI Gateway Control Plane portal — a governance-first control plane for managing AI traffic across providers. It covers what is **built**, what is **partially implemented**, and what is **missing** in the current prototype. The portal features a black + soft indigo (#818CF8) premium theme and uses mock data throughout.
+This document catalogs every user scenario in the AI Gateway Control Plane portal — the control plane for every AI model, tool, and agent in production. It covers what is **built**, what is **partially implemented**, and what is **missing** in the current prototype. The portal features a black + soft indigo (#818CF8) premium theme and uses mock data throughout.
 
 ---
 

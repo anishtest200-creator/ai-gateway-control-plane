@@ -571,9 +571,9 @@ const LandingPage: FC<LandingPageProps> = ({ onLogin, onSignup }) => {
         style={{
           display: 'flex',
           justifyContent: 'center',
-          gap: 64,
+          gap: 48,
           flexWrap: 'wrap',
-          maxWidth: 900,
+          maxWidth: 1000,
           margin: '0 auto',
         }}
       >
@@ -583,15 +583,14 @@ const LandingPage: FC<LandingPageProps> = ({ onLogin, onSignup }) => {
           { value: '10B+', label: 'Tokens Governed' },
           { value: '500+', label: 'Enterprise Teams' },
         ].map((stat) => (
-          <div key={stat.label} style={{ textAlign: 'center' }}>
+          <div key={stat.label} style={{ textAlign: 'center', padding: '16px 20px', minWidth: 160 }}>
             <div
               style={{
-                fontSize: 36,
+                fontSize: 40,
                 fontWeight: 800,
                 fontFamily: C.font,
-                background: `linear-gradient(135deg, ${C.white}, ${C.gold})`,
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
+                color: C.gold,
+                lineHeight: 1.1,
               }}
             >
               {stat.value}
@@ -599,10 +598,11 @@ const LandingPage: FC<LandingPageProps> = ({ onLogin, onSignup }) => {
             <div
               style={{
                 fontSize: 13,
-                color: '#666',
-                marginTop: 4,
+                color: '#888',
+                marginTop: 8,
                 fontFamily: C.font,
                 letterSpacing: '0.5px',
+                textTransform: 'uppercase',
               }}
             >
               {stat.label}

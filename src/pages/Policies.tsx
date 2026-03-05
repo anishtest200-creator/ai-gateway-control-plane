@@ -186,10 +186,10 @@ const accessRules: AssetAccessRule[] = [
   { id: 'ar3', name: 'Agent Operator Role', description: 'Only Agent-Operator and Admin roles can invoke or configure production agents.', type: 'who', assetType: 'Agent', namespace: 'production', enabled: true, config: { identities: ['Agent-Operator', 'Admin'] } },
   { id: 'ar4', name: 'Read-Only Analyst Access', description: 'Analyst role can query models but cannot modify configurations or deploy.', type: 'who', assetType: 'Model', namespace: 'global', enabled: true, config: { identities: ['Analyst'] } },
   { id: 'ar5', name: 'Internal Domain Only', description: 'Restrict all model invocations to identities from @contoso.com domain.', type: 'who', assetType: 'Model', namespace: 'global', enabled: true, config: { identities: ['contoso.com', 'contoso.onmicrosoft.com'] } },
-  { id: 'ar6', name: 'Cross-Namespace Model Import', description: 'Allow staging namespace to import and use models from production namespace.', type: 'where', assetType: 'Model', namespace: 'staging', enabled: true, config: { allowedNamespaces: ['production'] } },
-  { id: 'ar7', name: 'Agent Sharing Policy', description: 'Restrict agent imports to approved partner and production namespaces only.', type: 'where', assetType: 'Agent', namespace: 'global', enabled: true, config: { allowedNamespaces: ['partners', 'production'] } },
-  { id: 'ar8', name: 'Sandbox Isolation', description: 'Sandbox namespace cannot access production or staging models, tools, or agents.', type: 'where', assetType: 'Model', namespace: 'sandbox', enabled: true, config: { allowedNamespaces: ['sandbox', 'dev'] } },
-  { id: 'ar9', name: 'Tool Catalog Sharing', description: 'Allow all namespaces to discover shared tools but restrict execution to approved ones.', type: 'where', assetType: 'Tool', namespace: 'global', enabled: true, config: { allowedNamespaces: ['production', 'staging', 'dev'] } },
+  { id: 'ar6', name: 'Cross-Namespace Model Import', description: 'Allow staging namespace to import and use models from production namespace.', type: 'where', assetType: 'All', namespace: 'staging', enabled: true, config: { sourceNamespace: 'production', allowedNamespaces: ['staging'] } },
+  { id: 'ar7', name: 'Agent Sharing Policy', description: 'Restrict agent imports to approved partner and production namespaces only.', type: 'where', assetType: 'All', namespace: 'global', enabled: true, config: { sourceNamespace: 'global', allowedNamespaces: ['partners', 'production'] } },
+  { id: 'ar8', name: 'Sandbox Isolation', description: 'Sandbox namespace cannot access production or staging models, tools, or agents.', type: 'where', assetType: 'All', namespace: 'sandbox', enabled: true, config: { sourceNamespace: 'sandbox', allowedNamespaces: ['sandbox', 'dev'] } },
+  { id: 'ar9', name: 'Tool Catalog Sharing', description: 'Allow all namespaces to discover shared tools but restrict execution to approved ones.', type: 'where', assetType: 'All', namespace: 'global', enabled: true, config: { sourceNamespace: 'global', allowedNamespaces: ['production', 'staging', 'dev'] } },
 ]
 
 const guardrails: RAIGuardrail[] = [
@@ -359,8 +359,8 @@ const Policies: React.FC = () => {
   const [accessRuleList, setAccessRuleList] = useState<AssetAccessRule[]>(accessRules)
   const [accessRuleForm, setAccessRuleForm] = useState<{
     name: string; type: AccessRuleType; description: string; namespace: string;
-    assetType: string; identities: string; allowedNamespaces: string;
-  }>({ name: '', type: 'who', description: '', namespace: 'global', assetType: 'Model', identities: '', allowedNamespaces: '' })
+    assetType: string; identities: string; sourceNamespace: string; allowedNamespaces: string;
+  }>({ name: '', type: 'who', description: '', namespace: 'global', assetType: 'Model', identities: '', sourceNamespace: 'global', allowedNamespaces: '' })
   const [accessRuleAssignments, setAccessRuleAssignments] = useState<Record<string, boolean>>({})
 
   const allAssets = [
@@ -383,11 +383,13 @@ const Policies: React.FC = () => {
     const f = accessRuleForm
     const configMap: Record<AccessRuleType, Record<string, unknown>> = {
       'who': { identities: f.identities.split(',').map(s => s.trim()).filter(Boolean) },
-      'where': { allowedNamespaces: f.allowedNamespaces.split(',').map(s => s.trim()).filter(Boolean) },
+      'where': { sourceNamespace: f.sourceNamespace, allowedNamespaces: f.allowedNamespaces.split(',').map(s => s.trim()).filter(Boolean) },
     }
     const newRule: AssetAccessRule = {
       id: 'ar' + Date.now(), name: f.name, description: f.description, type: f.type,
-      assetType: f.assetType, namespace: f.namespace, enabled: true, config: configMap[f.type],
+      assetType: f.type === 'who' ? f.assetType : 'All',
+      namespace: f.type === 'who' ? f.namespace : f.sourceNamespace,
+      enabled: true, config: configMap[f.type],
     }
     setAccessRuleList(prev => [...prev, newRule])
     setRuleStates(s => ({ ...s, [newRule.id]: true }))
@@ -395,7 +397,7 @@ const Policies: React.FC = () => {
     setShowCreateFlow(false)
     setCreateFlowCategory(null)
     setAccessRuleStep(1)
-    setAccessRuleForm({ name: '', type: 'who', description: '', namespace: 'global', assetType: 'Model', identities: '', allowedNamespaces: '' })
+    setAccessRuleForm({ name: '', type: 'who', description: '', namespace: 'global', assetType: 'Model', identities: '', sourceNamespace: 'global', allowedNamespaces: '' })
     setAccessRuleAssignments({})
     void assigned // assignment data would be sent to backend
   }
@@ -571,8 +573,13 @@ const Policies: React.FC = () => {
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 4 }}>
                         <span style={{ color: '#fff', fontWeight: 600, fontSize: 13 }}>{r.name}</span>
-                        <span style={badge(colors.goldMuted, colors.gold)}>{r.assetType}</span>
-                        {r.namespace !== 'global' && (
+                        {r.type === 'who' && (
+                          <span style={badge(colors.goldMuted, colors.gold)}>{r.assetType}</span>
+                        )}
+                        {r.type === 'where' && Boolean(r.config.sourceNamespace) && (
+                          <span style={badge('rgba(212,168,67,0.12)', colors.gold)}>from: {String(r.config.sourceNamespace)}</span>
+                        )}
+                        {r.type === 'who' && r.namespace !== 'global' && (
                           <span style={badge('rgba(139,92,246,0.15)', '#a78bfa')}>{r.namespace}</span>
                         )}
                       </div>
@@ -599,21 +606,30 @@ const Policies: React.FC = () => {
     switch (rule.type) {
       case 'who':
         return (
-          <span style={detailStyle}>
-            Allowed identities:{' '}
-            {(cfg.identities as string[]).map(id => (
-              <span key={id} style={badge('rgba(192,132,252,0.12)', '#c084fc')}>{id}</span>
-            ))}
-          </span>
+          <>
+            <span style={detailStyle}>
+              Identities:{' '}
+              {(cfg.identities as string[]).map(id => (
+                <span key={id} style={badge('rgba(192,132,252,0.12)', '#c084fc')}>{id}</span>
+              ))}
+            </span>
+          </>
         )
       case 'where':
         return (
-          <span style={detailStyle}>
-            Allowed namespaces:{' '}
-            {(cfg.allowedNamespaces as string[]).map(ns => (
-              <span key={ns} style={badge('rgba(74,222,128,0.12)', '#4ade80')}>{ns}</span>
-            ))}
-          </span>
+          <>
+            {cfg.sourceNamespace && (
+              <span style={detailStyle}>
+                From: <span style={badge('rgba(212,168,67,0.12)', colors.gold)}>{cfg.sourceNamespace as string}</span> →
+              </span>
+            )}
+            <span style={detailStyle}>
+              Can access:{' '}
+              {(cfg.allowedNamespaces as string[]).map(ns => (
+                <span key={ns} style={badge('rgba(74,222,128,0.12)', '#4ade80')}>{ns}</span>
+              ))}
+            </span>
+          </>
         )
       default:
         return null
@@ -1198,36 +1214,47 @@ const Policies: React.FC = () => {
                         </div>
                       </div>
                       <div>
-                        <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Description</label>
-                        <textarea value={accessRuleForm.description} onChange={e => setAccessRuleForm(f => ({ ...f, description: e.target.value }))} rows={2} placeholder="Describe what this rule controls..." style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit', resize: 'vertical' as const, boxSizing: 'border-box' as const }} />
+                        <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Policy Intent <span style={{ color: '#666' }}>(describe the rule's purpose — may be used by AI policy engine)</span></label>
+                        <textarea value={accessRuleForm.description} onChange={e => setAccessRuleForm(f => ({ ...f, description: e.target.value }))} rows={2} placeholder={accessRuleForm.type === 'who' ? 'e.g. Only ML engineers and admins can invoke production GPT-4 models' : 'e.g. Staging can import models from production but not from sandbox'} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit', resize: 'vertical' as const, boxSizing: 'border-box' as const }} />
                       </div>
-                      <div style={{ display: 'flex', gap: 10 }}>
-                        <div style={{ flex: 1 }}>
-                          <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Asset Type</label>
-                          <select value={accessRuleForm.assetType} onChange={e => setAccessRuleForm(f => ({ ...f, assetType: e.target.value }))} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit' }}>
-                            <option>Model</option><option>Tool</option><option>Agent</option><option>All</option>
-                          </select>
-                        </div>
-                        <div style={{ flex: 1 }}>
-                          <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Namespace Scope</label>
-                          <select value={accessRuleForm.namespace} onChange={e => setAccessRuleForm(f => ({ ...f, namespace: e.target.value }))} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit' }}>
-                            {allNs.map(ns => <option key={ns} value={ns}>{ns}</option>)}
-                          </select>
-                        </div>
-                      </div>
+                      {/* Type-specific fields */}
                       {accessRuleForm.type === 'who' && (
-                        <div>
-                          <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Allowed Identities <span style={{ color: '#666' }}>(roles, groups, domains — comma-separated)</span></label>
-                          <input value={accessRuleForm.identities} onChange={e => setAccessRuleForm(f => ({ ...f, identities: e.target.value }))} placeholder="e.g. AI-Developer, ML-Engineer, contoso.com" style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' as const }} />
-                          {accessRuleForm.identities && <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginTop: 6 }}>{accessRuleForm.identities.split(',').map(r => r.trim()).filter(Boolean).map(r => <span key={r} style={badge('rgba(192,132,252,0.12)', '#c084fc')}>{r}</span>)}</div>}
-                        </div>
+                        <>
+                          <div style={{ display: 'flex', gap: 10 }}>
+                            <div style={{ flex: 1 }}>
+                              <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Asset Type</label>
+                              <select value={accessRuleForm.assetType} onChange={e => setAccessRuleForm(f => ({ ...f, assetType: e.target.value }))} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit' }}>
+                                <option>Model</option><option>Tool</option><option>Agent</option><option>All</option>
+                              </select>
+                            </div>
+                            <div style={{ flex: 1 }}>
+                              <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Namespace Scope</label>
+                              <select value={accessRuleForm.namespace} onChange={e => setAccessRuleForm(f => ({ ...f, namespace: e.target.value }))} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit' }}>
+                                {allNs.map(ns => <option key={ns} value={ns}>{ns}</option>)}
+                              </select>
+                            </div>
+                          </div>
+                          <div>
+                            <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Allowed Identities <span style={{ color: '#666' }}>(roles, groups, service principals, domains — comma-separated)</span></label>
+                            <input value={accessRuleForm.identities} onChange={e => setAccessRuleForm(f => ({ ...f, identities: e.target.value }))} placeholder="e.g. AI-Developer, ML-Engineer, contoso.com" style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' as const }} />
+                            {accessRuleForm.identities && <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginTop: 6 }}>{accessRuleForm.identities.split(',').map(r => r.trim()).filter(Boolean).map(r => <span key={r} style={badge('rgba(192,132,252,0.12)', '#c084fc')}>{r}</span>)}</div>}
+                          </div>
+                        </>
                       )}
                       {accessRuleForm.type === 'where' && (
-                        <div>
-                          <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Allowed Namespaces <span style={{ color: '#666' }}>(comma-separated)</span></label>
-                          <input value={accessRuleForm.allowedNamespaces} onChange={e => setAccessRuleForm(f => ({ ...f, allowedNamespaces: e.target.value }))} placeholder="e.g. production, staging" style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' as const }} />
-                          {accessRuleForm.allowedNamespaces && <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginTop: 6 }}>{accessRuleForm.allowedNamespaces.split(',').map(n => n.trim()).filter(Boolean).map(n => <span key={n} style={badge('rgba(74,222,128,0.12)', '#4ade80')}>{n}</span>)}</div>}
-                        </div>
+                        <>
+                          <div>
+                            <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Source Namespace <span style={{ color: '#666' }}>(where the assets originate)</span></label>
+                            <select value={accessRuleForm.sourceNamespace} onChange={e => setAccessRuleForm(f => ({ ...f, sourceNamespace: e.target.value }))} style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit' }}>
+                              {allNs.map(ns => <option key={ns} value={ns}>{ns}</option>)}
+                            </select>
+                          </div>
+                          <div>
+                            <label style={{ color: '#999', fontSize: 12, marginBottom: 4, display: 'block' }}>Allowed Target Namespaces <span style={{ color: '#666' }}>(who can consume these assets — comma-separated)</span></label>
+                            <input value={accessRuleForm.allowedNamespaces} onChange={e => setAccessRuleForm(f => ({ ...f, allowedNamespaces: e.target.value }))} placeholder="e.g. production, staging" style={{ width: '100%', backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' as const }} />
+                            {accessRuleForm.allowedNamespaces && <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginTop: 6 }}>{accessRuleForm.allowedNamespaces.split(',').map(n => n.trim()).filter(Boolean).map(n => <span key={n} style={badge('rgba(74,222,128,0.12)', '#4ade80')}>{n}</span>)}</div>}
+                          </div>
+                        </>
                       )}
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, marginTop: 20 }}>

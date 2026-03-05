@@ -13,13 +13,6 @@ interface Credential {
   expires: string;
 }
 
-interface TypeBreakdown {
-  label: string;
-  count: number;
-  total: number;
-  color: string;
-}
-
 interface CredentialDependency {
   assets: { name: string; type: string; namespace: string }[];
   routes: { pattern: string; strategy: string; healthy: boolean }[];
@@ -28,12 +21,6 @@ interface CredentialDependency {
   recentAccess: { timestamp: string; method: string; path: string; consumer: string; status: number; latencyMs: number }[];
 }
 
-interface HealthAlert {
-  emoji: string;
-  message: string;
-  borderColor: string;
-  credentialIndex: number;
-}
 
 // --- Mock Data ---
 const initialCredentials: Credential[] = [
@@ -49,14 +36,6 @@ const initialCredentials: Credential[] = [
   { name: 'internal-db', type: 'Connection String', namespace: 'hr-automation', target: 'PostgreSQL', status: 'active', lastRotated: '15 days ago', expires: '45 days' },
 ];
 
-const typeBreakdown: TypeBreakdown[] = [
-  { label: 'API Keys', count: 18, total: 47, color: '#D4A843' },
-  { label: 'OAuth 2.0', count: 12, total: 47, color: '#A78BFA' },
-  { label: 'Managed Identity', count: 8, total: 47, color: '#4ADE80' },
-  { label: 'Service Account', count: 5, total: 47, color: '#F59E0B' },
-  { label: 'IAM Role', count: 3, total: 47, color: '#60A5FA' },
-  { label: 'Connection String', count: 1, total: 47, color: '#888' },
-];
 
 const credentialDependencies: Record<string, CredentialDependency> = {
   'azure-openai-eastus': {
@@ -278,12 +257,6 @@ const credentialDependencies: Record<string, CredentialDependency> = {
   },
 };
 
-const healthAlerts: HealthAlert[] = [
-  { emoji: '🔴', message: 'ServiceNow API Key expired 3 days ago — 1 asset affected', borderColor: '#EF4444', credentialIndex: 7 },
-  { emoji: '🟡', message: 'Jira OAuth token expires in 3 days — 2 assets depend on it', borderColor: '#F59E0B', credentialIndex: 8 },
-  { emoji: '🟡', message: 'GCP Vertex Service Account expires in 5 days — 1 asset affected', borderColor: '#F59E0B', credentialIndex: 3 },
-  { emoji: '💡', message: 'Entra Managed Identity (auto-renew) — no action needed', borderColor: '#4ADE80', credentialIndex: 5 },
-];
 
 const assetTypeEmoji: Record<string, string> = {
   model: '🧠',
@@ -828,92 +801,22 @@ const Credentials: React.FC = () => {
   }
 
   return (
-    <div style={{ color: '#e0e0e0', display: 'flex', flexDirection: 'column', gap: 20 }}>
-      {/* Top Action Bar */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
-        <div style={{ display: 'flex', gap: 10 }}>
-          <button
-            onClick={() => setShowAddCredential(true)}
-            style={{
+    <div style={{ color: '#e0e0e0', display: 'flex', flexDirection: 'column', gap: 16 }}>
+      {/* Unified action bar: Add + Search + Filters */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+        <button
+          onClick={() => setShowAddCredential(true)}
+          style={{
             backgroundColor: '#D4A843', color: '#0A0A0A', border: 'none', borderRadius: 6,
-            padding: '8px 18px', fontWeight: 600, fontSize: 13, cursor: 'pointer',
+            padding: '8px 18px', fontWeight: 600, fontSize: 13, cursor: 'pointer', whiteSpace: 'nowrap',
           }}>
-            + Add Credential
-          </button>
-          <button style={{
-            backgroundColor: 'transparent', color: '#F59E0B', border: '1px solid #f5a623',
-            borderRadius: 6, padding: '8px 18px', fontWeight: 600, fontSize: 13, cursor: 'pointer',
-          }} onClick={() => showCredToast('✓ All expiring credentials rotated')}>
-            Rotate All Expiring
-          </button>
-        </div>
-        <div style={{ display: 'flex', gap: 10 }}>
-          <select style={{
-            backgroundColor: '#1E1E1E', color: '#ccc', border: '1px solid rgba(212, 168, 67, 0.10)',
-            borderRadius: 6, padding: '6px 12px', fontSize: 13,
-          }}>
-            <option>All Types</option>
-            <option>API Key</option>
-            <option>OAuth 2.0</option>
-            <option>Managed Identity</option>
-            <option>Service Account</option>
-            <option>IAM Role</option>
-            <option>Connection String</option>
-          </select>
-          <select style={{
-            backgroundColor: '#1E1E1E', color: '#ccc', border: '1px solid rgba(212, 168, 67, 0.10)',
-            borderRadius: 6, padding: '6px 12px', fontSize: 13,
-          }}>
-            <option>All Namespaces</option>
-            <option>retail-support</option>
-            <option>finance-analytics</option>
-            <option>customer-ops</option>
-            <option>hr-automation</option>
-            <option>dev-sandbox</option>
-          </select>
-        </div>
-      </div>
-
-      {/* Summary Stats */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14 }}>
-        {stats.map((s) => (
-          <div key={s.label} style={{ ...card, padding: '16px 20px' }}>
-            <div style={{ fontSize: 12, color: '#999', marginBottom: 4 }}>{s.label}</div>
-            <div style={{ fontSize: 28, fontWeight: 700, color: s.color || '#fff' }}>{s.value}</div>
-          </div>
-        ))}
-      </div>
-
-      {/* Credential Health Alerts */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        {healthAlerts.map((alert, i) => (
-          <div
-            key={i}
-            onClick={() => setSelectedCredential(credList[alert.credentialIndex])}
-            style={{
-              ...card,
-              padding: '12px 16px',
-              borderLeft: `4px solid ${alert.borderColor}`,
-              cursor: 'pointer',
-              display: 'flex', alignItems: 'center', gap: 10, transition: 'background-color 0.15s',
-            }}
-            onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.backgroundColor = '#1E1E1E'; }}
-            onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.backgroundColor = '#161616'; }}
-          >
-            <span style={{ fontSize: 16 }}>{alert.emoji}</span>
-            <span style={{ fontSize: 13, color: '#ccc', flex: 1 }}>{alert.message}</span>
-            <span style={{ color: '#D4A843', fontSize: 12, whiteSpace: 'nowrap' }}>View blast radius →</span>
-          </div>
-        ))}
-      </div>
-
-      {/* Search/Filter */}
-      <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+          + Add Credential
+        </button>
         <input
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          placeholder="Search credentials by name..."
-          style={{ flex: 1, backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit' }}
+          placeholder="Search credentials..."
+          style={{ flex: 1, minWidth: 180, backgroundColor: '#0F0F0F', border: '1px solid rgba(212,168,67,0.15)', color: '#E8E8E8', padding: '8px 12px', borderRadius: 6, fontSize: 13, fontFamily: 'inherit' }}
         />
         <select
           value={statusFilter}
@@ -924,28 +827,31 @@ const Credentials: React.FC = () => {
           <option value="active">Active</option>
           <option value="expiring">Expiring</option>
           <option value="expired">Expired</option>
+          <option value="revoked">Revoked</option>
         </select>
       </div>
 
-      {/* Credentials Table */}
+      {/* Compact summary row */}
+      <div style={{ display: 'flex', gap: 20, fontSize: 13, color: '#999' }}>
+        <span><span style={{ color: '#fff', fontWeight: 600 }}>{stats[0].value}</span> total</span>
+        <span><span style={{ color: '#4ADE80', fontWeight: 600 }}>{stats[1].value}</span> healthy</span>
+        <span><span style={{ color: '#F59E0B', fontWeight: 600 }}>{stats[2].value}</span> expiring</span>
+        <span><span style={{ color: '#EF4444', fontWeight: 600 }}>{stats[3].value}</span> expired</span>
+      </div>
+
+      {/* Credentials Table — simplified columns */}
       <div style={{ ...card, padding: 0, overflow: 'hidden' }}>
-        <div style={{ padding: '16px 20px', borderBottom: '1px solid rgba(212, 168, 67, 0.10)', fontWeight: 600, fontSize: 14 }}>
-          Credentials
-        </div>
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
             <thead>
               <tr style={{ borderBottom: '1px solid rgba(212, 168, 67, 0.10)', color: '#999', textAlign: 'left' }}>
-                {['Name', 'Type', 'Scope (Namespace)', 'Target', 'Status', 'Last Rotated', 'Expires', 'Dependencies', ''].map((h) => (
+                {['Name', 'Type', 'Namespace', 'Target', 'Status', 'Expires'].map((h) => (
                   <th key={h} style={{ padding: '10px 16px', fontWeight: 600, fontSize: 12, whiteSpace: 'nowrap' }}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {filteredCreds.map((c, i) => {
-                const deps = credentialDependencies[c.name];
-                const depCount = deps ? deps.assets.length : 0;
-                return (
+              {filteredCreds.map((c, i) => (
                 <tr
                   key={c.name}
                   onMouseEnter={() => setHoveredRow(i)}
@@ -960,91 +866,23 @@ const Credentials: React.FC = () => {
                 >
                   <td style={{ padding: '10px 16px', fontWeight: 500, color: '#D4A843' }}>{c.name}</td>
                   <td style={{ padding: '10px 16px' }}>
-                    <span style={{
-                      backgroundColor: '#1E1E1E', padding: '2px 8px', borderRadius: 4, fontSize: 12,
-                    }}>{c.type}</span>
+                    <span style={{ backgroundColor: '#1E1E1E', padding: '2px 8px', borderRadius: 4, fontSize: 12 }}>{c.type}</span>
                   </td>
                   <td style={{ padding: '10px 16px', color: '#bbb' }}>{c.namespace}</td>
                   <td style={{ padding: '10px 16px', color: '#bbb' }}>{c.target}</td>
                   <td style={{ padding: '10px 16px' }}>
                     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-                      <span style={{
-                        width: 8, height: 8, borderRadius: '50%',
-                        backgroundColor: statusColors[c.status], display: 'inline-block',
-                      }} />
+                      <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: statusColors[c.status], display: 'inline-block' }} />
                       <span style={{ color: statusColors[c.status] }}>{statusLabels[c.status]}</span>
                     </span>
                   </td>
-                  <td style={{ padding: '10px 16px', color: '#999' }}>{c.lastRotated}</td>
                   <td style={{ padding: '10px 16px', color: c.status === 'expired' ? '#EF4444' : c.status === 'expiring' ? '#F59E0B' : '#999' }}>
                     {c.expires}
                   </td>
-                  <td style={{ padding: '10px 16px' }}>
-                    <span
-                      onClick={(e) => { e.stopPropagation(); setSelectedCredential(c); }}
-                      style={{ color: '#D4A843', fontSize: 12, cursor: 'pointer', whiteSpace: 'nowrap' }}
-                    >
-                      {depCount > 0 ? `${depCount} asset${depCount !== 1 ? 's' : ''} →` : '—'}
-                    </span>
-                  </td>
-                  <td style={{ padding: '10px 16px', color: '#666', fontSize: 16 }}>⋯</td>
                 </tr>
-                );
-              })}
+              ))}
             </tbody>
           </table>
-        </div>
-      </div>
-
-      {/* Bottom row: Type Breakdown + Rotation Policy */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
-        {/* Credential Types Breakdown */}
-        <div style={card}>
-          <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 16 }}>Credential Types Breakdown</div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            {typeBreakdown.map((t) => (
-              <div key={t.label}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 4 }}>
-                  <span style={{ color: '#ccc' }}>{t.label}</span>
-                  <span style={{ color: '#999' }}>{t.count}</span>
-                </div>
-                <div style={{ height: 6, backgroundColor: '#1E1E1E', borderRadius: 3, overflow: 'hidden' }}>
-                  <div style={{
-                    height: '100%', borderRadius: 3,
-                    width: `${(t.count / t.total) * 100}%`,
-                    backgroundColor: t.color,
-                  }} />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Rotation Policy */}
-        <div style={card}>
-          <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 16 }}>Rotation Policy</div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 14, fontSize: 13 }}>
-            <PolicyItem
-              label="Auto-rotation"
-              value="Enabled for API Keys (90-day cycle)"
-              dotColor="#4ADE80"
-            />
-            <PolicyItem
-              label="Alert threshold"
-              value="7 days before expiry"
-              dotColor="#F59E0B"
-            />
-            <PolicyItem
-              label="Managed identities"
-              value="Auto-renewed by Azure"
-              dotColor="#D4A843"
-            />
-            <PolicyItem
-              label="Manual review required"
-              value="OAuth tokens, IAM roles"
-              dotColor="#999"
-            />
-          </div>
         </div>
       </div>
       {/* Add Credential Modal */}
@@ -1102,17 +940,5 @@ const Credentials: React.FC = () => {
   );
 };
 
-const PolicyItem: React.FC<{ label: string; value: string; dotColor: string }> = ({ label, value, dotColor }) => (
-  <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-    <span style={{
-      width: 8, height: 8, borderRadius: '50%', backgroundColor: dotColor,
-      display: 'inline-block', flexShrink: 0, marginTop: 5,
-    }} />
-    <div>
-      <div style={{ color: '#ccc', fontWeight: 500 }}>{label}</div>
-      <div style={{ color: '#999', fontSize: 12, marginTop: 2 }}>{value}</div>
-    </div>
-  </div>
-);
 
 export default Credentials;

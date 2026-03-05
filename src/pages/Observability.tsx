@@ -400,7 +400,7 @@ const Observability: React.FC = () => {
   };
 
   return (
-    <div style={{ padding: 24, maxWidth: 1280, margin: '0 auto' }}>
+    <div style={{ padding: 24 }}>
       {/* Toast */}
       {toastMsg && (
         <div style={{

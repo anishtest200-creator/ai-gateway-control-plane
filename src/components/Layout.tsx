@@ -635,7 +635,7 @@ const Layout: React.FC<LayoutProps> = ({ onSignOut }) => {
                 padding: '6px 10px 6px',
               }}
             >
-              ⚡ Overview
+              Overview
             </div>
             {navItems.map((item) => {
               const showSection = item.section && item.section !== lastSection;

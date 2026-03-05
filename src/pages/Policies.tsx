@@ -395,9 +395,6 @@ const Policies: React.FC = () => {
   )
   const [hoveredRow, setHoveredRow] = useState<string | null>(null)
   const [expandedVersions, setExpandedVersions] = useState<Record<string, boolean>>({})
-  const [showSimulator, setShowSimulator] = useState(false)
-  const [selectedSimPolicy, setSelectedSimPolicy] = useState<string>(policies[0]?.id ?? '')
-  const [simEnabled, setSimEnabled] = useState(true)
   const [showCreateFlow, setShowCreateFlow] = useState(false)
   const [createFlowCategory, setCreateFlowCategory] = useState<null | 'access' | 'runtime' | 'guardrail'>(null)
   const [policyList, setPolicyList] = useState<Policy[]>(policies)
@@ -996,25 +993,6 @@ const Policies: React.FC = () => {
     )
   }
 
-  /* ---- Impact Simulator helpers ---- */
-  const getSimulatorResults = () => {
-    const pol = policies.find(p => p.id === selectedSimPolicy)
-    if (!pol) return null
-    const trafficPct = simEnabled ? Math.min(95, pol.appliedTo * 6 + 10) : 0
-    const requestsDay = simEnabled ? pol.appliedTo * 1240 : 0
-    const nsAffected = pol.namespace === 'global'
-      ? ['production', 'staging', 'dev-team-alpha', 'research']
-      : [pol.namespace]
-    const assetTypes = pol.category === 'routing'
-      ? ['Model', 'Agent', 'Tool']
-      : pol.category === 'content-safety'
-        ? ['Model']
-        : pol.category === 'agent-execution'
-          ? ['Agent']
-          : ['Model', 'Tool']
-    return { trafficPct, requestsDay, nsAffected, assetTypes }
-  }
-
   /* ---- Pending Approvals section ---- */
   const renderApprovals = () => (
     <div style={{ ...card, padding: 0, overflow: 'hidden' }}>
@@ -1099,16 +1077,6 @@ const Policies: React.FC = () => {
           </p>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
-          <button
-            onClick={() => setShowSimulator(s => !s)}
-            style={{
-              padding: '8px 16px', borderRadius: 6, backgroundColor: 'transparent',
-              border: `1px solid ${colors.border}`, color: colors.text, fontSize: 13,
-              fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap',
-            }}
-          >
-            🔍 Simulate Impact
-          </button>
           <button onClick={() => { setShowCreateFlow(true); setCreateFlowCategory(null); setCreateFlowMethod(null); setAiComposeInput(''); setAiCompiling(false); setAiCompiled(false); setTemplateSelected(false) }} style={{ backgroundColor: '#D4A843', color: '#0A0A0A', border: 'none', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' }}>✚ Create Policy</button>
         </div>
       </div>
@@ -1117,103 +1085,6 @@ const Policies: React.FC = () => {
       <div style={{ fontSize: 13, color: colors.textMuted, lineHeight: 1.6 }}>
         <span style={{ fontWeight: 600, color: '#fff' }}>{enabledPolicies}</span> runtime rules · <span style={{ fontWeight: 600, color: '#fff' }}>{accessRuleList.filter(r => ruleStates[r.id]).length}</span> access rules · <span style={{ fontWeight: 600, color: '#fff' }}>{enabledGuardrails}</span> guardrails · <span style={{ fontWeight: 600, color: '#fff' }}>{approvalList.length}</span> pending approvals
       </div>
-
-      {/* Impact Simulator panel */}
-      {showSimulator && (() => {
-        const simResults = getSimulatorResults()
-        return (
-          <div style={{ ...card }}>
-            <div style={{ fontSize: 14, fontWeight: 600, color: '#fff', marginBottom: 12 }}>Policy Impact Simulator</div>
-            <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start', flexWrap: 'wrap' }}>
-              {/* Controls */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, minWidth: 240 }}>
-                <div>
-                  <label style={{ fontSize: 11, color: colors.textMuted, display: 'block', marginBottom: 4 }}>Select Policy</label>
-                  <select
-                    value={selectedSimPolicy}
-                    onChange={e => setSelectedSimPolicy(e.target.value)}
-                    style={{
-                      width: '100%', padding: '6px 10px', borderRadius: 6,
-                      backgroundColor: '#1A1A1A', border: `1px solid ${colors.border}`,
-                      color: colors.text, fontSize: 12, fontFamily: 'inherit',
-                    }}
-                  >
-                    {policyList.map(p => (
-                      <option key={p.id} value={p.id}>{p.name}</option>
-                    ))}
-                  </select>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <span style={{ fontSize: 12, color: colors.textMuted }}>Action:</span>
-                  <Toggle enabled={simEnabled} onToggle={() => setSimEnabled(e => !e)} />
-                  <span style={{ fontSize: 12, color: simEnabled ? colors.green : colors.red }}>
-                    {simEnabled ? 'Enable' : 'Disable'}
-                  </span>
-                </div>
-                {simEnabled && selectedSimPolicy && (
-                  <div style={{ backgroundColor: 'rgba(212, 168, 67, 0.08)', border: '1px solid rgba(212, 168, 67, 0.20)', borderRadius: 6, padding: '10px 14px', marginTop: 4 }}>
-                    <div style={{ fontSize: 12, color: colors.text, marginBottom: 4 }}>Estimated impact: <span style={{ color: colors.amber, fontWeight: 600 }}>~340 requests/hour</span> would be affected</div>
-                    <div style={{ fontSize: 12, color: colors.textMuted, marginBottom: 4 }}>Affected namespaces: <span style={{ color: colors.text }}>ai-platform, ml-inference</span></div>
-                    <div style={{ fontSize: 12, color: colors.textMuted }}>Risk level: <span style={{ color: colors.green, fontWeight: 600 }}>Low</span></div>
-                  </div>
-                )}
-              </div>
-              {/* Results */}
-              {simResults && (
-                <div style={{ flex: 1, minWidth: 280 }}>
-                  <div style={{ fontSize: 12, color: colors.text, marginBottom: 8 }}>
-                    Estimated impact: <span style={{ color: colors.amber, fontWeight: 600 }}>{simResults.trafficPct}%</span> of traffic affected
-                    (<span style={{ fontWeight: 600 }}>{simResults.requestsDay.toLocaleString()}</span> requests/day)
-                  </div>
-                  <div style={{ fontSize: 12, color: colors.textMuted, marginBottom: 4 }}>
-                    Namespaces affected: {simResults.nsAffected.map(ns => (
-                      <span key={ns} style={badge('rgba(139,92,246,0.15)', '#a78bfa')}>{ns}</span>
-                    ))}
-                  </div>
-                  <div style={{ fontSize: 12, color: colors.textMuted, marginBottom: 10 }}>
-                    Asset types affected: {simResults.assetTypes.map(at => (
-                      <span key={at} style={badge(colors.goldMuted, colors.gold)}>{at}</span>
-                    ))}
-                  </div>
-                  {/* Traffic bar */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-                    <span style={{ fontSize: 10, color: colors.textDim, width: 60 }}>Traffic</span>
-                    <div style={{ flex: 1, height: 14, borderRadius: 7, backgroundColor: 'rgba(212, 168, 67, 0.06)', overflow: 'hidden', display: 'flex' }}>
-                      <div style={{
-                        width: `${100 - simResults.trafficPct}%`, height: '100%',
-                        backgroundColor: 'rgba(16,185,129,0.5)', transition: 'width 0.3s',
-                      }} />
-                      <div style={{
-                        width: `${simResults.trafficPct}%`, height: '100%',
-                        backgroundColor: 'rgba(245,158,11,0.5)', transition: 'width 0.3s',
-                      }} />
-                    </div>
-                  </div>
-                  <div style={{ display: 'flex', gap: 6, fontSize: 10, color: colors.textDim, marginBottom: 12 }}>
-                    <span>🟩 Unaffected ({100 - simResults.trafficPct}%)</span>
-                    <span>🟨 Affected ({simResults.trafficPct}%)</span>
-                  </div>
-                  <div style={{ display: 'flex', gap: 8 }}>
-                    <button style={{
-                      padding: '6px 16px', borderRadius: 6, border: 'none',
-                      backgroundColor: colors.gold, color: '#0A0A0A', fontSize: 12,
-                      fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
-                    }} onClick={() => { setShowSimulator(false); alert('✓ Policy change applied'); }}>Apply Change</button>
-                    <button
-                      onClick={() => setShowSimulator(false)}
-                      style={{
-                        padding: '6px 16px', borderRadius: 6, backgroundColor: 'transparent',
-                        border: `1px solid ${colors.border}`, color: colors.textMuted, fontSize: 12,
-                        fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
-                      }}
-                    >Cancel</button>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        )
-      })()}
 
       {/* Tabs */}
       <div style={tabBar}>

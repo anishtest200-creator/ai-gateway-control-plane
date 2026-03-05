@@ -1068,22 +1068,12 @@ const Policies: React.FC = () => {
 
   return (
     <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 20 }}>
-      {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16 }}>
-        <div>
-          <h2 style={{ color: '#fff', fontSize: 20, fontWeight: 700, margin: 0 }}>Policies</h2>
-          <p style={{ color: colors.textMuted, fontSize: 13, margin: '4px 0 0' }}>
-            Configure runtime rules, asset access controls, and safety guardrails across your AI gateway.
-          </p>
+      {/* Header — stats + create button */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
+        <div style={{ fontSize: 13, color: colors.textMuted, lineHeight: 1.6 }}>
+          <span style={{ fontWeight: 600, color: '#fff' }}>{enabledPolicies}</span> runtime rules · <span style={{ fontWeight: 600, color: '#fff' }}>{accessRuleList.filter(r => ruleStates[r.id]).length}</span> access rules · <span style={{ fontWeight: 600, color: '#fff' }}>{enabledGuardrails}</span> guardrails · <span style={{ fontWeight: 600, color: '#fff' }}>{approvalList.length}</span> pending approvals
         </div>
-        <div style={{ display: 'flex', gap: 8 }}>
-          <button onClick={() => { setShowCreateFlow(true); setCreateFlowCategory(null); setCreateFlowMethod(null); setAiComposeInput(''); setAiCompiling(false); setAiCompiled(false); setTemplateSelected(false) }} style={{ backgroundColor: '#D4A843', color: '#0A0A0A', border: 'none', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' }}>✚ Create Policy</button>
-        </div>
-      </div>
-
-      {/* Compact stats summary */}
-      <div style={{ fontSize: 13, color: colors.textMuted, lineHeight: 1.6 }}>
-        <span style={{ fontWeight: 600, color: '#fff' }}>{enabledPolicies}</span> runtime rules · <span style={{ fontWeight: 600, color: '#fff' }}>{accessRuleList.filter(r => ruleStates[r.id]).length}</span> access rules · <span style={{ fontWeight: 600, color: '#fff' }}>{enabledGuardrails}</span> guardrails · <span style={{ fontWeight: 600, color: '#fff' }}>{approvalList.length}</span> pending approvals
+        <button onClick={() => { setShowCreateFlow(true); setCreateFlowCategory(null); setCreateFlowMethod(null); setAiComposeInput(''); setAiCompiling(false); setAiCompiled(false); setTemplateSelected(false) }} style={{ backgroundColor: '#D4A843', color: '#0A0A0A', border: 'none', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' }}>✚ Create Policy</button>
       </div>
 
       {/* Tabs */}

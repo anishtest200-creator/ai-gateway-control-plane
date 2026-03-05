@@ -5,6 +5,7 @@ type Strategy = 'failover' | 'load-balance' | 'single' | 'cost-aware' | 'latency
 
 interface Endpoint {
   provider: string;
+  model: string;
   region: string;
   health: 'healthy' | 'degraded' | 'unhealthy';
   weight?: number;
@@ -12,6 +13,15 @@ interface Endpoint {
   latencyP95?: number;
   capabilities?: string[];
 }
+
+/* ── Model Catalog ── */
+const modelCatalog: Record<string, string[]> = {
+  'Azure OpenAI': ['gpt-4o', 'gpt-4o-mini', 'gpt-4-turbo', 'gpt-4', 'gpt-3.5-turbo', 'o1-preview', 'o1-mini', 'text-embedding-ada-002', 'dall-e-3'],
+  'Anthropic': ['claude-sonnet-4-20250514', 'claude-3.5-haiku', 'claude-3-opus', 'claude-3-haiku'],
+  'Google Vertex': ['gemini-2.0-flash', 'gemini-1.5-pro', 'gemini-1.5-flash', 'gemini-1.0-pro', 'palm-2'],
+  'OpenAI Direct': ['gpt-4o', 'gpt-4o-mini', 'gpt-4-turbo', 'o1-preview', 'o1-mini', 'gpt-3.5-turbo'],
+  'AWS Bedrock': ['claude-sonnet-4-20250514', 'claude-3-haiku', 'titan-text-express', 'llama-3-70b', 'mistral-large'],
+};
 
 interface SmartConfig {
   budgetLimit?: number;
@@ -36,25 +46,25 @@ interface RouteGroup {
 const initialGroups: RouteGroup[] = [
   {
     id: 'gpt4o',
-    name: 'GPT-4o',
+    name: 'GPT-4o Reliability',
     pattern: '/v1/chat/completions (gpt-4o*)',
     strategy: 'failover',
     enabled: true,
     endpoints: [
-      { provider: 'Azure OpenAI', region: 'East US', health: 'healthy' },
-      { provider: 'Azure OpenAI', region: 'West US', health: 'healthy' },
-      { provider: 'OpenAI Direct', region: 'api.openai.com', health: 'healthy' },
+      { provider: 'Azure OpenAI', model: 'gpt-4o', region: 'East US', health: 'healthy' },
+      { provider: 'Azure OpenAI', model: 'gpt-4o', region: 'West US', health: 'healthy' },
+      { provider: 'OpenAI Direct', model: 'gpt-4o', region: 'api.openai.com', health: 'healthy' },
     ],
   },
   {
     id: 'claude',
-    name: 'Claude Sonnet',
+    name: 'Claude Reliability',
     pattern: '/v1/chat/completions (claude-*)',
     strategy: 'failover',
     enabled: true,
     endpoints: [
-      { provider: 'Anthropic', region: 'api.anthropic.com', health: 'healthy' },
-      { provider: 'AWS Bedrock', region: 'us-east-1', health: 'healthy' },
+      { provider: 'Anthropic', model: 'claude-sonnet-4-20250514', region: 'api.anthropic.com', health: 'healthy' },
+      { provider: 'AWS Bedrock', model: 'claude-sonnet-4-20250514', region: 'us-east-1', health: 'healthy' },
     ],
   },
   {
@@ -64,7 +74,7 @@ const initialGroups: RouteGroup[] = [
     strategy: 'single',
     enabled: true,
     endpoints: [
-      { provider: 'Google Vertex', region: 'us-central1', health: 'degraded' },
+      { provider: 'Google Vertex', model: 'gemini-1.5-pro', region: 'us-central1', health: 'degraded' },
     ],
   },
   {
@@ -74,9 +84,9 @@ const initialGroups: RouteGroup[] = [
     strategy: 'cost-aware',
     enabled: true,
     endpoints: [
-      { provider: 'Azure OpenAI', region: 'East US', health: 'healthy', costPer1k: 0.03, latencyP95: 180, capabilities: ['chat', 'vision', 'tools'] },
-      { provider: 'Anthropic', region: 'api.anthropic.com', health: 'healthy', costPer1k: 0.015, latencyP95: 220, capabilities: ['chat', 'vision', 'tools', 'large-context'] },
-      { provider: 'Google Vertex', region: 'us-central1', health: 'degraded', costPer1k: 0.01, latencyP95: 350, capabilities: ['chat', 'vision'] },
+      { provider: 'Azure OpenAI', model: 'gpt-4o-mini', region: 'East US', health: 'healthy', costPer1k: 0.03, latencyP95: 180, capabilities: ['chat', 'vision', 'tools'] },
+      { provider: 'Anthropic', model: 'claude-3.5-haiku', region: 'api.anthropic.com', health: 'healthy', costPer1k: 0.015, latencyP95: 220, capabilities: ['chat', 'vision', 'tools', 'large-context'] },
+      { provider: 'Google Vertex', model: 'gemini-2.0-flash', region: 'us-central1', health: 'degraded', costPer1k: 0.01, latencyP95: 350, capabilities: ['chat', 'vision'] },
     ],
     smartConfig: {
       budgetLimit: 5000,
@@ -92,9 +102,9 @@ const initialGroups: RouteGroup[] = [
     strategy: 'latency-aware',
     enabled: true,
     endpoints: [
-      { provider: 'Azure OpenAI', region: 'East US', health: 'healthy', costPer1k: 0.03, latencyP95: 120 },
-      { provider: 'Azure OpenAI', region: 'West US', health: 'healthy', costPer1k: 0.03, latencyP95: 145 },
-      { provider: 'Anthropic', region: 'api.anthropic.com', health: 'healthy', costPer1k: 0.015, latencyP95: 280 },
+      { provider: 'Azure OpenAI', model: 'gpt-4o-mini', region: 'East US', health: 'healthy', costPer1k: 0.03, latencyP95: 120 },
+      { provider: 'Azure OpenAI', model: 'gpt-4o-mini', region: 'West US', health: 'healthy', costPer1k: 0.03, latencyP95: 145 },
+      { provider: 'Anthropic', model: 'claude-3.5-haiku', region: 'api.anthropic.com', health: 'healthy', costPer1k: 0.015, latencyP95: 280 },
     ],
     smartConfig: {
       latencyTarget: 200,
@@ -108,9 +118,9 @@ const initialGroups: RouteGroup[] = [
     strategy: 'capability-aware',
     enabled: true,
     endpoints: [
-      { provider: 'Azure OpenAI', region: 'East US', health: 'healthy', costPer1k: 0.03, capabilities: ['chat', 'vision', 'tools'] },
-      { provider: 'Anthropic', region: 'api.anthropic.com', health: 'healthy', costPer1k: 0.015, capabilities: ['chat', 'vision', 'tools', 'large-context'] },
-      { provider: 'Google Vertex', region: 'us-central1', health: 'degraded', costPer1k: 0.01, capabilities: ['chat', 'vision'] },
+      { provider: 'Azure OpenAI', model: 'gpt-4o', region: 'East US', health: 'healthy', costPer1k: 0.03, capabilities: ['chat', 'vision', 'tools'] },
+      { provider: 'Anthropic', model: 'claude-sonnet-4-20250514', region: 'api.anthropic.com', health: 'healthy', costPer1k: 0.015, capabilities: ['chat', 'vision', 'tools', 'large-context'] },
+      { provider: 'Google Vertex', model: 'gemini-1.5-pro', region: 'us-central1', health: 'degraded', costPer1k: 0.01, capabilities: ['chat', 'vision'] },
     ],
     smartConfig: {
       capabilityRules: [
@@ -162,7 +172,7 @@ const healthColor = (h: string) => h === 'healthy' ? colors.green : h === 'degra
 const healthLabel = (h: string) => h === 'healthy' ? 'Healthy' : h === 'degraded' ? 'Degraded' : 'Unhealthy';
 
 const strategyMeta: Record<Strategy, { label: string; color: string; desc: string; icon: string }> = {
-  'failover': { label: 'Failover Chain', color: colors.purple, desc: 'Try endpoints in priority order', icon: '🔄' },
+  'failover': { label: 'Backup / Reliability', color: colors.purple, desc: 'Auto-failover to backup endpoints when primary is down', icon: '🛡️' },
   'load-balance': { label: 'Load Balanced', color: colors.blue, desc: 'Distribute traffic by weight', icon: '⚖️' },
   'single': { label: 'Single Endpoint', color: colors.textMuted, desc: 'One endpoint only', icon: '🎯' },
   'cost-aware': { label: 'Cost-Aware', color: '#10B981', desc: 'Prefer cheapest healthy endpoint; respect budget limits', icon: '💰' },
@@ -191,12 +201,12 @@ const Routing: React.FC = () => {
   const [formName, setFormName] = useState('');
   const [formPattern, setFormPattern] = useState('');
   const [formStrategy, setFormStrategy] = useState<Strategy>('failover');
-  const [formEndpoints, setFormEndpoints] = useState<Endpoint[]>([{ provider: 'Azure OpenAI', region: '', health: 'healthy' }]);
+  const [formEndpoints, setFormEndpoints] = useState<Endpoint[]>([{ provider: 'Azure OpenAI', model: 'gpt-4o', region: '', health: 'healthy' }]);
   const [formSmartConfig, setFormSmartConfig] = useState<SmartConfig>({});
 
   const resetForm = () => {
     setFormName(''); setFormPattern(''); setFormStrategy('failover');
-    setFormEndpoints([{ provider: 'Azure OpenAI', region: '', health: 'healthy' }]);
+    setFormEndpoints([{ provider: 'Azure OpenAI', model: 'gpt-4o', region: '', health: 'healthy' }]);
     setFormSmartConfig({});
     setCreateStep(1); setEditingId(null);
   };
@@ -241,7 +251,7 @@ const Routing: React.FC = () => {
   };
 
   const addEndpoint = () => {
-    setFormEndpoints(prev => [...prev, { provider: 'Azure OpenAI', region: '', health: 'healthy' }]);
+    setFormEndpoints(prev => [...prev, { provider: 'Azure OpenAI', model: 'gpt-4o', region: '', health: 'healthy' }]);
   };
 
   const removeEndpoint = (idx: number) => {
@@ -370,7 +380,7 @@ const Routing: React.FC = () => {
                   {/* Endpoint chain visualization */}
                   <div>
                     <div style={{ fontSize: 12, color: colors.textMuted, marginBottom: 10, textTransform: 'uppercase', letterSpacing: 0.5 }}>
-                      {g.strategy === 'failover' ? 'Failover Order (priority left → right)' :
+                      {g.strategy === 'failover' ? 'Backup Order (primary → fallbacks)' :
                        g.strategy === 'load-balance' ? 'Traffic Distribution' :
                        g.strategy === 'cost-aware' ? 'Available Endpoints (routed by cost)' :
                        g.strategy === 'latency-aware' ? 'Available Endpoints (routed by latency)' :
@@ -387,8 +397,8 @@ const Routing: React.FC = () => {
                           }}>
                             <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: healthColor(ep.health), flexShrink: 0 }} />
                             <div>
-                              <div style={{ fontSize: 13, color: '#fff', fontWeight: 500 }}>{ep.provider}</div>
-                              <div style={{ fontSize: 11, color: colors.textMuted, fontFamily: 'monospace' }}>{ep.region}</div>
+                              <div style={{ fontSize: 13, color: '#fff', fontWeight: 500 }}>{ep.model}</div>
+                              <div style={{ fontSize: 11, color: colors.textMuted }}>{ep.provider} · <span style={{ fontFamily: 'monospace' }}>{ep.region}</span></div>
                               {g.strategy === 'cost-aware' && ep.costPer1k != null && (
                                 <div style={{ fontSize: 10, color: '#10B981', marginTop: 2 }}>${ep.costPer1k}/1k tokens</div>
                               )}
@@ -658,7 +668,7 @@ const Routing: React.FC = () => {
 
                 {/* Endpoints section */}
                 <div style={{ fontSize: 12, color: colors.textMuted, marginBottom: 4 }}>
-                  {formStrategy === 'failover' ? 'Add endpoints in failover priority order (first = primary)' :
+                  {formStrategy === 'failover' ? 'Add endpoints in backup priority order — first is primary, rest are fallbacks for reliability' :
                    formStrategy === 'load-balance' ? 'Add endpoints and set traffic weight for each' :
                    formStrategy === 'single' ? 'Configure the single endpoint for this route' :
                    'Add available endpoints for smart routing to choose from'}
@@ -672,19 +682,30 @@ const Routing: React.FC = () => {
                       )}
                       <select
                         value={ep.provider}
-                        onChange={e => updateEndpoint(idx, 'provider', e.target.value)}
+                        onChange={e => {
+                          const newProvider = e.target.value;
+                          const models = modelCatalog[newProvider] || [];
+                          const updated = [...formEndpoints];
+                          updated[idx] = { ...updated[idx], provider: newProvider, model: models[0] || '' };
+                          setFormEndpoints(updated);
+                        }}
                         style={{ ...selectStyle, flex: 1 }}
                       >
-                        <option>Azure OpenAI</option>
-                        <option>Anthropic</option>
-                        <option>Google Vertex</option>
-                        <option>OpenAI Direct</option>
-                        <option>AWS Bedrock</option>
+                        {Object.keys(modelCatalog).map(p => <option key={p}>{p}</option>)}
                       </select>
+                      <select
+                        value={ep.model}
+                        onChange={e => updateEndpoint(idx, 'model', e.target.value)}
+                        style={{ ...selectStyle, flex: 1 }}
+                      >
+                        {(modelCatalog[ep.provider] || []).map(m => <option key={m} value={m}>{m}</option>)}
+                      </select>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                       <input
                         value={ep.region}
                         onChange={e => updateEndpoint(idx, 'region', e.target.value)}
-                        placeholder="Region / URL"
+                        placeholder="Region / Endpoint URL"
                         style={{ ...inputStyle, flex: 1 }}
                       />
                       {formStrategy === 'load-balance' && (
@@ -731,7 +752,7 @@ const Routing: React.FC = () => {
 
                 {(formStrategy !== 'single' || formEndpoints.length === 0) && (
                   <button onClick={addEndpoint} style={{ background: 'none', border: `1px dashed ${colors.border}`, borderRadius: 8, padding: '10px', color: colors.gold, fontSize: 13, cursor: 'pointer', fontFamily: 'inherit' }}>
-                    + Add {formStrategy === 'failover' ? 'Fallback' : 'Endpoint'}
+                    + Add {formStrategy === 'failover' ? 'Backup Endpoint' : 'Endpoint'}
                   </button>
                 )}
               </div>

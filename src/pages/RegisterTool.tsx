@@ -414,8 +414,8 @@ const infoBox: CSSProperties = {
 // --- Config data ---
 const toolTypes: { id: ToolType; name: string; desc: string; sub: string; icon: string; accent: string }[] = [
   { id: 'mcp', name: 'MCP Server', desc: 'Model Context Protocol endpoint', sub: 'Agents discover and invoke tools via MCP protocol', icon: '⬡', accent: '#4fc3f7' },
-  { id: 'rest', name: 'REST API', desc: 'Standard HTTP/REST endpoint', sub: 'Register any REST API as a governed tool', icon: '⬢', accent: '#66bb6a' },
-  { id: 'saas', name: 'SaaS Connector', desc: 'Pre-built SaaS integration', sub: 'Salesforce, ServiceNow, Jira, and more', icon: '◈', accent: '#b388ff' },
+  { id: 'rest', name: 'REST API', desc: 'Standard HTTP/REST endpoint', sub: 'Auto-converted to MCP so agents can discover and invoke via protocol', icon: '⬢', accent: '#66bb6a' },
+  { id: 'saas', name: 'SaaS Connector', desc: 'Pre-built SaaS integration', sub: 'Auto-converted to MCP — Salesforce, ServiceNow, Jira, and more', icon: '◈', accent: '#b388ff' },
 ];
 
 const toolSources: { id: ToolSource; name: string; desc: string; exclusive?: boolean }[] = [
@@ -635,6 +635,12 @@ function RegisterTool({ onClose, onComplete }: { onClose: () => void; onComplete
       <>
         <div style={title}>Configure endpoint</div>
         <div style={subtitle}>Provide connection details for the existing tool — the gateway will mediate all access through this endpoint</div>
+
+        {(form.toolType === 'rest' || form.toolType === 'saas') && (
+          <div style={{ ...infoBox, marginBottom: 16 }}>
+            ⬡ <strong>Auto-MCP conversion</strong> — All registered REST APIs and SaaS connectors are automatically converted to MCP protocol, enabling agents to discover and invoke them natively.
+          </div>
+        )}
 
         {/* MCP — External */}
         {key === 'mcp-external' && (

@@ -313,23 +313,23 @@ Agent runs:      12K executions
 
 ## Admin Access UX
 
-The governance experience in the portal is organized as follows:
+The governance experience in the portal is organized across two sidebar sections:
 
 ```
-Access
-   ├ Users
-   ├ Service Identities
-   ├ Domains
+Govern
    ├ Namespaces
    │      ├ Members
    │      ├ Assets
    │      ├ Policies
    │      ├ Credentials
-   │      ├ Environments
+   │      ├ Budget Rules (scope, threshold, enforcement actions)
    │      └ Observability
-   ├ Resource Permissions
-   ├ Access Requests
-   └ Audit Logs
+   └ Access Control
+          ├ Users
+          ├ Service Identities
+          ├ API Keys
+          ├ Access Requests
+          └ Audit
 ```
 
 ---

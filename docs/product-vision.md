@@ -164,10 +164,10 @@ The gateway governs agent traffic in production — enforcing policies on agent-
 
 The AI Gateway is operated through two portals:
 
-- **AI Gateway Control Plane** (this repository) — the governance-first portal for platform engineers, operations teams, and security teams. Organized into four sections: **Operations** (Overview, Traffic, Routing, Policies), **Inventory** (Catalog), **Insights** (Analytics, Audit Log), and **Administration** (Namespaces, Access Control, Secrets, Compliance), plus a Playground.
+- **AI Gateway Control Plane** (this repository) — the governance-first portal for platform engineers, operations teams, and security teams. Organized into four sections: **Configure** (Assets, Credentials, Routing, Policies), **Monitor** (Metrics, Audit Log), **Govern** (Namespaces, Access Control), and **Tools** (Test Console). Features a developer-first Overview landing page.
 - **AI Gateway Studio** ([standalone-ai-gateway](https://github.com/anishta_microsoft/standalone-ai-gateway)) — the developer-facing portal for asset catalogs, interactive playground, and full model/tool/agent management.
 
-The Control Plane portal provides 16 console pages covering governance configuration, policy management, traffic observability, and compliance monitoring.
+The Control Plane portal provides 12 console pages covering governance configuration, policy management, traffic observability, and budget tracking.
 
 ---
 
@@ -203,7 +203,7 @@ Initial focus: **product-market fit**, not revenue optimization.
 
 ### Portal — Built
 
-✅ Control Plane portal built with 16 console pages and 4 public marketing pages. Premium black + gold dark theme. Currently gathering feedback from field teams and early adopters.
+✅ Control Plane portal built with 12 console pages and 4 public marketing pages. Modern black + soft indigo (#818CF8) theme with raised card surfaces. Currently gathering feedback from field teams and early adopters.
 
 ### Current state
 

@@ -4,7 +4,7 @@
 
 Azure AI Gateway is a governance-first control plane for managing AI traffic across providers in production environments. It gives platform engineers, operations teams, and security teams a single pane of glass over every model, tool, and agent — whether running on Azure AI Foundry, AWS Bedrock, Google Vertex, OpenAI, Anthropic, or self-hosted infrastructure.
 
-The portal uses a black and gold premium design language throughout.
+The portal uses a **black and soft indigo** premium design language — modern, enterprise-grade, and universally appealing.
 
 ---
 
@@ -25,56 +25,53 @@ Before authentication, visitors see a set of marketing and onboarding pages:
 
 After login the sidebar is organized into four sections:
 
-### Operations
+### Configure
 
 | Page | Path | Description |
 |------|------|-------------|
-| **Overview** | `/` | Gateway health, policy coverage, and alerts at a glance |
-| **Traffic** | `/traffic` | Real-time request volume, latency, and error rates |
+| **Assets** | `/assets` | Registered models, tools, and agents |
+| **Credentials** | `/credentials` | API keys, managed identities, and secret rotation |
 | **Routing** | `/routing` | Multi-provider rules, failover chains, and load balancing |
 | **Policies** | `/policies` | Token limits, rate limits, and content safety guardrails |
-| **Secrets** | `/credentials` | API keys, managed identities, and secret rotation |
 
-### Inventory
-
-| Page | Path | Description |
-|------|------|-------------|
-| **Catalog** | `/assets` | Registered models, tools, and agents |
-
-### Insights
+### Monitor
 
 | Page | Path | Description |
 |------|------|-------------|
-| **Analytics** | `/observability` | Usage metrics, cost attribution, and trend analysis |
+| **Metrics** | `/observability` | Traffic stats, cost attribution, and budget tracking (3 tabs: Traffic, Cost, Budgets) |
 | **Audit Log** | `/logs` | Complete request and response audit trail |
 
-### Administration
+### Govern
 
 | Page | Path | Description |
 |------|------|-------------|
-| **Namespaces** | `/namespaces` | Team boundaries, quotas, and isolation policies |
+| **Namespaces** | `/namespaces` | Team boundaries, quotas, budget rules, and isolation policies |
 | **Access Control** | `/access` | Roles, permissions, and identity management |
-| **Compliance** | `/compliance` | Framework mapping and evidence generation |
-| **Playground** | `/test-console` | Test routing rules and policy enforcement live |
+
+### Tools
+
+| Page | Path | Description |
+|------|------|-------------|
+| **Test Console** | `/test-console` | Test routing rules and policy enforcement live |
 
 ---
 
 ## Advanced Features
 
-### Governance Dashboard
-Score ring visualization, real-time alerts, policy coverage heatmap, and cross-page drill-throughs.
+### Overview Dashboard
+Developer-first landing page with Quick Start shortcuts, gateway health hero, key metrics, attention-needed alerts, recent activity, and top models table.
 
 ### Policy Lifecycle
-Version history, impact simulator, staged rollout, and full audit trail for every policy change.
+Version history, impact simulator, staged rollout, and full audit trail for every policy change. AI-powered policy composition.
 
 ### Cost Governance
-Namespace-level budgets, anomaly detection, and chargeback reports for cost attribution across teams.
+Namespace-level budget rules, anomaly detection, and chargeback reports for cost attribution across teams. Budget configuration in Namespaces, budget monitoring in Metrics.
 
 ### Credential Blast Radius
 Dependency graph showing which models, tools, and agents rely on each credential, with emergency revocation.
 
-### Compliance
-Five framework mappings — SOC 2, HIPAA, GDPR, ISO 27001, and NIST — with automated evidence generation.
+### Metrics
+Three-tab analytics: Traffic (request stats, throughput, provider distribution), Cost (spend analysis, cost-by-model, chargeback), Budgets (allocation tracking, burn rates, alerts).
 
 ---
 

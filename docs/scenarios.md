@@ -1,6 +1,6 @@
 # User Scenarios — Azure AI Gateway Control Plane
 
-This document catalogs every user scenario in the AI Gateway Control Plane portal — a governance-first control plane for managing AI traffic across providers. It covers what is **built**, what is **partially implemented**, and what is **missing** in the current prototype. The portal features a black + gold premium theme and uses mock data throughout.
+This document catalogs every user scenario in the AI Gateway Control Plane portal — a governance-first control plane for managing AI traffic across providers. It covers what is **built**, what is **partially implemented**, and what is **missing** in the current prototype. The portal features a black + soft indigo (#818CF8) premium theme and uses mock data throughout.
 
 ---
 
@@ -8,18 +8,18 @@ This document catalogs every user scenario in the AI Gateway Control Plane porta
 
 ### Platform Engineer / Admin
 
-- **Primary user.** Configures routing, policies, credentials, namespaces, and compliance.
-- **Uses:** Overview, Traffic, Routing, Policies, Secrets, Namespaces, Access Control, Compliance, Analytics, Audit Log, Playground
+- **Primary user.** Configures routing, policies, credentials, namespaces, and access control.
+- **Uses:** Overview, Assets, Credentials, Routing, Policies, Metrics, Audit Log, Namespaces, Access Control, Test Console
 
 ### AI Developer / Agent Builder
 
-- **Secondary user.** Discovers approved assets, registers new ones, tests in the playground.
-- **Uses:** Catalog, Playground, Analytics
+- **Secondary user.** Discovers approved assets, registers new ones, tests in the console.
+- **Uses:** Assets, Test Console, Metrics
 
 ### Security / Compliance Officer
 
-- **Tertiary user.** Audits activity, enforces compliance frameworks, reviews access controls.
-- **Uses:** Compliance, Audit Log, Access Control, Secrets, Policies
+- **Tertiary user.** Audits activity, reviews access controls, monitors governance.
+- **Uses:** Audit Log, Access Control, Credentials, Policies, Namespaces
 
 ### Visitor / Prospect
 
@@ -57,11 +57,11 @@ This document catalogs every user scenario in the AI Gateway Control Plane porta
 
 | ID | Scenario | Persona | Page(s) | Status | Notes |
 |----|----------|---------|---------|--------|-------|
-| A1 | View gateway health at a glance | Admin | Overview | ✅ Built (UI) | Governance score ring, alerts, heatmap |
-| A2 | See policy coverage across namespaces | Admin | Overview | ✅ Built (UI) | Policy coverage heatmap |
-| A3 | Respond to governance alerts | Admin | Overview | ✅ Built (UI) | Clickable alerts navigate to relevant pages |
-| A4 | View recent governance timeline | Admin | Overview | ✅ Built (UI) | Timeline with navigation links |
-| A5 | Identify ungoverned assets | Admin | Overview | ✅ Built (UI) | Ungoverned assets list with "View all" link |
+| A1 | View gateway health at a glance | Admin | Overview | ✅ Built (UI) | Gateway health hero, key metrics, attention needed |
+| A2 | See key metrics across the gateway | Admin | Overview | ✅ Built (UI) | Six stat cards: requests, tokens, models, policies, cost, alerts |
+| A3 | Respond to attention alerts | Admin | Overview | ✅ Built (UI) | Prioritized action items with navigation links |
+| A4 | View recent activity | Admin | Overview | ✅ Built (UI) | Activity feed with event descriptions |
+| A5 | Quick-start common tasks | Admin | Overview | ✅ Built (UI) | Quick Start buttons: Test Console, Assets, Routing, Credentials, Metrics, Audit Log |
 
 ---
 
@@ -116,35 +116,35 @@ This document catalogs every user scenario in the AI Gateway Control Plane porta
 
 | ID | Scenario | Persona | Page(s) | Status | Notes |
 |----|----------|---------|---------|--------|-------|
-| S1 | View all credentials | Admin | Secrets | ✅ Built (UI) | Table with 10 credentials |
-| S2 | View credential detail | Admin | Secrets | ✅ Built (UI) | Click row opens detail panel |
-| S3 | View credential blast radius | Admin | Secrets | ✅ Built (UI) | Detail shows dependent assets, routes, namespaces |
-| S4 | View expiring/expired credentials | Admin | Secrets | ✅ Built (UI) | Health alerts with status indicators |
-| S5 | View credential access log | Admin | Secrets | ✅ Built (UI) | Detail shows 8 recent access log entries |
-| S6 | Navigate to dependent assets | Admin | Secrets | ✅ Built (UI) | Detail links navigate to `/assets`, `/routing`, `/logs` |
-| S7 | Add new credential | Admin | Secrets | ❌ Missing | No creation workflow |
-| S8 | Rotate credential | Admin | Secrets | ❌ Missing | No rotation action |
-| S9 | Revoke credential (emergency) | Admin | Secrets | ❌ Missing | No revocation action |
-| S10 | Edit credential scope | Admin | Secrets | ❌ Missing | No edit capability |
+| S1 | View all credentials | Admin | Credentials | ✅ Built (UI) | Table with 10 credentials |
+| S2 | View credential detail | Admin | Credentials | ✅ Built (UI) | Click row opens detail panel |
+| S3 | View credential blast radius | Admin | Credentials | ✅ Built (UI) | Detail shows dependent assets, routes, namespaces |
+| S4 | View expiring/expired credentials | Admin | Credentials | ✅ Built (UI) | Health alerts with status indicators |
+| S5 | View credential access log | Admin | Credentials | ✅ Built (UI) | Detail shows 8 recent access log entries |
+| S6 | Navigate to dependent assets | Admin | Credentials | ✅ Built (UI) | Detail links navigate to `/assets`, `/routing`, `/logs` |
+| S7 | Add new credential | Admin | Credentials | ❌ Missing | No creation workflow |
+| S8 | Rotate credential | Admin | Credentials | ❌ Missing | No rotation action |
+| S9 | Revoke credential (emergency) | Admin | Credentials | ❌ Missing | No revocation action |
+| S10 | Edit credential scope | Admin | Credentials | ❌ Missing | No edit capability |
 
 ---
 
-### Category: Asset Catalog (Admin / Developer)
+### Category: Asset Management (Admin / Developer)
 
 | ID | Scenario | Persona | Page(s) | Status | Notes |
 |----|----------|---------|---------|--------|-------|
-| C1 | View all models | Admin, Developer | Catalog | ✅ Built (UI) | Models tab, 32 models |
-| C2 | View all tools | Admin, Developer | Catalog | ✅ Built (UI) | Tools tab, 24 tools |
-| C3 | View all agents | Admin, Developer | Catalog | ✅ Built (UI) | Agents tab, 8 agents |
-| C4 | View governance overview | Admin, Developer | Catalog | ✅ Built (UI) | 4 stat cards: total, governed, partial, ungoverned |
-| C5 | View source distribution | Admin, Developer | Catalog | ✅ Built (UI) | 7 source pills |
+| C1 | View all models | Admin, Developer | Assets | ✅ Built (UI) | Models tab, 32 models |
+| C2 | View all tools | Admin, Developer | Assets | ✅ Built (UI) | Tools tab, 24 tools |
+| C3 | View all agents | Admin, Developer | Assets | ✅ Built (UI) | Agents tab, 8 agents |
+| C4 | View governance overview | Admin, Developer | Assets | ✅ Built (UI) | 4 stat cards: total, governed, partial, ungoverned |
+| C5 | View source distribution | Admin, Developer | Assets | ✅ Built (UI) | 7 source pills |
 | C6 | Register new model | Admin | RegisterModel | ✅ Built (UI) | 6-step wizard, 6 source types |
 | C7 | Register new tool | Admin | RegisterTool | ✅ Built (UI) | 6-step wizard, 3 tool types, 4 sources |
 | C8 | Register new agent | Admin | RegisterAgent | ✅ Built (UI) | 6-step wizard, 6 agent sources |
-| C9 | Search/filter assets | Admin, Developer | Catalog | ❌ Missing | No search bar or filter controls on catalog |
-| C10 | Edit existing asset | Admin | Catalog | ❌ Missing | No edit workflow |
-| C11 | Delete/decommission asset | Admin | Catalog | ❌ Missing | No delete or decommission action |
-| C12 | View asset detail | Admin, Developer | Catalog | ❌ Missing | No detail panel/page for individual assets |
+| C9 | Search/filter assets | Admin, Developer | Assets | ❌ Missing | No search bar or filter controls on catalog |
+| C10 | Edit existing asset | Admin | Assets | ❌ Missing | No edit workflow |
+| C11 | Delete/decommission asset | Admin | Assets | ❌ Missing | No delete or decommission action |
+| C12 | View asset detail | Admin, Developer | Assets | ❌ Missing | No detail panel/page for individual assets |
 
 ---
 

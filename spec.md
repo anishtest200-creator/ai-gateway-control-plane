@@ -40,7 +40,7 @@ Azure AI Gateway is the **control plane for enterprise AI traffic** — a multi-
 ### Secondary: AI Developers / Agent Builders
 - Discover approved models and tools through governed catalogs
 - Connect through standardized endpoints with built-in auth
-- Test workloads in the Playground
+- Test workloads in the Test Console
 - No need to manage provider credentials
 
 ### Tertiary: Security / Compliance Teams
@@ -176,9 +176,9 @@ Consumer → Gateway Ingress → Authentication → Policy Evaluation → Routin
 ### Components
 
 #### Control Plane
-- **Catalog**: Register, update, deprecate models/tools/agents with governed lifecycle (Registered → Approved → Published → Deprecated)
+- **Asset Registry**: Register, update, deprecate models/tools/agents with governed lifecycle (Registered → Approved → Published → Deprecated)
 - **Governance Engine**: Namespace management, policy CRUD, access rules, approval workflows
-- **Secrets**: Secret management, rotation, scope resolution, expiry monitoring
+- **Credential Manager**: Credential management, rotation, scope resolution, expiry monitoring
 - **Identity Service**: Consumer authentication, RBAC (Platform Admin, Namespace Admin, AI Developer, Viewer, Service Identity)
 
 #### Data Plane
@@ -209,7 +209,7 @@ Consumer → Gateway Ingress → Authentication → Policy Evaluation → Routin
 ## 5. Portal Experience
 
 ### Azure AI Gateway Control Plane
-Governance-first portal for platform engineers, operations teams, and security teams. Premium black + gold design language.
+Governance-first portal for platform engineers, operations teams, and security teams. Modern black + soft indigo (#818CF8) design language.
 
 **Public Pages:**
 | Page | Path | Description |
@@ -222,22 +222,22 @@ Governance-first portal for platform engineers, operations teams, and security t
 **Console Navigation:**
 | Section | Pages |
 |---------|-------|
-| Operations | Overview, Traffic, Routing, Policies, Secrets |
-| Inventory | Catalog (tabbed: Models / Tools / Agents) |
-| Insights | Analytics, Audit Log |
-| Administration | Namespaces, Access Control, Compliance, Playground |
+| Configure | Assets, Credentials, Routing, Policies |
+| Monitor | Metrics (Traffic / Cost / Budgets tabs), Audit Log |
+| Govern | Namespaces, Access Control |
+| Tools | Test Console |
 
 **Key Interactions:**
-- Monitor real-time traffic and policy enforcement
+- Developer-first Overview with Quick Start shortcuts, gateway health, key metrics, and attention alerts
+- Monitor real-time traffic, cost attribution, and budget tracking across 3 Metrics tabs
 - Configure routing rules and failover chains
 - Manage credentials, rotation policies, blast radius analysis, and expiry alerts
 - **Register models** from Azure AI Foundry, Amazon Bedrock, Google Vertex, OpenAI, Anthropic, or self-hosted endpoints
 - **Register tools** — MCP servers, REST APIs, SaaS connectors; import from Foundry or OpenAPI
 - **Register agents** from Foundry Agent Service, Bedrock, Vertex, or custom A2A endpoints with model/tool binding governance
 - View governance status across all assets (fully governed, partially governed, ungoverned)
-- Governance dashboard with score ring, policy coverage heatmap, and alerts
-- Compliance mapping for SOC 2, HIPAA, GDPR, ISO 27001, and NIST with evidence generation
-- Cost governance with namespace-level budgets, anomaly detection, and chargeback reports
+- Configure namespace-level budget rules (scope, threshold, enforcement actions)
+- Cost governance with anomaly detection and chargeback reports
 
 **Advanced Features:**
 - Policy lifecycle: version history, impact simulator, staged rollout, audit trail
@@ -502,8 +502,8 @@ Structured JSON logs for every request:
 }
 ```
 
-### Analytics Dashboard
-Enterprise-wide token usage dashboard with:
+### Metrics Dashboard
+Enterprise-wide observability with three tabs:
 - Hero metrics: Total Tokens, Total Requests, Estimated Cost, Active Consumers
 - Time-range toggle: 24h / 7d / 30d
 - Filters: Model, Consumer, Namespace, Deployment
@@ -584,4 +584,4 @@ _Track decisions that need resolution here._
 | Date | Change | Author |
 |------|--------|--------|
 | March 2026 | Initial spec created from product vision, positioning, entity model, architecture, governance, credential management, scenarios, competitive analysis, and user flows | — |
-| March 2026 | Extracted to dedicated repo (ai-gateway-control-plane). Updated portal section for control plane context. All 16 console pages and 4 public pages built. | — |
+| March 2026 | Extracted to dedicated repo (ai-gateway-control-plane). Updated portal section for control plane context. 12 console pages and 4 public pages built. Rebranded to soft indigo (#818CF8). Restructured nav into Configure / Monitor / Govern / Tools. | — |

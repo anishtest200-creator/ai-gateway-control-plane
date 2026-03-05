@@ -3,6 +3,8 @@
 > Step-by-step walkthrough of every user flow in the prototype portal.
 > ✅ = working in prototype | 🔧 = partial/limited | ❌ = not implemented
 > All data is mock. No real API calls or persistent state.
+> Navigation: Configure (Assets, Credentials, Routing, Policies) → Monitor (Metrics, Audit Log) → Govern (Namespaces, Access Control) → Tools (Test Console)
+> Theme: Black + Soft Indigo (#818CF8)
 
 ---
 

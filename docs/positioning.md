@@ -108,7 +108,7 @@ The **AI Gateway Control Plane** is the governance-first portal for platform eng
 - **Enterprise governance at scale** — Namespace isolation, access control, token quotas, audit logging, and policy enforcement across all registered AI assets.
 - **Registry-centric** — Assets are shown as "what's registered for production governance," not "what's available to build with." This is a governance and operations view.
 
-The Control Plane portal is organized into four sections — **Operations** (Overview, Traffic, Routing, Policies), **Inventory** (Catalog), **Insights** (Analytics, Audit Log), and **Administration** (Namespaces, Access Control, Secrets, Compliance) — plus a Playground for interactive testing.
+The Control Plane portal is organized into four sections — **Configure** (Assets, Credentials, Routing, Policies), **Monitor** (Metrics, Audit Log), **Govern** (Namespaces, Access Control), and **Tools** (Test Console) — for interactive testing and governance management.
 
 ### AI Gateway Studio — Developer Portal
 

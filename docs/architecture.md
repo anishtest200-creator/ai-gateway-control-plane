@@ -183,7 +183,7 @@ The Control Plane portal (this repository) is a single-page application built wi
 - **React 19** + **TypeScript** — component-based UI with full type safety
 - **Vite 7** — fast development server and production bundler
 - **React Router 7** — client-side routing across 16 console pages and 4 public marketing pages
-- **Inline CSS dark theme** — premium black + gold design with no external CSS framework
+- **Inline CSS dark theme** — modern black + soft indigo design with no external CSS framework
 - **Fluent UI icons** — consistent iconography via `@fluentui/react-icons`
 
 The portal is purely a governance configuration interface. It does not include a data plane runtime, proxy, or policy engine — those components are deployed and operated separately.

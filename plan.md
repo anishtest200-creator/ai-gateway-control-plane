@@ -8,19 +8,17 @@
 ## Current State
 
 ### What's Built
-- **16 console pages** with black + gold premium theme
-  - **Overview** — Governance score ring, alerts, policy coverage heatmap, namespace health
-  - **Traffic** — Real-time throughput, provider breakdown, policy enforcement stats
+- **12 console pages** with black + soft indigo premium theme (#818CF8)
+  - **Overview** — Developer-first landing: Quick Start buttons, gateway health hero, key metrics, attention needed, recent activity, top models
+  - **Assets** — Tabbed Models/Tools/Agents with governance overview, source distribution, registration wizards
+  - **Credentials** — Credential management, blast radius analysis, emergency revocation, rotation alerts
   - **Routing** — Routing rules, failover chains, load balancing, health checks
-  - **Policies** — Runtime rules, access rules, safety guardrails, version history, impact simulator, staged rollout
-  - **Secrets** — Credential management, blast radius analysis, emergency revocation, rotation alerts
-  - **Catalog** — Tabbed Models/Tools/Agents with governance overview, source distribution
-  - **Analytics** — Token analytics, cost attribution, namespace budgets, anomaly detection, chargeback
+  - **Policies** — Runtime rules, access rules, safety guardrails, AI compose, version history, impact simulator, staged rollout
+  - **Metrics** — Three tabs: Traffic (throughput, provider distribution), Cost (spend, chargeback), Budgets (allocation, burn rates)
   - **Audit Log** — Request/response audit trail with search, filters, detail panel
-  - **Namespaces** — Grid/detail views with members, credentials, assets, policies
+  - **Namespaces** — Grid/detail views with members, credentials, assets, policies, budget rules configuration
   - **Access Control** — Users, service identities, API keys, access requests, audit
-  - **Compliance** — 5 framework mappings (SOC2/HIPAA/GDPR/ISO27001/NIST), evidence generation
-  - **Playground** — Test routing, policies, and credential mediation live
+  - **Test Console** — Test routing, policies, and credential mediation live
 - **4 public marketing pages**
   - **Landing** — Hero, 3-column architecture diagram (Models/Tools/Agents), features, stats
   - **Pricing** — 3-tier SaaS (Developer free / Pro $99 / Enterprise custom), calculator, FAQ
@@ -28,23 +26,25 @@
   - **Demo** — 4 interactive scenarios with auto-advance, live metrics, testimonials
 - **3 registration wizards** (6-step: Source → Endpoint → Configuration → Governance → Namespace → Review)
   - Register Model, Register Tool, Register Agent
-- **Shell** — Top bar with "Azure AI Gateway" branding, sidebar navigation (Operations / Inventory / Insights / Administration)
+- **Shell** — Top bar with "Azure AI Gateway" branding, sidebar navigation (Configure / Monitor / Govern / Tools)
 - **Product documentation** — 10 docs covering architecture, governance, positioning, entity model, user flows, competitive analysis, scenarios, credential management, MVP scope, product vision
 
 ### Navigation Structure
 | Section | Pages |
 |---------|-------|
-| Operations | Overview, Traffic, Routing, Policies, Secrets |
-| Inventory | Catalog |
-| Insights | Analytics, Audit Log |
-| Administration | Namespaces, Access Control, Compliance, Playground |
+| Configure | Assets, Credentials, Routing, Policies |
+| Monitor | Metrics, Audit Log |
+| Govern | Namespaces, Access Control |
+| Tools | Test Console |
 
 ### Design Language
 - Background: `#0A0A0A` / `#161616`
-- Gold accent: `#D4A843`
-- Borders: `rgba(212,168,67,0.10)`
+- Indigo accent: `#818CF8` (bright: `#A5B4FC`, dim: `#6366F1`)
+- Borders: `rgba(129, 140, 248, 0.12)`
 - Text: `#E8E8E8`
 - Semantic: green `#4ADE80`, red `#EF4444`, amber `#F59E0B`
+- Cards: raised surface with box-shadow
+- Buttons: indigo bg + white text (standardized across all pages)
 
 ---
 
@@ -62,8 +62,17 @@
 - [x] Make brand clickable to return to landing page
 - [x] Replace "Open Console" with "Get Started"
 - [x] Remove redundant sidebar branding
-- [x] Rename nav items for clarity: Secrets, Catalog, Analytics, Audit Log, Access Control, Playground
-- [x] Update all documentation (README, spec, plan)
+- [x] Rename nav items: Assets, Credentials, Routing, Policies, Metrics, Audit Log, Namespaces, Access Control, Test Console
+- [x] Restructure nav into Configure / Monitor / Govern / Tools
+- [x] Streamline Metrics into 3 clean tabs: Traffic, Cost, Budgets
+- [x] Add budget rules configuration to Namespaces (scope, threshold, enforcement actions)
+- [x] Rebuild Overview as developer-first landing page (Quick Start, Health Hero, Key Metrics, Attention Needed, Activity, Top Models)
+- [x] Rebrand from gold (#D4A843) to soft indigo (#818CF8) — modern, enterprise-grade palette
+- [x] Add raised surface shadow to all cards and panels
+- [x] Standardize all button styles (indigo bg + white text, consistent padding/radius)
+- [x] Remove maxWidth constraints for full-width layouts
+- [x] AI-powered policy composition (natural language → policy)
+- [x] Update all documentation (README, spec, plan, docs/)
 - [x] Extract to dedicated repo for clean development
 
 ---
@@ -73,18 +82,16 @@
 ### High Priority
 - [ ] Replace mock data with API integration (or at minimum, shared mock data service)
 - [ ] Add responsive breakpoints for tablet/mobile
-- [ ] Add dark/light theme toggle
 - [ ] Implement real authentication (Entra ID / MSAL)
 - [ ] Add loading states and error boundaries to all pages
 - [ ] Take screenshots for docs/README
 
 ### Medium Priority
-- [ ] Extract inline styles to shared theme system (theme.ts is defined but not imported by pages)
 - [ ] Add unit tests for page components
 - [ ] Add E2E tests (Playwright or Cypress)
 - [ ] Implement search/filter across all list views
 - [ ] Add export functionality (CSV/PDF) for analytics and audit log
-- [ ] Add notification system (toast/snackbar)
+- [ ] Add dark/light theme toggle
 
 ### Low Priority
 - [ ] Internationalization (i18n)
